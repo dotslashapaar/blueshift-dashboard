@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import MdxLayout from "@/app/mdx-layout";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
 import { getCourse, getLesson, getCourseLessons } from "@/app/utils/mdx";

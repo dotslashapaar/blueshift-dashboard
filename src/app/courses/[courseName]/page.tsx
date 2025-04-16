@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { redirect } from "next/navigation";
 import { getCourseLessons } from "@/app/utils/mdx";
 
