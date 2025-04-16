@@ -1,0 +1,68 @@
+{
+  "header": {
+    "lessons": "Lessons",
+    "courses": "Courses",
+    "rewards": "Rewards",
+    "set_goal": "Set your Goal",
+    "connect_wallet": "Connect Wallet"
+  },
+  "lessons": {
+    "title": "Select a course to get started",
+    "subtitle": "Welcome,",
+    "subtitle_returning": "Welcome back,",
+    "title_returning": "Jump back into a course",
+    "get_started": "Get Started",
+    "continue_learning": "Continue Learning",
+    "start_course": "Start Course",
+    "lessons": "lessons",
+    "empty_results_title": "No results found",
+    "empty_results_description": "Try searching for a different course or use filters instead.",
+    "empty_filters_title": "You have no filters selected",
+    "empty_filters_description": "Select a language you wish to learn to see results here.",
+    "continue": "Continue",
+    "completed": "Lessons Completed",
+    "all_completed": "All Lessons Completed",
+    "take_the_challenge": "Take the Challenge"
+  },
+  "ui": {
+    "search_placeholder": "Search by name, language, or level..."
+  },
+  "languages": {
+    "anchor": "Anchor",
+    "rust": "Rust",
+    "typescript": "Typescript"
+  },
+  "rewards": {
+    "title": "Claim, View and Share your NFTs",
+    "subtitle": "Rewards",
+    "Unclaimed": "Unclaimed",
+    "claimed": "Claimed",
+    "claim": "Claim",
+    "locked": "Locked",
+    "empty_title": "No rewards found",
+    "empty_description": "Try changing your filters to see rewards here.",
+    "locked_description": "Complete the Course to Unlock",
+    "claimed_description": "NFT Is Available in your Wallet"
+  },
+  "shift_goal": {
+    "title": "Setup Your Shift Goal",
+    "description": "Receive weekly reminders to keep you on track of achieving your goals!",
+    "connect_discord": "Connect Discord"
+  },
+  "wallet_recommended": {
+    "title": "Connect Your Wallet",
+    "description": "Connect your wallet to progress through courses and earn NFT rewards!",
+    "connect_wallet": "Connect Wallet",
+    "dont_show_again": "Don't show again"
+  },
+  "contents": {
+    "contents": "Contents",
+    "view_source": "View Source"
+  },
+  "challenges": {
+    "ready": "Ready to finish the course?",
+    "not_ready": "Complete all lessons first",
+    "see_challenge": "See Challenge",
+    "back_to_lessons": "Back to Lessons"
+  }
+}

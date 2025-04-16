@@ -1,0 +1,45 @@
+"use client";
+
+import classNames from "classnames";
+import Icon from "../Icon/Icon";
+import i18n from "../../../i18n/client";
+import { useStore } from "@/stores/store";
+
+interface SearchInputProps {
+  disabled?: boolean;
+  value?: string;
+  onChange?: (value: string) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  className?: string;
+}
+
+export default function SearchInput({
+  disabled,
+  onKeyDown,
+  className,
+}: SearchInputProps) {
+  const { t } = i18n;
+  const { searchValue, setSearchValue } = useStore();
+  return (
+    <div
+      className={classNames(
+        "w-full group focus-within:outline transition outline-transparent focus-within:outline-border-active relative h-[50px] px-3 bg-card border border-border bg-background-card rounded-xl flex items-center gap-x-3",
+        className
+      )}
+    >
+      <Icon
+        name="Search"
+        className="text-mute group-focus-within:text-tertiary transition flex-shrink-0 w-max"
+      />
+      <input
+        disabled={disabled}
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        onKeyDown={onKeyDown}
+        type="text"
+        placeholder={t("ui.search_placeholder")}
+        className="w-full placeholder:text-mute transition leading-none h-full outline-none bg-transparent"
+      />
+    </div>
+  );
+}

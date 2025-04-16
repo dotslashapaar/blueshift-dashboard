@@ -1,26 +1,103 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: #0B0E14;
+  --color-primary: #EFF1F6;
+  --color-secondary: #CED5E4;
+  --color-tertiary: #ADB9D2;
+  --color-mute: #585e6c;
+  --color-background-card: #11141A;
+  --color-background-card-foreground: #171A20;
+  --color-border: #1A1E26;
+  --color-border-active: rgba(173,185,210,0.2);
+  --color-background-primary: rgba(0,153,153,0.08);
+  --color-brand-primary: #00FFFF;
+  --color-brand-secondary: #00E6E6;
+  --color-brand-tertiary: #00B3B3;
+  --color-brand-anchor: #DDEAE0;
+  --color-brand-rust: #FFAD66;
+  --color-brand-typescript: #69A2F1;
+  --font-sans: var(--font-switzer);
+  --font-mono: var(--font-montech);
+  --font-geist-mono: var(--font-geist-mono);
+  --text-3xl: 32px;
+  --container-app: 1500px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply w-screen h-auto overflow-x-hidden;
+  background: var(--color-background);
+  font-family: var(--font-Switzer);
+  color: var(--color-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+h1 {
+  letter-spacing: -0.025em;
+}
+
+.gradient-border {
+  position: relative;
+}
+
+.wrapper {
+  @apply max-w-app mx-auto w-full px-4 relative;
+  @apply md:px-8;
+  @apply lg:px-14;
+}
+
+.content-wrapper {
+  @apply px-4 max-w-app md:px-8 lg:px-14 mx-auto w-full
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  mask-mode: match-source, match-source;
+  mask-repeat: repeat, repeat;
+  mask-clip: content-box, border-box;
+  mask-origin: content-box, border-box;
+  mask-position: 0% 0%, 0% 0%;
+  mask-size: auto, auto;
+  pointer-events: none;
+}
+
+article img {
+  @apply rounded-2xl;
+}
+
+article a  {
+  @apply text-brand-secondary hover:text-brand-primary transition;
+}
+
+blockquote {
+  @apply border-l-0
+}
+
+blockquote p {
+  @apply text-brand-secondary my-0;
+}
+
+blockquote p::before {
+  @apply hidden;
+}
+
+blockquote p::after {
+  @apply hidden;
+}
+
+:root:has(.no-scroll) {
+  overflow-y:hidden;
 }

@@ -1,0 +1,34 @@
+"use client";
+
+import Link from "next/link";
+import Button from "../Button/Button";
+
+import i18n from "@/i18n/client";
+interface CourseChallengeButtonProps {
+  isCourseReady: boolean;
+  courseName: string;
+}
+
+export default function CourseChallengeButton({
+  isCourseReady = false,
+  courseName,
+}: CourseChallengeButtonProps) {
+  const { t } = i18n;
+  return (
+    <div className="text-center bg-background-card relative lg:absolute lg:left-14 bottom-0 bg-card rounded-2xl px-6 py-5 flex flex-col gap-y-4">
+      <span className="font-medium text-secondary">
+        {isCourseReady ? t("challenges.ready") : t("challenges.not_ready")}
+      </span>
+      <Link href={`/courses/${courseName}/challenge`}>
+        <Button
+          disabled={!isCourseReady}
+          variant="primary"
+          size="lg"
+          label={t("challenges.see_challenge")}
+          icon="Challenge"
+          className="disabled:opacity-40 w-full disabled:cursor-default"
+        ></Button>
+      </Link>
+    </div>
+  );
+}
