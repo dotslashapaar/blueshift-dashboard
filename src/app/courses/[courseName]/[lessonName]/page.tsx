@@ -1,4 +1,4 @@
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 import MdxLayout from "@/app/mdx-layout";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
