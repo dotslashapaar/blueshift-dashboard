@@ -36,7 +36,7 @@ const Switzer = localFont({
 });
 
 const MontechV2 = localFont({
-  src: "./fonts/MontechV2-medium.ttf",
+  src: "./fonts/MontechV2-Medium.ttf",
   weight: "500",
   style: "normal",
   variable: "--font-montech",
