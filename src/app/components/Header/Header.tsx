@@ -8,16 +8,12 @@ import Button from "../Button/Button";
 import { AnimatePresence, anticipate, motion } from "motion/react";
 import { useState } from "react";
 import i18n from "@/i18n/client";
-import { useStore } from "@/stores/store";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function HeaderContent() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const { t } = i18n;
-  const { setOpenedModal } = useStore();
-  const { connected } = useWallet();
   const { setVisible } = useWalletModal();
 
   return (

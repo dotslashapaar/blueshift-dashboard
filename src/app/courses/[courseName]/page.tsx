@@ -1,13 +1,15 @@
 import { redirect } from "next/navigation";
 import { getCourseLessons } from "@/app/utils/mdx";
+
 interface CoursePageProps {
-  params: {
+  params: Promise<{
     courseName: string;
-  };
+  }>;
 }
 
 export default async function CoursePage({ params }: CoursePageProps) {
-  const lessons = await getCourseLessons(params.courseName);
+  const resolvedParams = await params;
+  const lessons = await getCourseLessons(resolvedParams.courseName);
 
   // Sort lessons by lessonNumber and get the first one
   const firstLesson = lessons.sort(
@@ -21,5 +23,5 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
   // Convert lesson title to URL-friendly slug
   const firstLessonSlug = firstLesson.title.toLowerCase().replace(/\s+/g, "-");
-  redirect(`/courses/${params.courseName}/${firstLessonSlug}`);
+  redirect(`/courses/${resolvedParams.courseName}/${firstLessonSlug}`);
 }

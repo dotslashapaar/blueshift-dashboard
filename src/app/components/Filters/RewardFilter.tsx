@@ -2,7 +2,6 @@
 import { useRef, useState } from "react";
 
 import classNames from "classnames";
-import i18n from "../../../i18n/client";
 import Icon from "../Icon/Icon";
 import { AnimatePresence, anticipate, motion } from "motion/react";
 import { useOnClickOutside } from "usehooks-ts";
@@ -16,7 +15,6 @@ interface FiltersProps {
 }
 
 export default function RewardFilter({ className }: FiltersProps) {
-  const { t } = i18n;
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLElement>(null) as React.RefObject<HTMLElement>;
   const { selectedRewardStatus, toggleRewardStatus } = usePersistentStore();

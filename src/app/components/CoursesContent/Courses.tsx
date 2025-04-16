@@ -1,4 +1,3 @@
-import { getAllCourses } from "@/app/utils/mdx";
 import CourseFilter from "../Filters/CourseFilter";
 import SearchInput from "../SearchInput/Search";
 import ViewToggle from "../ViewToggle/ViewToggle";

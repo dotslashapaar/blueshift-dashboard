@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Button from "../Button/Button";
 import i18n from "@/i18n/client";
 import classNames from "classnames";

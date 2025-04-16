@@ -1,9 +1,7 @@
-import { compile } from "@mdx-js/mdx";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "path";
 import { CourseMetadata, LessonMetadata } from "./course";
 import matter from "gray-matter";
-import rehypePrettyCode from "rehype-pretty-code";
 import { notFound } from "next/navigation";
 
 const coursesPath = join(process.cwd(), "src/app/content/courses");

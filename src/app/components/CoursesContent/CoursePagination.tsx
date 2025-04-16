@@ -25,7 +25,7 @@ export default function CoursePagination({
   className,
   courseName,
 }: CoursePaginationProps) {
-  const { courseProgress, setCourseProgress } = usePersistentStore();
+  const { setCourseProgress } = usePersistentStore();
 
   const router = useRouter();
   const [isFixed, setIsFixed] = useState(false);

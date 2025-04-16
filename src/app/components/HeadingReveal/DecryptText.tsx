@@ -7,7 +7,6 @@ interface DecryptedTextProps {
   className?: string;
   encryptedClassName?: string;
   parentClassName?: string;
-  [key: string]: any;
   isHovering?: boolean;
 }
 
@@ -29,10 +28,6 @@ export default function DecryptedText({
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-
-    const availableChars = Array.from(new Set(text.split(""))).filter(
-      (char) => char !== " "
-    );
 
     const shuffleText = (
       currentRevealed: Set<number>,

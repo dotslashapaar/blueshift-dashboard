@@ -3,11 +3,12 @@ import HeadingReveal from "../components/HeadingReveal/HeadingReveal";
 import Rewards from "../components/RewardsContent/Rewards";
 
 export default async function RewardsPage({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const { t } = await createTranslation(locale, "common");
+  const resolvedParams = await params;
+  const { t } = await createTranslation(resolvedParams.locale, "common");
 
   return (
     <div className="flex flex-col w-full gap-y-8">

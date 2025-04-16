@@ -55,8 +55,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
   const isLastLesson = currentLessonIndex === sortedLessons.length - 1;
 
   const components: MDXComponents = {
-    ArticleSection: ArticleSection as any,
-    Codeblock: Codeblock as any,
+    ArticleSection: ArticleSection,
+    Codeblock: Codeblock,
     blockquote: ({ children }) => (
       <blockquote className="bg-background-primary rounded-xl !text-brand-secondary flex items-start gap-x-2 py-4 px-6">
         <Icon

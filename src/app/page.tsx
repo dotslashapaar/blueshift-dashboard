@@ -3,11 +3,12 @@ import Courses from "./components/CoursesContent/Courses";
 import HeadingReveal from "./components/HeadingReveal/HeadingReveal";
 
 export default async function Home({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const { t } = await createTranslation(locale, "common");
+  const resolvedParams = await params;
+  const { t } = await createTranslation(resolvedParams.locale, "common");
 
   return (
     <div className="flex flex-col w-full gap-y-8">

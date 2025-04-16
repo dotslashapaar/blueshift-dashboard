@@ -1,4 +1,3 @@
-import Icon from "../Icon/Icon";
 import i18n from "@/i18n/client";
 
 type CoursesEmptyProps = {

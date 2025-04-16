@@ -1,6 +1,6 @@
 "use client";
 
-import { RewardsStatus, CourseMetadata } from "@/app/utils/course";
+import { CourseMetadata } from "@/app/utils/course";
 
 import { usePersistentStore } from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
@@ -55,7 +55,7 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
     if (width < 768) {
       setView("grid");
     }
-  }, [width]);
+  }, [width, setView]);
 
   return (
     <motion.div

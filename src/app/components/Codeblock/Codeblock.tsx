@@ -11,6 +11,7 @@ export default function Codeblock({
 }) {
   const getCodeText = () => {
     if (!children) return "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const code = (children as any)?.props?.children?.props?.children?.props
       ?.children;
 
@@ -18,9 +19,12 @@ export default function Codeblock({
       return code
         .map((line) => {
           if (typeof line === "string") return line;
-          return line.props.children
-            .map((span: any) => span.props.children)
-            .join("");
+          return (
+            line.props.children
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              .map((span: any) => span.props.children)
+              .join("")
+          );
         })
         .join("");
     }
@@ -40,7 +44,7 @@ export default function Codeblock({
           >
             <Icon
               name="Copy"
-              size={16 as any}
+              size={16 as 18 | 14 | 12}
               className="text-mute hover:text-secondary transition cursor-pointer"
             />
           </div>

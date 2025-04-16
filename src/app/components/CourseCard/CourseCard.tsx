@@ -5,7 +5,6 @@ import classNames from "classnames";
 import { usePersistentStore } from "@/stores/store";
 import DifficultyBadge from "../DifficultyBadge/DifficultyBadge";
 import { motion } from "motion/react";
-import Icon from "../Icon/Icon";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
 
 type CourseCardProps = {
