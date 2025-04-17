@@ -48,7 +48,7 @@ export default function ReturningCourseFooter({
             width: `${(completedLessonsCount / totalLessonCount) * 100}%`,
             height: 6,
           }}
-          transition={{ duration: 0.4, ease: anticipate }}
+          transition={{ duration: 0.4, ease: anticipate, delay: 0.2 }}
         />
       </div>
       {completedLessonsCount !== totalLessonCount ? (

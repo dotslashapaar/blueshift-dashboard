@@ -63,6 +63,10 @@
     "ready": "Ready to finish the course?",
     "not_ready": "Complete all lessons first",
     "see_challenge": "See Challenge",
-    "back_to_lessons": "Back to Lessons"
+    "back_to_lessons": "Back to Lessons",
+    "locked": "This challenge is locked",
+    "locked_description": "Finish the lessons first to unlock the challenge.",
+    "connect_wallet": "Connect Wallet",
+    "connect_wallet_description": "A Solana wallet is required to complete the challenge and unlock NFTs"
   }
 }

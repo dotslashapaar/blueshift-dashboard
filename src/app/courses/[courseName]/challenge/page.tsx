@@ -6,6 +6,7 @@ import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
 import Icon from "@/app/components/Icon/Icon";
 import { courseColors } from "@/app/utils/course";
 import { getCourse, getCourseLessons } from "@/app/utils/mdx";
+import ChallengeContent from "@/app/components/Challenges/ChallengesContent";
 
 interface ChallengePageProps {
   params: Promise<{
@@ -52,6 +53,8 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
         </div>
       </div>
       <Divider />
+
+      <ChallengeContent currentCourse={courseMetadata} />
     </div>
   );
 }

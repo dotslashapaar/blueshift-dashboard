@@ -43,6 +43,7 @@ export type CourseMetadata = {
   difficulty: CourseDifficulty;
   isFeatured: boolean;
   status?: RewardsStatus;
+  totalLessons: number;
 };
 
 export type LessonMetadata = {

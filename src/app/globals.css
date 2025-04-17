@@ -13,6 +13,8 @@
   --color-border: #1A1E26;
   --color-border-active: rgba(173,185,210,0.2);
   --color-background-primary: rgba(0,153,153,0.08);
+  --color-success: #00E66B;
+  --color-error: #FF285A;
   --color-brand-primary: #00FFFF;
   --color-brand-secondary: #00E6E6;
   --color-brand-tertiary: #00B3B3;
@@ -100,4 +102,10 @@ blockquote p::after {
 
 :root:has(.no-scroll) {
   overflow-y:hidden;
+}
+
+.custom-scrollbar {
+  @apply [&::-webkit-scrollbar]:!w-[6px] [&::-webkit-scrollbar-button]:!bg-transparent [&::-webkit-scrollbar-button]:!rounded-full [&::-webkit-scrollbar]:!h-auto [&::-webkit-scrollbar-thumb]:!rounded-full [&::-webkit-scrollbar-thumb]:!bg-background-card-foreground [&::-webkit-scrollbar-track]:!rounded-full [&::-webkit-scrollbar-track]:!bg-transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-background-card-foreground) transparent;
 }
