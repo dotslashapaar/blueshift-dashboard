@@ -1,8 +1,6 @@
 import createMDX from "@next/mdx";
 import pkg from "./next-i18next.config.js";
 const { i18n } = pkg;
-import rehypePrettyCode from "rehype-pretty-code";
-import oneDarkPro from 'shiki/themes/one-dark-pro.mjs'
 
 const nextConfig = {
   i18n,
@@ -14,3 +12,6 @@ const withMDX = createMDX({
 });
 
 export default withMDX(nextConfig); 
+
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();
