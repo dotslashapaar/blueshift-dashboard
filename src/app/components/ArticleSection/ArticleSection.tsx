@@ -6,13 +6,17 @@ import { usePathname } from "next/navigation";
 export function ArticleSection({
   name,
   id,
+  level = "h2",
 }: {
   name: string;
   id: string;
+  level?: "h2" | "h3" | "h4";
 }) {
   const pathname = usePathname();
+  const Heading = level;
+
   return (
-    <h3 id={id} className="scroll-mt-24 flex items-center gap-x-2">
+    <Heading id={id} className="scroll-mt-24 flex items-center gap-x-2">
       {name}
       <div
         className="cursor-pointer"
@@ -26,7 +30,7 @@ export function ArticleSection({
           className="transition text-mute hover:text-tertiary"
         />
       </div>
-    </h3>
+    </Heading>
   );
 }
 

@@ -1,26 +1,25 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-
 @theme inline {
-  --color-background: #0B0E14;
-  --color-primary: #EFF1F6;
-  --color-secondary: #CED5E4;
-  --color-tertiary: #ADB9D2;
+  --color-background: #0b0e14;
+  --color-primary: #eff1f6;
+  --color-secondary: #ced5e4;
+  --color-tertiary: #adb9d2;
   --color-mute: #585e6c;
-  --color-background-card: #11141A;
-  --color-background-card-foreground: #171A20;
-  --color-border: #1A1E26;
-  --color-border-active: rgba(173,185,210,0.2);
-  --color-background-primary: rgba(0,153,153,0.08);
-  --color-success: #00E66B;
-  --color-error: #FF285A;
-  --color-brand-primary: #00FFFF;
-  --color-brand-secondary: #00E6E6;
-  --color-brand-tertiary: #00B3B3;
-  --color-brand-anchor: #DDEAE0;
-  --color-brand-rust: #FFAD66;
-  --color-brand-typescript: #69A2F1;
+  --color-background-card: #11141a;
+  --color-background-card-foreground: #171a20;
+  --color-border: #1a1e26;
+  --color-border-active: rgba(173, 185, 210, 0.2);
+  --color-background-primary: rgba(0, 153, 153, 0.08);
+  --color-success: #00e66b;
+  --color-error: #ff285a;
+  --color-brand-primary: #00ffff;
+  --color-brand-secondary: #00e6e6;
+  --color-brand-tertiary: #00b3b3;
+  --color-brand-anchor: #ddeae0;
+  --color-brand-rust: #ffad66;
+  --color-brand-typescript: #69a2f1;
   --font-sans: var(--font-switzer);
   --font-mono: var(--font-montech);
   --font-geist-mono: var(--font-geist-mono);
@@ -54,7 +53,7 @@ h1 {
 }
 
 .content-wrapper {
-  @apply px-4 max-w-app md:px-8 lg:px-14 mx-auto w-full
+  @apply px-4 max-w-app md:px-8 lg:px-14 mx-auto w-full;
 }
 
 .gradient-border::before {
@@ -63,15 +62,21 @@ h1 {
   inset: 0;
   padding: 1px;
   border-radius: inherit;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   mask-mode: match-source, match-source;
   mask-repeat: repeat, repeat;
   mask-clip: content-box, border-box;
   mask-origin: content-box, border-box;
-  mask-position: 0% 0%, 0% 0%;
+  mask-position:
+    0% 0%,
+    0% 0%;
   mask-size: auto, auto;
   pointer-events: none;
 }
@@ -80,12 +85,12 @@ article img {
   @apply rounded-2xl;
 }
 
-article a  {
+article a {
   @apply text-brand-secondary hover:text-brand-primary transition;
 }
 
 blockquote {
-  @apply border-l-0
+  @apply border-l-0;
 }
 
 blockquote p {
@@ -101,11 +106,25 @@ blockquote p::after {
 }
 
 :root:has(.no-scroll) {
-  overflow-y:hidden;
+  overflow-y: hidden;
+}
+
+h3,
+h4 {
+  @apply scroll-mt-24;
+}
+
+p code,
+li code {
+  @apply bg-background-primary;
 }
 
 .custom-scrollbar {
   @apply [&::-webkit-scrollbar]:!w-[6px] [&::-webkit-scrollbar-button]:!bg-transparent [&::-webkit-scrollbar-button]:!rounded-full [&::-webkit-scrollbar]:!h-auto [&::-webkit-scrollbar-thumb]:!rounded-full [&::-webkit-scrollbar-thumb]:!bg-background-card-foreground [&::-webkit-scrollbar-track]:!rounded-full [&::-webkit-scrollbar-track]:!bg-transparent;
   scrollbar-width: thin;
   scrollbar-color: var(--color-background-card-foreground) transparent;
+}
+
+.rehype-pretty-copy {
+  @apply opacity-0;
 }
