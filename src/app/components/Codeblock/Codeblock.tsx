@@ -1,6 +1,10 @@
 "use client";
 
+import { useRef, useState } from "react";
 import Icon from "../Icon/Icon";
+import { motion } from "motion/react";
+import classNames from "classnames";
+import { anticipate } from "motion";
 
 export function Codeblock({
   children,
@@ -9,27 +13,20 @@ export function Codeblock({
   children: React.ReactNode;
   lang: string;
 }) {
-  const getCodeText = () => {
-    if (!children) return "";
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const code = (children as any)?.props?.children?.props?.children?.props
-      ?.children;
+  const preRef = useRef<HTMLDivElement>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
-    if (Array.isArray(code)) {
-      return code
-        .map((line) => {
-          if (typeof line === "string") return line;
-          return (
-            line.props.children
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              .map((span: any) => span.props.children)
-              .join("")
-          );
-        })
-        .join("");
-    }
+  const handleClickCopy = async () => {
+    const code = preRef.current?.textContent;
 
-    return "";
+    if (!code) return;
+
+    await navigator.clipboard.writeText(code);
+    setIsCopied(true);
+
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 3000);
   };
 
   return (
@@ -37,20 +34,33 @@ export function Codeblock({
       <div className="text-sm font-medium text-brand-secondary flex items-center justify-between px-6 py-3 border-b-border bg-background-card-foreground rounded-t-xl">
         {lang}
         {children && (
-          <div
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: anticipate }}
+            key={isCopied ? "success" : "copy"}
             onClick={() => {
-              navigator.clipboard.writeText(getCodeText());
+              if (isCopied) return;
+              handleClickCopy();
             }}
           >
             <Icon
-              name="Copy"
+              name={isCopied ? "Success" : "Copy"}
               size={16 as 18 | 14 | 12}
-              className="text-mute hover:text-secondary transition cursor-pointer"
+              className={classNames(
+                "text-mute hover:text-secondary transition cursor-pointer",
+                {
+                  "!text-brand-primary !cursor-default": isCopied,
+                }
+              )}
             />
-          </div>
+          </motion.div>
         )}
       </div>
-      <div className="bg-background-card">{children}</div>
+      <div className="bg-background-card" ref={preRef}>
+        {children}
+      </div>
     </div>
   );
 }

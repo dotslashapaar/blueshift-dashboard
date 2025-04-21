@@ -20,6 +20,7 @@ import { RewardsIcon } from "./Rewards";
 import { RustIcon } from "./Rust";
 import { SearchIcon } from "./Search";
 import { ShiftArrowIcon } from "./ShiftArrow";
+import { SuccessIcon } from "./Success";
 import { TableIcon } from "./Table";
 import { TargetIcon } from "./Target";
 import { TypescriptIcon } from "./Typescript";
@@ -52,6 +53,7 @@ export const IconComponents = {
   Rust: RustIcon,
   Search: SearchIcon,
   ShiftArrow: ShiftArrowIcon,
+  Success: SuccessIcon,
   Table: TableIcon,
   Target: TargetIcon,
   Typescript: TypescriptIcon,
