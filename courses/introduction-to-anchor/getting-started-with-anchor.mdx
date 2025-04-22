@@ -60,13 +60,13 @@ Let's look at how the barebone version of our Vault programs looks like, and the
 
 Let's start from the basics:
 
-#### `declare_id!()`
+<ArticleSection name="`declare_id!()`" id="declare_id_macro" level="h3" />
 
 The `declare_id!()` macro is used to specify the program onchain address. This is a unique pubkey that comes from the keypair stored in the `target` folder of your anchor project that will be used to deploy the `.so` file that represents the logic and all the data of the smart contract itself.
 
 **Note**: It will not be `22222222222222222222222222222222222222222222`, we use this convention in our Blueshift smart contracts examples just because of the way our testing framework works. In a real-world scenario, your onchain program ID will be the one generated for you when you run the Anchor commands to create and build your program.
 
-#### `#[program]` & `#[derive(Accounts)]`
+<ArticleSection name="`#[program]` & `#[derive(Accounts)]`" id="program_and_derive_accounts_macros" level="h3" />
 
 For each instruction, there is a `context` that tells the smart contract which accounts are going to be used in this instruction. Additionally, there is the possibility of passing custom data inside of it to use within the logic of the instruction.
 
@@ -111,7 +111,7 @@ Additionally, as you can see, some accounts leverage the `#[account(...)]` macro
   - **PDA Signatures**: Because PDAs are controlled by the program, they can sign actions on behalf of the program during CPI calls if needed.  
   - **Storing Data**: PDAs can also be used to store data in a programmatically derived address, making it easier to locate and verify them during instructions.
 
-#### `#[error_code]`
+<ArticleSection name="`#[error_code]`" id="error_code_macro" level="h3" />
 
 The `#[error_code]` macro, which is used to create custom errors inside the program.
 
@@ -145,7 +145,7 @@ anchor init blueshift_anchor_vault
 
 Open the newly generated folder, and you’re ready to start coding!
 
-#### Template
+<ArticleSection name="Template" id="template" level="h3" />
 
 Before starting with the logic, copy the following template and use it:
 
@@ -178,7 +178,7 @@ pub enum VaultError {
 }
 ```
 
-#### Deposit
+<ArticleSection name="Deposit" id="deposit" level="h3" />
 
 Here’s what happens in the `deposit` logic:
 - It verifies that the vault account has zero lamports, ensuring the vault doesn’t already exist.
@@ -239,7 +239,7 @@ transfer(
 
 Here, we create a `CpiContext` specifying the System Program and the relevant from and to accounts, then execute the transfer by passing in the amount of lamports.
 
-#### Withdraw
+<ArticleSection name="Withdraw" id="withdraw" level="h3" />
 
 Here’s what happens in the `withdraw` logic:
 - Transfers lamports from the vault to the signer using the System Program and the signer capabilities of the PDA.
