@@ -77,22 +77,21 @@ export default async function LessonPage({
             className="text-3xl font-semibold"
           />
         </div>
-        <CoursePagination
-          currentLesson={currentLessonIndex + 1}
-          totalLessons={sortedLessons.length}
-          currentLessonName={lessonMetadata.title}
-          previousLessonSlug={previousLessonSlug}
-          nextLessonSlug={nextLessonSlug}
-          courseName={courseMetadata.title.toLowerCase().replace(/\s+/g, "-")}
-        />
       </div>
 
       <Divider />
 
-      <div className="flex flex-col gap-y-8 h-full relative px-4 md:px-8 lg:px-14 mx-auto w-full mt-[64px] max-w-[1100px]">
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-y-24 lg:gap-y-0 lg:gap-x-12 gap-x-0">
-          <TableOfContents />
-          <div className="col-span-1 md:col-span-7 flex flex-col gap-y-8">
+      <div className="flex flex-col gap-y-8 h-full relative px-4 md:px-8 lg:px-14 mx-auto w-full mt-[36px] border-b border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-10 xl:grid-cols-13 gap-y-24 lg:gap-y-0 gap-x-0 lg:gap-x-6">
+          <CoursePagination
+            courseName={courseMetadata.title}
+            currentLesson={currentLessonIndex + 1}
+            lessons={sortedLessons.map((lesson) => ({
+              title: lesson.title,
+              slug: lesson.slug,
+            }))}
+          />
+          <div className="pb-8 pt-[36px] -mt-[36px] order-2 lg:order-1 col-span-1 md:col-span-7 flex flex-col gap-y-8 xl:border-x border-border xl:px-6">
             <MdxLayout>{children}</MdxLayout>
             {nextLesson && (
               <Link
@@ -112,6 +111,7 @@ export default async function LessonPage({
               </Link>
             )}
           </div>
+          <TableOfContents />
         </div>
         <CourseChallengeButton
           isCourseReady={isLastLesson}

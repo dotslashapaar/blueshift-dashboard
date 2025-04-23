@@ -58,7 +58,7 @@ export default function HeaderContent() {
               })}
             />
             <span
-              className={classNames({
+              className={classNames("font-mono text-[15px] pt-0.5", {
                 "text-brand-secondary":
                   pathname === "/" || pathname.startsWith("/courses"),
               })}
@@ -90,7 +90,7 @@ export default function HeaderContent() {
               })}
             />
             <span
-              className={classNames({
+              className={classNames("font-mono text-[15px] pt-0.5", {
                 "text-brand-secondary": pathname === "/rewards",
               })}
             >
@@ -156,7 +156,7 @@ export default function HeaderContent() {
                     })}
                   />
                   <span
-                    className={classNames({
+                    className={classNames("font-mono text-[15px] pt-0.5", {
                       "text-brand-secondary":
                         pathname === "/" || pathname.startsWith("/courses"),
                     })}
@@ -187,7 +187,7 @@ export default function HeaderContent() {
                     })}
                   />
                   <span
-                    className={classNames({
+                    className={classNames("font-mono text-[15px] pt-0.5", {
                       "text-brand-secondary": pathname === "/rewards",
                     })}
                   >

@@ -93,7 +93,7 @@ export default function TableOfContents() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, ease: anticipate }}
-      className="h-max lg:sticky top-32 md:col-span-3 flex flex-col gap-y-8"
+      className="order-1 lg:order-2 h-max lg:sticky top-24 md:col-span-2 lg:col-span-3 flex flex-col gap-y-8"
     >
       <div className="flex items-center space-x-2">
         <Icon name="Table" />

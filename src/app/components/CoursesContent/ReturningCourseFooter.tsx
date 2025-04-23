@@ -101,6 +101,7 @@ export default function ReturningCourseFooter({
           >
             <Icon name="Challenge" className="text-brand-secondary" />
             <DecryptedText
+              parentClassName="font-mono text-[15px] pt-0.5"
               isHovering={isHovering}
               text={t("lessons.take_the_challenge")}
             />

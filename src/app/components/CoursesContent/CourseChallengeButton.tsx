@@ -15,7 +15,7 @@ export default function CourseChallengeButton({
 }: CourseChallengeButtonProps) {
   const { t } = i18n;
   return (
-    <div className="text-center bg-background-card relative lg:absolute lg:left-14 bottom-0 bg-card rounded-2xl px-6 py-5 flex flex-col gap-y-4">
+    <div className="text-center bg-background-card relative xl:absolute xl:left-14 bottom-8 bg-card rounded-2xl px-6 py-5 flex flex-col gap-y-4">
       <span className="font-medium text-secondary">
         {isCourseReady ? t("challenges.ready") : t("challenges.not_ready")}
       </span>
