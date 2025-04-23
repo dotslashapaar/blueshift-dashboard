@@ -46,6 +46,21 @@ export default function CourseFilter({ className }: FiltersProps) {
     }
   };
 
+  const handleLanguageClick = (language: CourseLanguages) => {
+    if (selectedLanguages.length === allLanguages.length) {
+      // If "All" is selected, deselect all and select only the clicked language
+      allLanguages.forEach((lang) => {
+        if (selectedLanguages.includes(lang)) {
+          toggleLanguage(lang);
+        }
+      });
+      toggleLanguage(language);
+    } else {
+      // Normal toggle behavior
+      toggleLanguage(language);
+    }
+  };
+
   useOnClickOutside(dropdownRef, () => setIsOpen(false));
 
   return (
@@ -71,7 +86,7 @@ export default function CourseFilter({ className }: FiltersProps) {
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ duration: 0.4, ease: anticipate }}
             className={classNames(
-              "border border-border z-50 rounded-xl flex w-max flex-col gap-y-1 absolute top-[calc(100%+6px)] p-1 bg-background-card",
+              "border border-border z-50 min-w-[200px] rounded-xl flex w-max flex-col gap-y-1 absolute top-[calc(100%+6px)] p-1 bg-background-card",
               className
             )}
           >
@@ -82,10 +97,13 @@ export default function CourseFilter({ className }: FiltersProps) {
               <Checkbox
                 checked={selectedLanguages.length === allLanguages.length}
               />
+              <span className="text-sm font-medium leading-none text-secondary">
+                All
+              </span>
             </button>
             <Divider />
             <div className={classNames("flex relative flex-col gap-y-1")}>
-              <AnimatePresence>
+              {/* <AnimatePresence>
                 {selectedLanguages.length === allLanguages.length && (
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -97,22 +115,24 @@ export default function CourseFilter({ className }: FiltersProps) {
                     )}
                   />
                 )}
-              </AnimatePresence>
+              </AnimatePresence> */}
               {allLanguages.map((language) => (
                 <button
                   key={language}
-                  onClick={() => toggleLanguage(language)}
+                  onClick={() => handleLanguageClick(language)}
                   className={classNames(
                     "flex items-center relative gap-x-4 py-3 px-2.5 pr-4 rounded-lg transition hover:bg-background-card-foreground",
                     selectedLanguages.includes(language) &&
-                      selectedLanguages.length !== allLanguages.length &&
-                      "bg-background-card-foreground"
+                      "bg-background-card-foreground",
+                    selectedLanguages.includes(language) &&
+                      "hover:!bg-background-card-foreground/50"
                   )}
                 >
-                  <Checkbox
+                  {/* <Checkbox
+                    theme="secondary"
                     className="z-10 relative"
                     checked={selectedLanguages.includes(language)}
-                  />
+                  /> */}
                   <div className="flex items-center gap-x-2 relative z-10">
                     <Icon name={language as IconName} />
                     <span
@@ -121,7 +141,7 @@ export default function CourseFilter({ className }: FiltersProps) {
                         selectedLanguages.includes(language) && "!text-primary"
                       )}
                     >
-                      {language}
+                      {courseLanguages[language]}
                     </span>
                   </div>
                 </button>

@@ -45,6 +45,21 @@ export default function RewardFilter({ className }: FiltersProps) {
     }
   };
 
+  const handleStatusClick = (status: RewardsStatus) => {
+    if (selectedRewardStatus.length === allStatuses.length) {
+      // If "All" is selected, deselect all and select only the clicked status
+      allStatuses.forEach((s) => {
+        if (selectedRewardStatus.includes(s)) {
+          toggleRewardStatus(s);
+        }
+      });
+      toggleRewardStatus(status);
+    } else {
+      // Normal toggle behavior
+      toggleRewardStatus(status);
+    }
+  };
+
   useOnClickOutside(dropdownRef, () => setIsOpen(false));
 
   return (
@@ -81,6 +96,9 @@ export default function RewardFilter({ className }: FiltersProps) {
               <Checkbox
                 checked={selectedRewardStatus.length === allStatuses.length}
               />
+              <span className="text-sm font-medium leading-none text-secondary">
+                All
+              </span>
             </button>
             <Divider />
             <div className={classNames("flex relative flex-col gap-y-1")}>
@@ -100,7 +118,7 @@ export default function RewardFilter({ className }: FiltersProps) {
               {allStatuses.map((status) => (
                 <button
                   key={status}
-                  onClick={() => toggleRewardStatus(status)}
+                  onClick={() => handleStatusClick(status)}
                   className={classNames(
                     "flex items-center relative gap-x-4 py-3 px-2.5 pr-4 rounded-lg transition hover:bg-background-card-foreground",
                     selectedRewardStatus.includes(status) &&
@@ -109,6 +127,7 @@ export default function RewardFilter({ className }: FiltersProps) {
                   )}
                 >
                   <Checkbox
+                    theme="secondary"
                     className="z-10 relative"
                     checked={selectedRewardStatus.includes(status)}
                   />

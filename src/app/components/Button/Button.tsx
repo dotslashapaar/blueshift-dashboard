@@ -37,7 +37,7 @@ export default function Button({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       className={classNames(
-        "group/button flex items-center cursor-pointer justify-center font-medium gap-x-2 flex-shrink-0 gradient-border",
+        "font-mono text-[15px] group/button flex items-center cursor-pointer justify-center font-medium gap-x-2 flex-shrink-0 gradient-border",
 
         // Sizes
         {

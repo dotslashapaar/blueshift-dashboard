@@ -1,7 +1,7 @@
 export const courseLanguages = {
   Anchor: "Anchor",
   Rust: "Rust",
-  Typescript: "Typescript",
+  Typescript: "TypeScript",
 } as const;
 
 export const courseColors = {
