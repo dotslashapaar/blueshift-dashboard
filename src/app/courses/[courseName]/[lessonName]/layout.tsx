@@ -1,6 +1,6 @@
 import MdxLayout from "@/app/mdx-layout";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
-import { getCourse, getLesson, getCourseLessons } from "@/app/utils/mdx";
+import { getCourse } from "@/app/utils/mdx";
 import { courseColors } from "@/app/utils/course";
 import Icon from "@/app/components/Icon/Icon";
 import Divider from "@/app/components/Divider/Divider";
@@ -23,34 +23,27 @@ export default async function LessonPage({
 }: LessonPageProps) {
   const resolvedParams = await params;
   const courseMetadata = await getCourse(resolvedParams.courseName);
-  const { frontmatter: lessonMetadata } = await getLesson(
-    resolvedParams.courseName,
-    resolvedParams.lessonName
-  );
 
   // Get all lessons for the course
-  const allLessons = await getCourseLessons(resolvedParams.courseName);
-
-  // Sort lessons by lessonNumber
-  const sortedLessons = allLessons.sort(
-    (a, b) => a.lessonNumber - b.lessonNumber
-  );
+  const allLessons =courseMetadata.lessons;
 
   // Find current lesson index
-  const currentLessonIndex = sortedLessons.findIndex(
-    (lesson) => lesson.title === lessonMetadata.title
+  const currentLessonIndex = allLessons.findIndex(
+    (lesson) => lesson.slug === resolvedParams.lessonName
   );
 
+  const lessonMetadata = courseMetadata.lessons[currentLessonIndex]
+
   // Get next lesson slug (if exists)
-  const nextLesson = sortedLessons[currentLessonIndex + 1];
+  const nextLesson = allLessons[currentLessonIndex + 1];
   const nextLessonSlug = nextLesson ? nextLesson.slug : "";
 
   // Get previous lesson slug (if exists)
-  const previousLesson = sortedLessons[currentLessonIndex - 1];
+  const previousLesson = allLessons[currentLessonIndex - 1];
   const previousLessonSlug = previousLesson ? previousLesson.slug : "";
 
   // Check if this is the last lesson
-  const isLastLesson = currentLessonIndex === sortedLessons.length - 1;
+  const isLastLesson = currentLessonIndex === allLessons.length - 1;
 
   return (
     <div className="flex flex-col w-full">
@@ -86,7 +79,7 @@ export default async function LessonPage({
           <CoursePagination
             courseName={courseMetadata.title}
             currentLesson={currentLessonIndex + 1}
-            lessons={sortedLessons.map((lesson) => ({
+            lessons={allLessons.map((lesson) => ({
               title: lesson.title,
               slug: lesson.slug,
             }))}

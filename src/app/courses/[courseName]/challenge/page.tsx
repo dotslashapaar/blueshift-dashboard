@@ -5,7 +5,7 @@ import Divider from "@/app/components/Divider/Divider";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
 import Icon from "@/app/components/Icon/Icon";
 import { courseColors } from "@/app/utils/course";
-import { getCourse, getCourseLessons } from "@/app/utils/mdx";
+import { getCourse } from "@/app/utils/mdx";
 import ChallengeContent from "@/app/components/Challenges/ChallengesContent";
 
 interface ChallengePageProps {
@@ -17,7 +17,6 @@ interface ChallengePageProps {
 export default async function ChallengePage({ params }: ChallengePageProps) {
   const resolvedParams = await params;
   const courseMetadata = await getCourse(resolvedParams.courseName);
-  const courseLessons = await getCourseLessons(resolvedParams.courseName);
 
   return (
     <div className="flex flex-col w-full">
@@ -45,8 +44,8 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
           />
           <BackToCourseButton
             courseSlug={courseMetadata.title.toLowerCase().replace(/\s+/g, "-")}
-            courseLessons={courseLessons.map((lesson) => ({
-              number: lesson.lessonNumber,
+            courseLessons={courseMetadata.lessons.map((lesson, index) => ({
+              number: index + 1,
               slug: lesson.slug,
             }))}
           />
