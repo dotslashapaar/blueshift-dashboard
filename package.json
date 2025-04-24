@@ -5,12 +5,11 @@
   "scripts": {
     "vercel-build": "next build",
     "dev": "next dev",
-    "build:mdx": "node scripts/generate-mdx-data.mjs",
     "build:pages": "npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "next lint",
-    "preview": "npm run build:mdx && npm run build:pages && wrangler pages dev",
-    "deploy": "npm run build:mdx && npm run build:pages && wrangler pages deploy",
+    "preview": "npm run build:pages && wrangler pages dev",
+    "deploy": "npm run build:pages && wrangler pages deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "engines": {

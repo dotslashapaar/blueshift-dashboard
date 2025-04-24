@@ -37,13 +37,14 @@ export const rewardsStatus = {
 } as const;
 
 export type CourseMetadata = {
+  slug: string;
   title: string;
   language: CourseLanguages;
   color: string;
   difficulty: CourseDifficulty;
   isFeatured: boolean;
   status?: RewardsStatus;
-  totalLessons: number;
+  lessons: LessonMetadata[];
 };
 
 export type LessonMetadata = {
@@ -55,3 +56,23 @@ export type LessonMetadata = {
 export type RewardsStatus = keyof typeof rewardsStatus;
 export type CourseLanguages = keyof typeof courseLanguages;
 export type CourseDifficulty = keyof typeof courseDifficulty;
+
+/**
+  * Adds a lesson number to each lesson in the course metadata.
+ * @param courses
+ */
+export function withCourseNumber(
+  courses: CourseMetadataWithoutLessonNumber[]
+): CourseMetadata[] {
+  return courses.map((course) => ({
+    ...course,
+    lessons: course.lessons.map((lesson, index) => ({
+      ...lesson,
+      lessonNumber: index + 1,
+    })),
+  }));
+}
+
+type CourseMetadataWithoutLessonNumber = Omit<CourseMetadata, 'lessons'> & {
+  lessons: Omit<LessonMetadata, 'lessonNumber'>[];
+};

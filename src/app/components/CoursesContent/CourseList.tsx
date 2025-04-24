@@ -34,7 +34,7 @@ const courseSections = {
 
 type CoursesContentProps = {
   searchValue?: string;
-  initialCourses: { slug: string; metadata: CourseMetadata }[];
+  initialCourses: CourseMetadata[];
   courseLessons: {
     slug: string;
     totalLessons: number;
@@ -53,12 +53,12 @@ export default function CourseList({
   const isProgressEmpty = Object.keys(courseProgress).length === 0;
 
   const filteredCourses = initialCourses.filter((course) => {
-    const matchesSearch = course.metadata.title
+    const matchesSearch = course.title
       .toLowerCase()
       .includes((searchValue || "").toLowerCase());
     const matchesLanguage =
       selectedLanguages.length === 0 ||
-      selectedLanguages.includes(course.metadata.language);
+      selectedLanguages.includes(course.language);
     return matchesSearch && matchesLanguage;
   });
 
@@ -91,7 +91,7 @@ export default function CourseList({
     if (width < 768) {
       setView("grid");
     }
-  }, [width]);
+  }, [setView, width]);
 
   return (
     <motion.div
@@ -126,7 +126,7 @@ export default function CourseList({
                 )}
               >
                 {filteredCourses
-                  .filter((course) => course.metadata.isFeatured)
+                  .filter((course) => course.isFeatured)
                   .map((course) => {
                     const totalLessons =
                       courseLessons.find((c) => c.slug === course.slug)
@@ -134,10 +134,10 @@ export default function CourseList({
                     return (
                       <CourseCard
                         key={course.slug}
-                        name={course.metadata.title}
-                        language={course.metadata.language}
-                        color={course.metadata.color}
-                        difficulty={course.metadata.difficulty}
+                        name={course.title}
+                        language={course.language}
+                        color={course.color}
+                        difficulty={course.difficulty}
                         footer={
                           <NewCourseFooter
                             courseSlug={course.slug}
@@ -187,10 +187,10 @@ export default function CourseList({
                         return (
                           <CourseCard
                             key={course.slug}
-                            name={course.metadata.title}
-                            language={course.metadata.language}
-                            color={course.metadata.color}
-                            difficulty={course.metadata.difficulty}
+                            name={course.title}
+                            language={course.language}
+                            color={course.color}
+                            difficulty={course.difficulty}
                             footer={
                               <ReturningCourseFooter
                                 courseName={course.slug}
@@ -217,7 +217,7 @@ export default function CourseList({
           {Object.entries(courseSections).map(([language, section]) => {
             const languageCourses = filteredCourses.filter(
               (course) =>
-                course.metadata.language === language &&
+                course.language === language &&
                 courseProgress[course.slug] === undefined
             );
 
@@ -248,10 +248,10 @@ export default function CourseList({
                       return (
                         <CourseCard
                           key={course.slug}
-                          name={course.metadata.title}
-                          language={course.metadata.language}
-                          color={course.metadata.color}
-                          difficulty={course.metadata.difficulty}
+                          name={course.title}
+                          language={course.language}
+                          color={course.color}
+                          difficulty={course.difficulty}
                           footer={
                             <NewCourseFooter
                               courseSlug={course.slug}

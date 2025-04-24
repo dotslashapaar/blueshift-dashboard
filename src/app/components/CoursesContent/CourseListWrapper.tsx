@@ -10,6 +10,7 @@ export default async function CourseListWrapper() {
   const courseLessons = await Promise.all(
     courses.map(async (course) => {
       const lessons = await getCourseLessons(course.slug);
+
       return {
         slug: course.slug,
         totalLessons: lessons.length,

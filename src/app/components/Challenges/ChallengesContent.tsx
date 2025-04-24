@@ -15,13 +15,13 @@ export default function ChallengesContent({
   currentCourse: CourseMetadata;
 }) {
   // Replace with real connection later
-  const [isUserConnected, setIsUserConnected] = useState(true);
+  const [isUserConnected] = useState(true);
   const { courseProgress } = usePersistentStore();
   const { t } = i18n;
   console.log(currentCourse);
   console.log(courseProgress);
   const isCourseCompleted =
-    courseProgress[currentCourse.title] === currentCourse.totalLessons;
+    courseProgress[currentCourse.title] === currentCourse.lessons.length;
   return (
     <div className="relative w-full h-full">
       {!isUserConnected ? (
