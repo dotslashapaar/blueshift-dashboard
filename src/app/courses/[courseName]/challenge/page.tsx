@@ -1,5 +1,3 @@
-export const runtime = "edge";
-
 import BackToCourseButton from "@/app/components/Challenges/BackToCourseButton";
 import Divider from "@/app/components/Divider/Divider";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";

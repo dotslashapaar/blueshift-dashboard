@@ -25,7 +25,7 @@ export default function SolanaWalletProvider({
   );
 
   return (
-    <ConnectionProvider endpoint="https://api.devnet.solana.com">
+    <ConnectionProvider endpoint="https://api.devnet.solana.com" config={{ commitment: "confirmed", httpAgent: false }}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
