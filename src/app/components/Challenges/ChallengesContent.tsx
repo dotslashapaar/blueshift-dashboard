@@ -21,7 +21,7 @@ export default function ChallengesContent({
   console.log(currentCourse);
   console.log(courseProgress);
   const isCourseCompleted =
-    courseProgress[currentCourse.title] === currentCourse.lessons.length;
+    courseProgress[currentCourse.slug] === currentCourse.lessons.length;
   return (
     <div className="relative w-full h-full">
       {!isUserConnected ? (

@@ -78,7 +78,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
       <div className="flex flex-col gap-y-8 h-full relative px-4 md:px-8 lg:px-14 mx-auto w-full mt-[36px] border-b border-border">
         <div className="grid grid-cols-1 lg:grid-cols-10 xl:grid-cols-13 gap-y-24 lg:gap-y-0 gap-x-0 lg:gap-x-6">
           <CoursePagination
-            courseName={courseMetadata.title}
+            courseSlug={courseMetadata.slug}
             currentLesson={currentLessonIndex + 1}
             lessons={allLessons.map((lesson) => ({
               title: lesson.title,
@@ -91,7 +91,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             </MdxLayout>
             {nextLesson && (
               <Link
-                href={`/courses/${courseMetadata.title.toLowerCase().replace(/\s+/g, "-")}/${nextLessonSlug}`}
+                href={`/courses/${courseMetadata.slug}/${nextLessonSlug}`}
                 className="flex justify-between items-center w-full bg-background-card border border-border group py-5 px-5 rounded-xl"
               >
                 <div className="flex items-center gap-x-2">
@@ -111,7 +111,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
         </div>
         <CourseChallengeButton
           isCourseReady={isLastLesson}
-          courseName={courseMetadata.title.toLowerCase().replace(/\s+/g, "-")}
+          courseSlug={courseMetadata.slug}
         />
       </div>
     </div>

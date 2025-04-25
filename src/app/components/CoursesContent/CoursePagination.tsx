@@ -14,21 +14,20 @@ interface CoursePaginationProps {
   }[];
   currentLesson: number;
   className?: string;
-  courseName: string;
+  courseSlug: string;
 }
 
 export default function CoursePagination({
   currentLesson,
   lessons,
   className,
-  courseName,
+  courseSlug,
 }: CoursePaginationProps) {
   const { setCourseProgress } = usePersistentStore();
 
-  const courseSlug = courseName.toLowerCase().replace(/\s+/g, "-");
-
   const router = useRouter();
-  const [isFixed, setIsFixed] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_isFixed, setIsFixed] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
       setIsFixed(window.scrollY > 250);
@@ -39,8 +38,8 @@ export default function CoursePagination({
   }, []);
 
   useEffect(() => {
-    setCourseProgress(courseName, currentLesson);
-  }, [currentLesson]);
+    setCourseProgress(courseSlug, currentLesson);
+  }, [courseSlug, currentLesson, setCourseProgress]);
 
   return (
     <motion.div

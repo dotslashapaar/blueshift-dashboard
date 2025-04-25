@@ -6,12 +6,12 @@ import Button from "../Button/Button";
 import i18n from "@/i18n/client";
 interface CourseChallengeButtonProps {
   isCourseReady: boolean;
-  courseName: string;
+  courseSlug: string;
 }
 
 export default function CourseChallengeButton({
   isCourseReady = false,
-  courseName,
+  courseSlug,
 }: CourseChallengeButtonProps) {
   const { t } = i18n;
   return (
@@ -19,7 +19,7 @@ export default function CourseChallengeButton({
       <span className="font-medium text-secondary">
         {isCourseReady ? t("challenges.ready") : t("challenges.not_ready")}
       </span>
-      <Link href={`/courses/${courseName}/challenge`}>
+      <Link href={`/courses/${courseSlug}/challenge`}>
         <Button
           disabled={!isCourseReady}
           variant="primary"
