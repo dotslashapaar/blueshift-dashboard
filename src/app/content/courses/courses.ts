@@ -2,8 +2,8 @@ import {CourseMetadata, withCourseNumber} from "@/app/utils/course";
 
 export const courses: CourseMetadata[] = withCourseNumber([
   {
-    slug: "introduction-to-anchor",
-    title: "Introduction to Anchor",
+    slug: "anchor-vault",
+    title: "Vault",
     language: "Anchor",
     color: "221,234,224",
     difficulty: 1,
@@ -11,18 +11,29 @@ export const courses: CourseMetadata[] = withCourseNumber([
     status: "Unclaimed",
     lessons: [
       {
-        slug: "getting-started-with-anchor",
-        title: "Chapter 1: The Vault",
-      },
-      {
-        slug: "exchanging-assets-with-escrow",
-        title: "Chapter 2: The Escrow",
+        slug: "lesson",
+        title: "Vault",
       },
     ]
   },
   {
-    slug: "introduction-to-pinocchio-development",
-    title: "Introduction to Pinocchio Development",
+    slug: "anchor-escrow",
+    title: "Escrow",
+    language: "Anchor",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    status: "Unclaimed",
+    lessons: [
+      {
+        slug: "lesson",
+        title: "Escrow",
+      },
+    ]
+  },
+  {
+    slug: "pinocchio-vault",
+    title: "Pinocchio Vault",
     language: "Rust",
     color: "255,173,102",
     difficulty: 2,
@@ -30,7 +41,7 @@ export const courses: CourseMetadata[] = withCourseNumber([
     status: "Unclaimed",
     lessons: [
       {
-        slug: "getting-started-with-pinocchio",
+        slug: "lesson",
         title: "Getting Started with Pinocchio",
       },
     ]
@@ -41,7 +52,7 @@ export const courses: CourseMetadata[] = withCourseNumber([
     language: "Rust",
     color: "255,173,102",
     difficulty: 4,
-    isFeatured: false,
+    isFeatured: true,
     status: "Claimed",
     lessons: [
       {
