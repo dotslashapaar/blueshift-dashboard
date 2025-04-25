@@ -42,13 +42,7 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
             headingLevel="h1"
             className="text-3xl font-semibold"
           />
-          <BackToCourseButton
-            courseSlug={courseMetadata.slug}
-            courseLessons={courseMetadata.lessons.map((lesson, index) => ({
-              number: index + 1,
-              slug: lesson.slug,
-            }))}
-          />
+          <BackToCourseButton course={courseMetadata} />
         </div>
       </div>
       <Divider />

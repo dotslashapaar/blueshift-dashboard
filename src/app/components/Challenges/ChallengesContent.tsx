@@ -8,6 +8,8 @@ import i18n from "@/i18n/client";
 import { CourseMetadata } from "@/app/utils/course";
 import ChallengeRequirements from "./ChallengeRequirements";
 import ChallengeTable from "./ChallengeTable";
+import Link from "next/link";
+import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 
 export default function ChallengesContent({
   currentCourse,
@@ -18,10 +20,10 @@ export default function ChallengesContent({
   const [isUserConnected] = useState(true);
   const { courseProgress } = usePersistentStore();
   const { t } = i18n;
-  console.log(currentCourse);
-  console.log(courseProgress);
   const isCourseCompleted =
     courseProgress[currentCourse.slug] === currentCourse.lessons.length;
+  const lastLessonSlug = useCurrentLessonSlug(currentCourse);
+
   return (
     <div className="relative w-full h-full">
       {!isUserConnected ? (
@@ -60,13 +62,15 @@ export default function ChallengesContent({
                   {t("challenges.locked_description")}
                 </div>
               </div>
-              <Button
-                label="Back to Course"
-                variant="primary"
-                size="lg"
-                className="!w-[2/3]"
-                icon="ArrowLeft"
-              />
+              <Link href={`/courses/${currentCourse.slug}/${lastLessonSlug}`}>
+                <Button
+                  label="Back to Course"
+                  variant="primary"
+                  size="lg"
+                  className="!w-[2/3]"
+                  icon="ArrowLeft"
+                />
+              </Link>
             </div>
           )}
           <div className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24">
