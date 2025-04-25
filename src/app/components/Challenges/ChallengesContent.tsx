@@ -49,7 +49,7 @@ export default function ChallengesContent({
       ) : (
         <>
           {/* Overlay for locked course */}
-          {isCourseCompleted && (
+          {!isCourseCompleted && (
             <div className="absolute z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
               <div className="flex flex-col gap-y-4 sm:!-mt-24 max-w-[90dvw]">
                 <div className="text-center justify-center text-lg sm:text-xl font-medium leading-none gap-x-2 items-center flex">
