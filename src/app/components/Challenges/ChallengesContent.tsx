@@ -11,6 +11,25 @@ import ChallengeTable from "./ChallengeTable";
 import Link from "next/link";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 
+// Placeholder data - replace with actual data fetching later
+const placeholderRequirements = [
+  {
+    title: "Requirement 1: Setup",
+    description:
+      "Ensure your environment is correctly set up following the initial course instructions.",
+  },
+  {
+    title: "Requirement 2: Implement Function",
+    description:
+      "Implement the core function as described in the challenge details. Ensure all edge cases are handled.",
+  },
+  {
+    title: "Requirement 3: Testing",
+    description:
+      "Write comprehensive tests for your implementation to ensure correctness and robustness.",
+  },
+];
+
 export default function ChallengesContent({
   currentCourse,
 }: {
@@ -74,7 +93,10 @@ export default function ChallengesContent({
             </div>
           )}
           <div className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24">
-            <ChallengeRequirements />
+            <ChallengeRequirements
+              title={"Course Challenge"} // Use actual title if available
+              requirements={placeholderRequirements} // Use actual requirements
+            />
             <ChallengeTable />
           </div>
         </>
