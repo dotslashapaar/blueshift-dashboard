@@ -36,6 +36,16 @@ export const rewardsStatus = {
   Claimed: "Claimed",
 } as const;
 
+export type challengeMetadata = {
+  apiPath: string;
+  title: string;
+  requirements: {
+    title: string;
+    description: string;
+    instructionKey: string;
+  }[]
+}
+
 export type CourseMetadata = {
   slug: string;
   title: string;
@@ -45,6 +55,7 @@ export type CourseMetadata = {
   isFeatured: boolean;
   status?: RewardsStatus;
   lessons: LessonMetadata[];
+  challenge?: challengeMetadata;
 };
 
 export type LessonMetadata = {

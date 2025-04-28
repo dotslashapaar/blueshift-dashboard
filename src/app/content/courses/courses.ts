@@ -1,4 +1,4 @@
-import {CourseMetadata, withCourseNumber} from "@/app/utils/course";
+import { CourseMetadata, withCourseNumber } from "@/app/utils/course";
 
 export const courses: CourseMetadata[] = withCourseNumber([
   {
@@ -14,7 +14,25 @@ export const courses: CourseMetadata[] = withCourseNumber([
         slug: "lesson",
         title: "Vault",
       },
-    ]
+    ],
+    challenge: {
+      title: "Challenge: Anchor Vault",
+      apiPath: "/v1/verify/anchor/vault",
+      requirements: [
+        {
+          title: "Challenge 1: Taking deposits",
+          description:
+            "Your program should allow a user to deposit SOL into their own vault.",
+          instructionKey: "deposit",
+        },
+        {
+          title: "Challenge 2: Allowing withdrawal",
+          description:
+            "The vault owner should be able to withdraw SOL from their vault.",
+          instructionKey: "withdraw",
+        },
+      ],
+    },
   },
   {
     slug: "anchor-escrow",
@@ -29,7 +47,31 @@ export const courses: CourseMetadata[] = withCourseNumber([
         slug: "lesson",
         title: "Escrow",
       },
-    ]
+    ],
+    challenge: {
+      title: "Challenge: Anchor Escrow",
+      apiPath: "/v1/verify/anchor/escrow",
+      requirements: [
+        {
+          title: "Challenge 1: Making an escrow swap deal",
+          description:
+            "Your program should allow a user to create a swap order secured by an escrow.",
+          instructionKey: "make",
+        },
+        {
+          title: "Challenge 2: Taking an escrow swap deal",
+          description:
+            "Your program should allow a user to take an escrow swap deal.",
+          instructionKey: "take",
+        },
+        {
+          title: "Challenge 3: Canceling an escrow swap deal",
+          description:
+            "Your program should allow a user to cancel an escrow swap deal and refund the maker.",
+          instructionKey: "refund",
+        },
+      ],
+    },
   },
   {
     slug: "pinocchio-vault",
@@ -44,7 +86,25 @@ export const courses: CourseMetadata[] = withCourseNumber([
         slug: "lesson",
         title: "Getting Started with Pinocchio",
       },
-    ]
+    ],
+    challenge: {
+      title: "Challenge: Pinocchio Vault",
+      apiPath: "/v1/verify/native/vault",
+      requirements: [
+        {
+          title: "Challenge 1: Taking deposits",
+          description:
+            "Your program should allow a user to deposit SOL into their own vault.",
+          instructionKey: "deposit",
+        },
+        {
+          title: "Challenge 2: Allowing withdrawal",
+          description:
+            "The vault owner should be able to withdraw SOL from their vault.",
+          instructionKey: "withdraw",
+        },
+      ],
+    },
   },
   {
     slug: "quantum-vault",
@@ -59,7 +119,7 @@ export const courses: CourseMetadata[] = withCourseNumber([
         slug: "introduction-to-quantum-vault",
         title: "Introduction to Quantum Vault",
       },
-    ]
+    ],
   },
   {
     slug: "your-first-spl-token",
@@ -74,8 +134,6 @@ export const courses: CourseMetadata[] = withCourseNumber([
         slug: "understanding-spl-tokens",
         title: "Understanding SPL Tokens",
       },
-    ]
-  }
-])
-
-
+    ],
+  },
+]);

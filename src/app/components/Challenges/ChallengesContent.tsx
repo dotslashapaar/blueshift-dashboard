@@ -10,25 +10,9 @@ import ChallengeRequirements from "./ChallengeRequirements";
 import ChallengeTable from "./ChallengeTable";
 import Link from "next/link";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
+import { useChallengeFileUploadVerification } from "@/app/hooks/useChallengeFileUploadVerification";
 
-// Placeholder data - replace with actual data fetching later
-const placeholderRequirements = [
-  {
-    title: "Requirement 1: Setup",
-    description:
-      "Ensure your environment is correctly set up following the initial course instructions.",
-  },
-  {
-    title: "Requirement 2: Implement Function",
-    description:
-      "Implement the core function as described in the challenge details. Ensure all edge cases are handled.",
-  },
-  {
-    title: "Requirement 3: Testing",
-    description:
-      "Write comprehensive tests for your implementation to ensure correctness and robustness.",
-  },
-];
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ChallengesContent({
   currentCourse,
@@ -42,6 +26,31 @@ export default function ChallengesContent({
   const isCourseCompleted =
     courseProgress[currentCourse.slug] === currentCourse.lessons.length;
   const lastLessonSlug = useCurrentLessonSlug(currentCourse);
+  const challenge = currentCourse.challenge;
+
+  if (!apiBaseUrl) {
+    console.error(
+      "Verification API Base URL is not defined in the environment variables.",
+    );
+  }
+
+  const verificationEndpoint = challenge?.apiPath
+    ? `${apiBaseUrl}${challenge.apiPath}`
+    : "";
+
+  const {
+    isLoading,
+    error,
+    triggerUpload,
+    requirements,
+    completedRequirementsCount,
+    allIncomplete,
+  } = useChallengeFileUploadVerification({
+    verificationEndpoint: verificationEndpoint,
+    challenge: challenge!,
+  });
+
+  // Remove the handleUploadClick function as it's now inside the hook
 
   return (
     <div className="relative w-full h-full">
@@ -92,13 +101,29 @@ export default function ChallengesContent({
               </Link>
             </div>
           )}
-          <div className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24">
-            <ChallengeRequirements
-              title={"Course Challenge"} // Use actual title if available
-              requirements={placeholderRequirements} // Use actual requirements
-            />
-            <ChallengeTable />
-          </div>
+          {/* Display loading state */}
+          {isLoading && (
+            <div className="absolute z-20 flex items-center justify-center top-0 left-0 w-full h-full bg-background/50 backdrop-blur-sm">
+              <p>Verifying...</p> {/* Replace with a proper spinner/loader */}
+            </div>
+          )}
+          {/* Display error state */}
+          {error && (
+            <div className="absolute z-20 flex items-center justify-center top-10 left-1/2 transform -translate-x-1/2 bg-red-500 text-white p-4 rounded shadow-lg">
+              <p>Error: {error}</p>
+            </div>
+          )}
+          {challenge && (
+            <div className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24">
+              <ChallengeRequirements challenge={challenge} />
+              <ChallengeTable
+                onUploadClick={triggerUpload}
+                requirements={requirements}
+                completedRequirementsCount={completedRequirementsCount}
+                allIncomplete={allIncomplete}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
