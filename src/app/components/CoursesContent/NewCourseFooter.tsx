@@ -3,6 +3,8 @@ import Button from "../Button/Button";
 import i18n from "@/i18n/client";
 import classNames from "classnames";
 import { usePersistentStore } from "@/stores/store";
+import Icon from "../Icon/Icon";
+import ProgressCircle from "../ProgressCircle/ProgressCircle";
 
 type NewCourseFooterProps = {
   courseSlug: string;
@@ -26,9 +28,12 @@ export default function NewCourseFooter({
         view === "grid" && "w-full justify-between items-end"
       )}
     >
-      <span className="text-sm text-tertiary font-mono">
-        {lessonCount} {t("lessons.lessons")}
-      </span>
+      <div className="flex items-center gap-x-2">
+        <ProgressCircle percentFilled={10} />
+        <span className="pt-1 text-sm text-tertiary font-mono">
+          0 / {lessonCount}
+        </span>
+      </div>
       <Link href={`/courses/${courseSlug}`}>
         <Button
           variant="primary"

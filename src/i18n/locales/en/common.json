@@ -22,7 +22,7 @@
     "continue": "Continue",
     "completed": "Lessons Completed",
     "all_completed": "All Lessons Completed",
-    "take_the_challenge": "Take the Challenge"
+    "take_challenge": "Take Challenge"
   },
   "ui": {
     "search_placeholder": "Search by name, language, or level..."
@@ -61,7 +61,6 @@
   },
   "challenges": {
     "ready": "Ready to finish the course?",
-    "not_ready": "Complete all lessons first",
     "see_challenge": "See Challenge",
     "back_to_lessons": "Back to Lessons",
     "locked": "This challenge is locked",
