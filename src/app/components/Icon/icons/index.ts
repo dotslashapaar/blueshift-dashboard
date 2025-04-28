@@ -16,11 +16,13 @@ import { LessonsIcon } from "./Lessons";
 import { LinkIcon } from "./Link";
 import { ListViewIcon } from "./ListView";
 import { LockedIcon } from "./Locked";
+import { ProgressIcon } from "./Progress";
 import { RewardsIcon } from "./Rewards";
 import { RustIcon } from "./Rust";
 import { SearchIcon } from "./Search";
 import { ShiftArrowIcon } from "./ShiftArrow";
 import { SuccessIcon } from "./Success";
+import { SuccessCircleIcon } from "./SuccessCircle";
 import { TableIcon } from "./Table";
 import { TargetIcon } from "./Target";
 import { TypescriptIcon } from "./Typescript";
@@ -49,11 +51,13 @@ export const IconComponents = {
   Link: LinkIcon,
   ListView: ListViewIcon,
   Locked: LockedIcon,
+  Progress: ProgressIcon,
   Rewards: RewardsIcon,
   Rust: RustIcon,
   Search: SearchIcon,
   ShiftArrow: ShiftArrowIcon,
   Success: SuccessIcon,
+  SuccessCircle: SuccessCircleIcon,
   Table: TableIcon,
   Target: TargetIcon,
   Typescript: TypescriptIcon,

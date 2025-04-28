@@ -8,6 +8,8 @@ import i18n from "@/i18n/client";
 import { useState } from "react";
 import { usePersistentStore } from "@/stores/store";
 import Icon from "../Icon/Icon";
+import Button from "../Button/Button";
+import ProgressCircle from "../ProgressCircle/ProgressCircle";
 type ReturningLessonFooterProps = {
   courseName: string;
   completedLessonsCount: number;
@@ -32,7 +34,7 @@ export default function ReturningCourseFooter({
         view === "grid" && "w-full"
       )}
     >
-      <div
+      {/* <div
         className={classNames(
           "h-[8px] w-full flex items-center justify-start relative p-px bg-background rounded-full",
           view === "list" && "!hidden"
@@ -50,7 +52,7 @@ export default function ReturningCourseFooter({
           }}
           transition={{ duration: 0.4, ease: anticipate, delay: 0.2 }}
         />
-      </div>
+      </div> */}
       {completedLessonsCount !== totalLessonCount ? (
         <div
           className={classNames(
@@ -59,11 +61,13 @@ export default function ReturningCourseFooter({
             view === "list" && "flex-col gap-y-2 items-end"
           )}
         >
-          <div className="font-medium flex-shrink-0">
-            <span className="text-primary">
-              {completedLessonsCount}/{totalLessonCount}{" "}
+          <div className="flex items-center gap-x-2">
+            <ProgressCircle
+              percentFilled={(completedLessonsCount / totalLessonCount) * 100}
+            />
+            <span className="pt-1 text-sm text-tertiary font-mono">
+              {completedLessonsCount}/{totalLessonCount}
             </span>
-            <span className="text-tertiary">{t("lessons.completed")}</span>
           </div>
           <Link
             onMouseOver={() => setIsHovering(true)}
@@ -71,9 +75,12 @@ export default function ReturningCourseFooter({
             href={`/courses/${courseName}/${currentLessonSlug}`}
             className="text-brand-secondary hover:text-brand-primary transition font-medium"
           >
-            <DecryptedText
-              isHovering={isHovering}
-              text={t("lessons.continue")}
+            <Button
+              variant="primary"
+              size="md"
+              label={t("lessons.continue")}
+              icon="ArrowRight"
+              iconSide="right"
             />
           </Link>
         </div>
@@ -85,13 +92,11 @@ export default function ReturningCourseFooter({
             view === "list" && "flex-col gap-y-2 items-end"
           )}
         >
-          <div
-            className={classNames(
-              "font-medium flex-shrink-0",
-              view === "grid" && " hidden xl:block"
-            )}
-          >
-            <span className="text-mute">{t("lessons.all_completed")}</span>
+          <div className="flex items-center gap-x-2">
+            <Icon name="SuccessCircle" className="text-success" />
+            <span className="pt-1 text-sm text-success font-mono">
+              {completedLessonsCount}/{totalLessonCount}
+            </span>
           </div>
           <Link
             onMouseOver={() => setIsHovering(true)}
@@ -99,11 +104,12 @@ export default function ReturningCourseFooter({
             href={`/courses/${courseName}/challenge`}
             className="text-brand-secondary hover:text-brand-primary transition font-medium flex items-center gap-x-2"
           >
-            <Icon name="Challenge" className="text-brand-secondary" />
-            <DecryptedText
-              parentClassName="font-mono text-[15px] pt-0.5"
-              isHovering={isHovering}
-              text={t("lessons.take_the_challenge")}
+            <Button
+              variant="primary"
+              size="md"
+              label={t("lessons.take_challenge")}
+              icon="Challenge"
+              iconSide="left"
             />
           </Link>
         </div>

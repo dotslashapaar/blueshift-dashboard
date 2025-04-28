@@ -66,12 +66,16 @@ export default function CourseList({
   const hasNoFilters = !searchValue && selectedLanguages.length === 0;
 
   // Helper function to get the current lesson slug
-  const getCurrentLessonSlug = (courseSlug: string) => {
-    const progress = courseProgress[courseSlug];
+  const getCurrentLessonSlug = (courseTitle: string) => {
+    const progress = courseProgress[courseTitle];
     if (!progress) return "";
 
     // Find the course lessons
-    const courseLessonData = courseLessons.find((c) => c.slug === courseSlug);
+    const courseLessonData = courseLessons.find(
+      (c) =>
+        initialCourses.find((course) => course.metadata.title === courseTitle)
+          ?.slug === c.slug
+    );
     if (!courseLessonData) return "";
 
     // If progress is 0, return empty string (no current lesson)
@@ -156,7 +160,7 @@ export default function CourseList({
             <div className="flex flex-col gap-y-8">
               {/* Returning Users */}
               {filteredCourses.some(
-                (course) => courseProgress[course.slug] !== undefined
+                (course) => courseProgress[course.metadata.title] !== undefined
               ) && (
                 <>
                   <div className="flex items-center gap-x-3">
@@ -175,14 +179,15 @@ export default function CourseList({
                   >
                     {filteredCourses
                       .filter(
-                        (course) => courseProgress[course.slug] !== undefined
+                        (course) =>
+                          courseProgress[course.metadata.title] !== undefined
                       )
                       .map((course) => {
                         const totalLessons =
                           courseLessons.find((c) => c.slug === course.slug)
                             ?.totalLessons || 0;
                         const currentLessonSlug = getCurrentLessonSlug(
-                          course.slug
+                          course.metadata.title
                         );
                         return (
                           <CourseCard
@@ -195,7 +200,7 @@ export default function CourseList({
                               <ReturningCourseFooter
                                 courseName={course.slug}
                                 completedLessonsCount={
-                                  courseProgress[course.slug]
+                                  courseProgress[course.metadata.title]
                                 }
                                 totalLessonCount={totalLessons}
                                 currentLessonSlug={currentLessonSlug}
@@ -218,7 +223,7 @@ export default function CourseList({
             const languageCourses = filteredCourses.filter(
               (course) =>
                 course.metadata.language === language &&
-                courseProgress[course.slug] === undefined
+                courseProgress[course.metadata.title] === undefined
             );
 
             if (languageCourses.length === 0) return null;
