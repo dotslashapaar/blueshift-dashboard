@@ -42,7 +42,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
   // const previousLessonSlug = previousLesson ? previousLesson.slug : "";
 
   // Check if this is the last lesson
-  const isLastLesson = currentLessonIndex === allLessons.length - 1;
+  // const isLastLesson = currentLessonIndex === allLessons.length - 1;
 
   return (
     <div className="flex flex-col w-full border-b border-b-border">
@@ -58,7 +58,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
               <Icon name={courseMetadata.language} />
               <span
                 className="font-medium text-xl font-mono relative top-0.25"
-                style={{ color: `rgb(${courseColors[courseMetadata.language]})` }}
+                style={{
+                  color: `rgb(${courseColors[courseMetadata.language]})`,
+                }}
               >
                 {courseMetadata.language}
               </span>
@@ -89,50 +91,53 @@ export default async function LessonPage({ params }: LessonPageProps) {
             <MdxLayout>
               <Lesson />
             </MdxLayout>
-            {nextLesson && (
-              <div className=" w-full flex items-center flex-col gap-y-10">
-                <div className="w-[calc(100%+32px)] md:w-[calc(100%+64px)] lg:w-[calc(100%+48px)] gap-y-6 md:gap-y-0 flex flex-col md:flex-row justify-between items-center gap-x-12 group -mt-12 pt-24 pb-16 px-8 [background:linear-gradient(180deg,rgba(0,255,255,0)_0%,rgba(0,255,255,0.08)_50%,rgba(0,255,255,0)_100%)]">
-                  <span className="text-primary w-auto flex-shrink-0 font-mono">
-                    Ready to take the challenge?
-                  </span>
-                  <Link
-                    href={`/courses/${courseMetadata.slug}/challenge`}
-                    className="w-max"
-                  >
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      label="Take Challenge"
-                      icon="Challenge"
-                      className="disabled:opacity-40 w-full disabled:cursor-default"
-                    ></Button>
-                  </Link>
-                </div>
-                <div className="relative w-full -mt-6">
-                  <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">
-                    OR SKIP TO NEXT LESSON
-                  </div>
-                  <div className="w-full h-[1px] bg-border absolute"></div>
-                </div>
+
+            <div className=" w-full flex items-center flex-col gap-y-10">
+              <div className="w-[calc(100%+32px)] md:w-[calc(100%+64px)] lg:w-[calc(100%+48px)] gap-y-6 md:gap-y-0 flex flex-col md:flex-row justify-between items-center gap-x-12 group -mt-12 pt-24 pb-16 px-8 [background:linear-gradient(180deg,rgba(0,255,255,0)_0%,rgba(0,255,255,0.08)_50%,rgba(0,255,255,0)_100%)]">
+                <span className="text-primary w-auto flex-shrink-0 font-mono">
+                  Ready to take the challenge?
+                </span>
                 <Link
-                  href={`/courses/${courseMetadata.slug}/${nextLessonSlug}`}
-                  className="flex justify-between items-center w-full bg-background-card border border-border group py-5 px-5 rounded-xl"
+                  href={`/courses/${courseMetadata.slug}/challenge`}
+                  className="w-max"
                 >
-                  <div className="flex items-center gap-x-2">
-                    <span className="text-mute text-sm font-mono pt-1">
-                      Next Lesson
-                    </span>
-                    <span className="font-medium text-primary">
-                      {nextLesson?.title}
-                    </span>
-                  </div>
-                  <Icon
-                    name="ArrowRight"
-                    className="text-mute text-sm group-hover:text-primary group-hover:translate-x-1 transition"
-                  />
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    label="Take Challenge"
+                    icon="Challenge"
+                    className="disabled:opacity-40 w-full disabled:cursor-default"
+                  ></Button>
                 </Link>
               </div>
-            )}
+              {nextLesson && (
+                <>
+                  <div className="relative w-full -mt-6">
+                    <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">
+                      OR SKIP TO NEXT LESSON
+                    </div>
+                    <div className="w-full h-[1px] bg-border absolute"></div>
+                  </div>
+                  <Link
+                    href={`/courses/${courseMetadata.slug}/${nextLessonSlug}`}
+                    className="flex justify-between items-center w-full bg-background-card border border-border group py-5 px-5 rounded-xl"
+                  >
+                    <div className="flex items-center gap-x-2">
+                      <span className="text-mute text-sm font-mono pt-1">
+                        Next Lesson
+                      </span>
+                      <span className="font-medium text-primary">
+                        {nextLesson?.title}
+                      </span>
+                    </div>
+                    <Icon
+                      name="ArrowRight"
+                      className="text-mute text-sm group-hover:text-primary group-hover:translate-x-1 transition"
+                    />
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
           <TableOfContents />
         </div>
