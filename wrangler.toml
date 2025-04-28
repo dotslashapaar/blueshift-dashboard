@@ -1,4 +1,12 @@
+main = ".open-next/worker.js"
 name = "blueshift-dashboard"
 compatibility_date = "2025-03-25"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+routes = [
+    { pattern = "learn.blueshift.gg", custom_domain = true }
+]

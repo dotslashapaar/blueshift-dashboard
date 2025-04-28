@@ -1,4 +1,3 @@
-import { setupDevPlatform } from "@cloudflare/next-on-pages/next-dev";
 import createMDX from "@next/mdx";
 import rehypePrettyCode from "rehype-pretty-code";
 import pkg from "./next-i18next.config.js";
@@ -30,6 +29,6 @@ const withMDX = createMDX({
 
 export default withMDX(nextConfig);
 
-if (process.env.NODE_ENV === "development") {
-  await setupDevPlatform();
-}
+// added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
+await initOpenNextCloudflareForDev();

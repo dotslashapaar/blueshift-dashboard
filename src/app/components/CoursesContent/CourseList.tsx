@@ -34,7 +34,7 @@ const courseSections = {
 
 type CoursesContentProps = {
   searchValue?: string;
-  initialCourses: { slug: string; metadata: CourseMetadata }[];
+  initialCourses: CourseMetadata[];
   courseLessons: {
     slug: string;
     totalLessons: number;
@@ -53,12 +53,12 @@ export default function CourseList({
   const isProgressEmpty = Object.keys(courseProgress).length === 0;
 
   const filteredCourses = initialCourses.filter((course) => {
-    const matchesSearch = course.metadata.title
+    const matchesSearch = course.title
       .toLowerCase()
       .includes((searchValue || "").toLowerCase());
     const matchesLanguage =
       selectedLanguages.length === 0 ||
-      selectedLanguages.includes(course.metadata.language);
+      selectedLanguages.includes(course.language);
     return matchesSearch && matchesLanguage;
   });
 
@@ -66,16 +66,12 @@ export default function CourseList({
   const hasNoFilters = !searchValue && selectedLanguages.length === 0;
 
   // Helper function to get the current lesson slug
-  const getCurrentLessonSlug = (courseTitle: string) => {
-    const progress = courseProgress[courseTitle];
+  const getCurrentLessonSlug = (courseSlug: string) => {
+    const progress = courseProgress[courseSlug];
     if (!progress) return "";
 
     // Find the course lessons
-    const courseLessonData = courseLessons.find(
-      (c) =>
-        initialCourses.find((course) => course.metadata.title === courseTitle)
-          ?.slug === c.slug
-    );
+    const courseLessonData = courseLessons.find((c) => c.slug === courseSlug);
     if (!courseLessonData) return "";
 
     // If progress is 0, return empty string (no current lesson)
@@ -95,7 +91,7 @@ export default function CourseList({
     if (width < 768) {
       setView("grid");
     }
-  }, [width]);
+  }, [setView, width]);
 
   return (
     <motion.div
@@ -130,7 +126,7 @@ export default function CourseList({
                 )}
               >
                 {filteredCourses
-                  .filter((course) => course.metadata.isFeatured)
+                  .filter((course) => course.isFeatured)
                   .map((course) => {
                     const totalLessons =
                       courseLessons.find((c) => c.slug === course.slug)
@@ -138,10 +134,10 @@ export default function CourseList({
                     return (
                       <CourseCard
                         key={course.slug}
-                        name={course.metadata.title}
-                        language={course.metadata.language}
-                        color={course.metadata.color}
-                        difficulty={course.metadata.difficulty}
+                        name={course.title}
+                        language={course.language}
+                        color={course.color}
+                        difficulty={course.difficulty}
                         footer={
                           <NewCourseFooter
                             courseSlug={course.slug}
@@ -160,7 +156,7 @@ export default function CourseList({
             <div className="flex flex-col gap-y-8">
               {/* Returning Users */}
               {filteredCourses.some(
-                (course) => courseProgress[course.metadata.title] !== undefined
+                (course) => courseProgress[course.slug] !== undefined
               ) && (
                 <>
                   <div className="flex items-center gap-x-3">
@@ -179,28 +175,27 @@ export default function CourseList({
                   >
                     {filteredCourses
                       .filter(
-                        (course) =>
-                          courseProgress[course.metadata.title] !== undefined
+                        (course) => courseProgress[course.slug] !== undefined
                       )
                       .map((course) => {
                         const totalLessons =
                           courseLessons.find((c) => c.slug === course.slug)
                             ?.totalLessons || 0;
                         const currentLessonSlug = getCurrentLessonSlug(
-                          course.metadata.title
+                          course.slug
                         );
                         return (
                           <CourseCard
                             key={course.slug}
-                            name={course.metadata.title}
-                            language={course.metadata.language}
-                            color={course.metadata.color}
-                            difficulty={course.metadata.difficulty}
+                            name={course.title}
+                            language={course.language}
+                            color={course.color}
+                            difficulty={course.difficulty}
                             footer={
                               <ReturningCourseFooter
                                 courseName={course.slug}
                                 completedLessonsCount={
-                                  courseProgress[course.metadata.title]
+                                  courseProgress[course.slug]
                                 }
                                 totalLessonCount={totalLessons}
                                 currentLessonSlug={currentLessonSlug}
@@ -222,8 +217,8 @@ export default function CourseList({
           {Object.entries(courseSections).map(([language, section]) => {
             const languageCourses = filteredCourses.filter(
               (course) =>
-                course.metadata.language === language &&
-                courseProgress[course.metadata.title] === undefined
+                course.language === language &&
+                courseProgress[course.slug] === undefined
             );
 
             if (languageCourses.length === 0) return null;
@@ -253,10 +248,10 @@ export default function CourseList({
                       return (
                         <CourseCard
                           key={course.slug}
-                          name={course.metadata.title}
-                          language={course.metadata.language}
-                          color={course.metadata.color}
-                          difficulty={course.metadata.difficulty}
+                          name={course.title}
+                          language={course.language}
+                          color={course.color}
+                          difficulty={course.difficulty}
                           footer={
                             <NewCourseFooter
                               courseSlug={course.slug}

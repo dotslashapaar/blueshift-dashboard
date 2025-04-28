@@ -1,8 +1,8 @@
 "use client";
 
-import { CourseMetadata } from "@/app/utils/course";
+import {CourseMetadata} from "@/app/utils/course";
 
-import { usePersistentStore } from "@/stores/store";
+import {usePersistentStore} from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
@@ -10,10 +10,10 @@ import i18n from "@/i18n/client";
 import Divider from "../Divider/Divider";
 import RewardsEmpty from "./RewardsEmpty";
 import RewardsFooter from "./RewardsFooter";
-import { motion } from "motion/react";
-import { anticipate } from "motion";
-import { useWindowSize } from "usehooks-ts";
-import { useEffect } from "react";
+import {motion} from "motion/react";
+import {anticipate} from "motion";
+import {useWindowSize} from "usehooks-ts";
+import {useEffect} from "react";
 
 const rewardSections = {
   Unclaimed: {
@@ -31,7 +31,7 @@ const rewardSections = {
 } as const;
 
 type RewardsListProps = {
-  initialCourses: { slug: string; metadata: CourseMetadata }[];
+  initialCourses: CourseMetadata[];
 };
 
 export default function RewardsList({ initialCourses }: RewardsListProps) {
@@ -39,11 +39,9 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
   const { view, setView, selectedRewardStatus } = usePersistentStore();
 
   const filteredRewards = initialCourses.filter((course) => {
-    const matchesStatus =
-      selectedRewardStatus.length === 0 ||
-      (course.metadata.status &&
-        selectedRewardStatus.includes(course.metadata.status));
-    return matchesStatus;
+    return selectedRewardStatus.length === 0 ||
+      (course.status &&
+        selectedRewardStatus.includes(course.status));
   });
 
   const hasNoResults = filteredRewards.length === 0;
@@ -72,7 +70,7 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
           {/* Reward Sections */}
           {Object.entries(rewardSections).map(([status, section]) => {
             const statusRewards = filteredRewards.filter(
-              (reward) => reward.metadata.status === status
+              (reward) => reward.status === status
             );
 
             if (statusRewards.length === 0) return null;
@@ -101,11 +99,11 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
                     {statusRewards.map((reward) => (
                       <CourseCard
                         key={reward.slug}
-                        name={reward.metadata.title}
-                        language={reward.metadata.language}
-                        difficulty={reward.metadata.difficulty}
-                        status={reward.metadata.status}
-                        color={reward.metadata.color}
+                        name={reward.title}
+                        language={reward.language}
+                        difficulty={reward.difficulty}
+                        status={reward.status}
+                        color={reward.color}
                         className={classNames(
                           (status === "Claimed" || status === "Locked") &&
                             "opacity-70"
@@ -113,7 +111,7 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
                         footer={
                           <RewardsFooter
                             status={
-                              reward.metadata.status as
+                              reward.status as
                                 | "Claimed"
                                 | "Locked"
                                 | "Unclaimed"
