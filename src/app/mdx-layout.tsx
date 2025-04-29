@@ -30,6 +30,14 @@ export default function MdxLayout({ children }: { children: React.ReactNode }) {
       prose-code:text-brand-secondary
       prose-code:before:hidden
       prose-code:after:hidden
+      prose-headings:font-sans
+      prose-p:font-content
+      prose-li:font-content
+      prose-ol:font-content
+      prose-ul:font-content
+      prose-blockquote:font-content
+      prose-pre:font-content
+      prose-a:font-content
       prose-li:text-primary
       prose-li:mb-2
       prose-pre:bg-background-card prose-code:rounded-lg prose-code:px-2 prose-code:py-1"

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import CopyClipboard from "../CopyClipboard/CopyClipboard";
 import Icon from "../Icon/Icon";
 import { usePathname } from "next/navigation";
 
@@ -14,22 +16,16 @@ export function ArticleSection({
 }) {
   const pathname = usePathname();
   const Heading = level;
+  const [value, setValue] = useState("");
+  useEffect(() => {
+    const value = `${window.location.origin}${pathname}#${id}`;
+    setValue(value);
+  }, [id, pathname]);
 
   return (
     <Heading id={id} className="scroll-mt-24 flex items-center gap-x-2">
       {name}
-      <div
-        className="cursor-pointer"
-        onClick={() => {
-          const fullUrl = `${window.location.origin}${pathname}#${id}`;
-          navigator.clipboard.writeText(fullUrl);
-        }}
-      >
-        <Icon
-          name="Link"
-          className="transition text-mute hover:text-tertiary"
-        />
-      </div>
+      <CopyClipboard value={value} />
     </Heading>
   );
 }

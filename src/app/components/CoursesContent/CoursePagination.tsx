@@ -45,7 +45,7 @@ export default function CoursePagination({
     <motion.div
       layoutId="course-pagination"
       className={classNames(
-        "gradient-border !fixed xl:!sticky z-50 py-5 xl:pb-8 px-4 col-span-3 h-max left-1/2 xl:left-auto -translate-x-1/2 xl:translate-x-0 bottom-8 xl:bottom-auto xl:top-24 bg-background-card-foreground xl:[background:linear-gradient(180deg,rgba(0,179,179,0.08),rgba(0,179,179,0.02)),#11141A] flex flex-col gap-y-4 rounded-xl  xl:before:[background:linear-gradient(180deg,rgba(0,179,179,0.12),transparent)]",
+        "font-content gradient-border !fixed xl:!sticky z-50 py-5 xl:pb-8 px-4 col-span-3 h-max left-1/2 xl:left-auto -translate-x-1/2 xl:translate-x-0 bottom-8 xl:bottom-auto xl:top-24 bg-background-card-foreground xl:[background:linear-gradient(180deg,rgba(0,179,179,0.08),rgba(0,179,179,0.02)),#11141A] flex flex-col gap-y-4 rounded-xl  xl:before:[background:linear-gradient(180deg,rgba(0,179,179,0.12),transparent)]",
         className
       )}
     >

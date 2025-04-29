@@ -1,8 +1,8 @@
 "use client";
 
-import {CourseMetadata} from "@/app/utils/course";
+import { CourseMetadata } from "@/app/utils/course";
 
-import {usePersistentStore} from "@/stores/store";
+import { usePersistentStore } from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
@@ -10,10 +10,11 @@ import i18n from "@/i18n/client";
 import Divider from "../Divider/Divider";
 import RewardsEmpty from "./RewardsEmpty";
 import RewardsFooter from "./RewardsFooter";
-import {motion} from "motion/react";
-import {anticipate} from "motion";
-import {useWindowSize} from "usehooks-ts";
-import {useEffect} from "react";
+import { motion } from "motion/react";
+import { anticipate } from "motion";
+import { useWindowSize } from "usehooks-ts";
+import { useEffect } from "react";
+import { getCourseLessons } from "@/app/utils/mdx";
 
 const rewardSections = {
   Unclaimed: {
@@ -39,9 +40,10 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
   const { view, setView, selectedRewardStatus } = usePersistentStore();
 
   const filteredRewards = initialCourses.filter((course) => {
-    return selectedRewardStatus.length === 0 ||
-      (course.status &&
-        selectedRewardStatus.includes(course.status));
+    return (
+      selectedRewardStatus.length === 0 ||
+      (course.status && selectedRewardStatus.includes(course.status))
+    );
   });
 
   const hasNoResults = filteredRewards.length === 0;

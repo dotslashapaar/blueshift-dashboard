@@ -20,9 +20,10 @@
   --color-brand-anchor: #ddeae0;
   --color-brand-rust: #ffad66;
   --color-brand-typescript: #69a2f1;
-  --font-sans: var(--font-switzer);
+  --font-sans: var(--font-funnel-display);
   --font-mono: var(--font-montech);
   --font-geist-mono: var(--font-geist-mono);
+  --font-content: var(--font-switzer);
   --text-3xl: 32px;
   --container-app: 1500px;
 }
@@ -30,7 +31,7 @@
 body {
   @apply w-screen h-auto overflow-x-hidden;
   background: var(--color-background);
-  font-family: var(--font-Switzer);
+  font-family: var(--font-funnel-display);
   color: var(--color-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
