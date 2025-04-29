@@ -30,7 +30,7 @@ export default function ChallengesContent({
 
   if (!apiBaseUrl) {
     console.error(
-      "Verification API Base URL is not defined in the environment variables.",
+      "API Base URL is not defined in the environment variables.",
     );
   }
 
