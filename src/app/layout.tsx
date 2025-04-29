@@ -63,7 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${Switzer.variable} ${MontechV2.variable} ${GeistMono.variable} ${FunnelDisplay.variable} antialiased`}
+        className={`${MontechV2.variable} ${GeistMono.variable} ${FunnelDisplay.variable} ${Switzer.variable} antialiased`}
       >
         <WalletProvider>
           <GlobalModals />

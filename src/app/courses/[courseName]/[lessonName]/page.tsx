@@ -8,7 +8,8 @@ import TableOfContents from "@/app/components/TableOfContents/TableOfContents";
 import CoursePagination from "@/app/components/CoursesContent/CoursePagination";
 import Link from "next/link";
 import Button from "@/app/components/Button/Button";
-
+import CopyClipboard from "@/app/components/CopyClipboard/CopyClipboard";
+import LessonTitle from "@/app/components/LessonTitle/LessonTitle";
 interface LessonPageProps {
   params: Promise<{
     courseName: string;
@@ -28,7 +29,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   // Find current lesson index
   const currentLessonIndex = allLessons.findIndex(
-    (lesson) => lesson.slug === lessonName,
+    (lesson) => lesson.slug === lessonName
   );
 
   // const lessonMetadata = courseMetadata.lessons[currentLessonIndex];
@@ -66,11 +67,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
               </span>
             </div>
             <span className="sr-only">{courseMetadata.title}</span>
-            <HeadingReveal
-              text={courseMetadata.title}
-              headingLevel="h1"
-              className="text-3xl font-semibold"
-            />
+            <LessonTitle title={courseMetadata.title} />
           </div>
         </div>{" "}
       </div>
