@@ -5,7 +5,7 @@ import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import GlobalModals from "./components/Modals/GlobalModals";
 import WalletProvider from "./contexts/WalletProvider";
-import { Geist_Mono } from "next/font/google";
+import { Geist_Mono, Funnel_Display } from "next/font/google";
 
 const GeistMono = Geist_Mono({
   subsets: ["latin"],
@@ -43,6 +43,12 @@ const MontechV2 = localFont({
   display: "swap",
 });
 
+const FunnelDisplay = Funnel_Display({
+  subsets: ["latin"],
+  variable: "--font-funnel-display",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Blueshift",
   description:
@@ -57,7 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${Switzer.variable} ${MontechV2.variable} ${GeistMono.variable} antialiased`}
+        className={`${Switzer.variable} ${MontechV2.variable} ${GeistMono.variable} ${FunnelDisplay.variable} antialiased`}
       >
         <WalletProvider>
           <GlobalModals />

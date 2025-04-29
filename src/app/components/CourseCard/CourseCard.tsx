@@ -6,6 +6,7 @@ import { usePersistentStore } from "@/stores/store";
 import DifficultyBadge from "../DifficultyBadge/DifficultyBadge";
 import { motion } from "motion/react";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
+import Link from "next/link";
 
 type CourseCardProps = {
   name: string;
@@ -16,6 +17,8 @@ type CourseCardProps = {
   difficulty?: CourseDifficulty;
   footer?: React.ReactNode;
   className?: string;
+  currentLesson?: string;
+  currentCourse?: string;
 };
 
 export default function CourseCard({
@@ -25,15 +28,28 @@ export default function CourseCard({
   difficulty,
   footer,
   className,
+  currentLesson,
+  currentCourse,
 }: CourseCardProps) {
+  const getCourseLink = () => {
+    if (currentLesson && currentCourse) {
+      return `/courses/${currentCourse}/${currentLesson}`;
+    } else if (currentCourse && !currentLesson) {
+      return `/courses/${currentCourse}`;
+    }
+    return "#";
+  };
+
   const { view } = usePersistentStore();
   return (
-    <motion.div
+    <Link
+      href={getCourseLink()}
       style={{ "--courseColor": color } as React.CSSProperties}
       className={classNames(
         "gradient-border rounded-2xl pb-8 px-5 relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.03),transparent_75%),linear-gradient(180deg,var(--color-background-card),var(--color-background-card))] before:[background:linear-gradient(180deg,rgba(var(--courseColor),0.1),rgba(var(--courseColor),0.05))]",
         view === "grid" && "pt-5",
         view === "list" && "pt-5 !pb-5",
+        "hover:-translate-y-1 transition-transform duration-300",
         className
       )}
     >
@@ -85,6 +101,6 @@ export default function CourseCard({
         </div>
         {footer && footer}
       </div>
-    </motion.div>
+    </Link>
   );
 }

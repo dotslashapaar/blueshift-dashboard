@@ -23,7 +23,7 @@ export default function HeaderContent() {
           <Link href="/">
             <img
               src="/branding/logo-primary.svg"
-              className="h-5"
+              className="h-4"
               alt="Blueshift Logo Primary"
             ></img>
           </Link>

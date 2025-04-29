@@ -138,6 +138,8 @@ export default function CourseList({
                         language={course.language}
                         color={course.color}
                         difficulty={course.difficulty}
+                        currentCourse={course.slug}
+                        currentLesson={getCurrentLessonSlug(course.slug)}
                         footer={
                           <NewCourseFooter
                             courseSlug={course.slug}
@@ -186,6 +188,8 @@ export default function CourseList({
                         );
                         return (
                           <CourseCard
+                            currentLesson={currentLessonSlug}
+                            currentCourse={course.slug}
                             key={course.slug}
                             name={course.title}
                             language={course.language}
@@ -247,6 +251,8 @@ export default function CourseList({
                           ?.totalLessons || 0;
                       return (
                         <CourseCard
+                          currentLesson={getCurrentLessonSlug(course.slug)}
+                          currentCourse={course.slug}
                           key={course.slug}
                           name={course.title}
                           language={course.language}
