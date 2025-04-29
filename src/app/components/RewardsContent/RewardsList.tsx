@@ -6,7 +6,7 @@ import { usePersistentStore } from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import Divider from "../Divider/Divider";
 import RewardsEmpty from "./RewardsEmpty";
 import RewardsFooter from "./RewardsFooter";
@@ -36,7 +36,7 @@ type RewardsListProps = {
 };
 
 export default function RewardsList({ initialCourses }: RewardsListProps) {
-  const { t } = i18n;
+  const t = useTranslations();
   const { view, setView, selectedRewardStatus } = usePersistentStore();
 
   const filteredRewards = initialCourses.filter((course) => {

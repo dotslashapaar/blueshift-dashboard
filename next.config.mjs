@@ -1,10 +1,8 @@
 import createMDX from "@next/mdx";
 import rehypePrettyCode from "rehype-pretty-code";
-import pkg from "./next-i18next.config.js";
-const { i18n } = pkg;
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig = {
-  i18n,
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   eslint: {
     ignoreDuringBuilds: true,
@@ -27,7 +25,9 @@ const withMDX = createMDX({
   },
 });
 
-export default withMDX(nextConfig);
+const withNextIntl = createNextIntlPlugin();
+
+export default withNextIntl(withMDX(nextConfig));
 
 // added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';

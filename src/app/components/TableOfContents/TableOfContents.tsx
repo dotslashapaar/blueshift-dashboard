@@ -5,7 +5,7 @@ import Icon from "../Icon/Icon";
 import { useEffect, useState } from "react";
 import { anticipate } from "motion";
 import classNames from "classnames";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 export default function TableOfContents() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [sections, setSections] = useState<
@@ -15,7 +15,7 @@ export default function TableOfContents() {
       subsections: { id: string; text: string }[];
     }[]
   >([]);
-  const { t } = i18n;
+  const t = useTranslations();
   useEffect(() => {
     // Get all h2 elements from the article
     const article = document.querySelector("article");

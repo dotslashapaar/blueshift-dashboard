@@ -7,13 +7,13 @@ import { usePathname } from "next/navigation";
 import Button from "../Button/Button";
 import { AnimatePresence, anticipate, motion } from "motion/react";
 import { useState } from "react";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function HeaderContent() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const { t } = i18n;
+  const t = useTranslations();
   const { setVisible } = useWalletModal();
 
   return (

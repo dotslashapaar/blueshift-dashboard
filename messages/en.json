@@ -25,7 +25,9 @@
     "take_challenge": "Take Challenge"
   },
   "ui": {
-    "search_placeholder": "Search by name, language, or level..."
+    "search_placeholder": "Search by name, language, or level...",
+    "search_language__filter_label": "All Languages",
+    "search_language_filter__all_languages": "All"
   },
   "languages": {
     "anchor": "Anchor",

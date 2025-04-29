@@ -1,14 +1,9 @@
-import { createTranslation } from "@/i18n/server";
-import HeadingReveal from "../components/HeadingReveal/HeadingReveal";
-import Rewards from "../components/RewardsContent/Rewards";
+import { useTranslations} from "next-intl";
+import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
+import Rewards from "@/app/components/RewardsContent/Rewards";
 
-export default async function RewardsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const resolvedParams = await params;
-  const { t } = await createTranslation(resolvedParams.locale, "common");
+export default function RewardsPage() {
+  const t = useTranslations();
 
   return (
     <div className="flex flex-col w-full gap-y-8">

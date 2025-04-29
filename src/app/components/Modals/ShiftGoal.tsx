@@ -1,10 +1,10 @@
 "use client";
 import Modal from "./Modal";
 import { useStore } from "@/stores/store";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import Button from "../Button/Button";
 export default function ShiftGoal() {
-  const { t } = i18n;
+  const t = useTranslations();
   const { openedModal, closeModal } = useStore();
 
   return (

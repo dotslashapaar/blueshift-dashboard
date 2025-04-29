@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from '@/i18n/navigation';
 import Button from "../Button/Button";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import { CourseMetadata } from "@/app/utils/course";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 
@@ -14,7 +14,7 @@ export default function BackToCourseButton({
   course,
 }: BackToCourseButtonProps) {
   const lastLessonSlug = useCurrentLessonSlug(course);
-  const { t } = i18n;
+  const t = useTranslations();
 
   return (
     <Link href={`/courses/${course.slug}/${lastLessonSlug}`} className="!mt-4">

@@ -1,0 +1,73 @@
+{
+  "header": {
+    "lessons": "課程",
+    "courses": "課程",
+    "rewards": "獎勵",
+    "set_goal": "設定目標",
+    "connect_wallet": "連接錢包"
+  },
+  "lessons": {
+    "title": "選擇一門課程開始",
+    "subtitle": "歡迎,",
+    "subtitle_returning": "歡迎回來,",
+    "title_returning": "返回課程",
+    "get_started": "開始",
+    "continue_learning": "繼續學習",
+    "start_course": "開始課程",
+    "lessons": "課程",
+    "empty_results_title": "找不到結果",
+    "empty_results_description": "嘗試搜尋不同的課程或使用篩選器。",
+    "empty_filters_title": "您沒有選擇任何篩選器",
+    "empty_filters_description": "選擇您想學習的語言以在此處查看結果。",
+    "continue": "繼續",
+    "completed": "已完成課程",
+    "all_completed": "所有課程已完成",
+    "take_challenge": "接受挑戰"
+  },
+  "ui": {
+    "search_placeholder": "按名稱、語言或級別搜尋...",
+    "search_language__filter_label": "所有語言",
+    "search_language_filter__all_languages": "所有"
+  },
+  "languages": {
+    "anchor": "Anchor",
+    "rust": "Rust",
+    "typescript": "Typescript"
+  },
+  "rewards": {
+    "title": "領取、查看和分享您的 NFT",
+    "subtitle": "獎勵",
+    "Unclaimed": "未領取",
+    "claimed": "已領取",
+    "claim": "領取",
+    "locked": "已鎖定",
+    "empty_title": "找不到獎勵",
+    "empty_description": "嘗試更改您的篩選器以在此處查看獎勵。",
+    "locked_description": "完成課程以解鎖",
+    "claimed_description": "NFT 已在您的錢包中可用"
+  },
+  "shift_goal": {
+    "title": "設定您的 Shift 目標",
+    "description": "接收每週提醒，讓您按計劃實現目標！",
+    "connect_discord": "連接 Discord"
+  },
+  "wallet_recommended": {
+    "title": "連接您的錢包",
+    "description": "連接您的錢包以推進課程並賺取 NFT 獎勵！",
+    "connect_wallet": "連接錢包",
+    "dont_show_again": "不再顯示"
+  },
+  "contents": {
+    "contents": "內容",
+    "view_source": "查看原始碼"
+  },
+  "challenges": {
+    "ready": "準備好完成課程了嗎？",
+    "see_challenge": "查看挑戰",
+    "back_to_lessons": "返回課程",
+    "locked": "此挑戰已鎖定",
+    "locked_description": "先完成課程以解鎖挑戰。",
+    "connect_wallet": "連接錢包",
+    "connect_wallet_description": "需要 Solana 錢包才能完成挑戰並解鎖 NFT"
+  }
+}
