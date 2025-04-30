@@ -215,7 +215,7 @@ export async function GET(request: Request) {
                   />
                 </g>
 
-                {/* {hasLanguage && language === "rust" && (
+                {hasLanguage && language === "rust" && (
                   <g>
                     <path
                       d="M156.548 70.0151L149.181 74.2681L156.548 78.521L163.915 74.2681L156.548 70.0151Z"
@@ -396,7 +396,7 @@ export async function GET(request: Request) {
                       fill="#69A2F1"
                     />
                   </g>
-                )} */}
+                )}
               </g>
               <defs>
                 <filter
@@ -479,7 +479,7 @@ export async function GET(request: Request) {
                 rowGap: "16px",
               }}
             >
-              {/* {hasLanguage && language === "rust" && (
+              {hasLanguage && language === "rust" && (
                 <svg
                   width="77"
                   height="25"
@@ -590,7 +590,7 @@ export async function GET(request: Request) {
                     fill="#69A2F1"
                   />
                 </svg>
-              )} */}
+              )}
               <div
                 style={{
                   fontSize: 56,
@@ -608,14 +608,14 @@ export async function GET(request: Request) {
       {
         width: 1200,
         height: 630,
-        // fonts: [
-        //   {
-        //     name: "Funnel Display",
-        //     data: await loadGoogleFont("Funnel Display", title),
-        //     style: "normal",
-        //     weight: 500,
-        //   },
-        // ],
+        fonts: [
+          {
+            name: "Funnel Display",
+            data: await loadGoogleFont("Funnel Display", title),
+            style: "normal",
+            weight: 500,
+          },
+        ],
       }
     );
   } catch (e: any) {
