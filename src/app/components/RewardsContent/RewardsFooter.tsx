@@ -39,9 +39,14 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
         </span>
       )}
       {status === "Claimed" && (
-        <span className="text-tertiary font-medium gap-x-1.5 flex items-center">
-          {t("rewards.claimed_description")}
-        </span>
+        <Button
+          variant="primary"
+          size="md"
+          label={t("rewards.view_nft")}
+          icon="Claim"
+          iconSide="right"
+          className="!w-full !min-w-[150px]"
+        />
       )}
     </div>
   );
