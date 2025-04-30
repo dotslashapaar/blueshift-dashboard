@@ -6,6 +6,13 @@
     "set_goal": "設定目標",
     "connect_wallet": "連接錢包"
   },
+  "courses": {
+    "anchor-vault": "保險庫",
+    "anchor-escrow": "第三方託管",
+    "pinocchio-vault": "Pinocchio 保險庫",
+    "quantum-vault": "抗量子保險庫",
+    "your-first-spl-token": "你的第一枚 SPL 幣"
+  },
   "lessons": {
     "title": "選擇一門課程開始",
     "subtitle": "歡迎,",

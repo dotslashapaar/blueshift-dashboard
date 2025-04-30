@@ -53,7 +53,7 @@ export default function CourseList({
   const isProgressEmpty = Object.keys(courseProgress).length === 0;
 
   const filteredCourses = initialCourses.filter((course) => {
-    const matchesSearch = course.title
+    const matchesSearch = t(`courses.${course.slug}`)
       .toLowerCase()
       .includes((searchValue || "").toLowerCase());
     const matchesLanguage =
@@ -134,7 +134,7 @@ export default function CourseList({
                     return (
                       <CourseCard
                         key={course.slug}
-                        name={course.title}
+                        name={t(`courses.${course.slug}`)}
                         language={course.language}
                         color={course.color}
                         difficulty={course.difficulty}
@@ -191,7 +191,7 @@ export default function CourseList({
                             currentLesson={currentLessonSlug}
                             currentCourse={course.slug}
                             key={course.slug}
-                            name={course.title}
+                            name={t(`courses.${course.slug}`)}
                             language={course.language}
                             color={course.color}
                             difficulty={course.difficulty}
@@ -254,7 +254,7 @@ export default function CourseList({
                           currentLesson={getCurrentLessonSlug(course.slug)}
                           currentCourse={course.slug}
                           key={course.slug}
-                          name={course.title}
+                          name={t(`courses.${course.slug}`)}
                           language={course.language}
                           color={course.color}
                           difficulty={course.difficulty}

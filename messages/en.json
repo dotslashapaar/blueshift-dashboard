@@ -6,6 +6,13 @@
     "set_goal": "Set your Goal",
     "connect_wallet": "Connect Wallet"
   },
+  "courses": {
+    "anchor-vault": "Vault",
+    "anchor-escrow": "Escrow",
+    "pinocchio-vault": "Pinocchio Vault",
+    "quantum-vault": "Quantum Vault",
+    "your-first-spl-token": "Your First SPL Token"
+  },
   "lessons": {
     "title": "Select a course to get started",
     "subtitle": "Welcome,",
