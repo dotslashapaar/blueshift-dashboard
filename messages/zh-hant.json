@@ -44,7 +44,8 @@
     "empty_title": "找不到獎勵",
     "empty_description": "嘗試更改您的篩選器以在此處查看獎勵。",
     "locked_description": "完成課程以解鎖",
-    "claimed_description": "NFT 已在您的錢包中可用"
+    "claimed_description": "NFT 已在您的錢包中可用",
+    "view_nft": "查看 NFT"
   },
   "shift_goal": {
     "title": "設定您的 Shift 目標",
