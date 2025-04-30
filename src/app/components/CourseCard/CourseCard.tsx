@@ -42,8 +42,7 @@ export default function CourseCard({
 
   const { view } = usePersistentStore();
   return (
-    <Link
-      href={getCourseLink()}
+    <div
       style={{ "--courseColor": color } as React.CSSProperties}
       className={classNames(
         "gradient-border rounded-2xl pb-8 px-5 relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.03),transparent_75%),linear-gradient(180deg,var(--color-background-card),var(--color-background-card))] before:[background:linear-gradient(180deg,rgba(var(--courseColor),0.1),rgba(var(--courseColor),0.05))]",
@@ -53,6 +52,10 @@ export default function CourseCard({
         className
       )}
     >
+      <Link
+        href={getCourseLink()}
+        className="absolute inset-0 z-1 w-full h-full"
+      ></Link>
       {view === "grid" && difficulty && (
         <div className="absolute top-6 right-5">
           <DifficultyBadge difficulty={difficulty} />
@@ -101,6 +104,6 @@ export default function CourseCard({
         </div>
         {footer && footer}
       </div>
-    </Link>
+    </div>
   );
 }

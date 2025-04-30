@@ -9,10 +9,12 @@ export function ArticleSection({
   name,
   id,
   level = "h2",
+  isCode = false,
 }: {
   name: string;
   id: string;
   level?: "h2" | "h3" | "h4";
+  isCode?: boolean;
 }) {
   const pathname = usePathname();
   const Heading = level;
@@ -23,8 +25,14 @@ export function ArticleSection({
   }, [id, pathname]);
 
   return (
-    <Heading id={id} className="scroll-mt-24 flex items-center gap-x-2">
-      {name}
+    <Heading id={id} className="scroll-mt-24 flex items-center gap-x-2 prose">
+      {!isCode ? (
+        <span>{name}</span>
+      ) : (
+        <div className="gradient-border heading-code flex items-center justify-center">
+          <code>{name}</code>
+        </div>
+      )}
       <CopyClipboard value={value} />
     </Heading>
   );

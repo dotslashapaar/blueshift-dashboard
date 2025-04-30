@@ -16,7 +16,7 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
   return (
     <div
       className={classNames(
-        "flex",
+        "relative z-10 flex",
         view === "list" &&
           "ml-auto flex-col items-end gap-y-2.5 justify-center",
         view === "grid" && "w-full justify-between items-end"
