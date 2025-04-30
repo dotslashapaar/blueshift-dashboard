@@ -69,65 +69,52 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
       {hasNoResults && <RewardsEmpty />}
       {!hasNoFilters && !hasNoResults && (
         <>
-          {/* Reward Sections */}
-          {Object.entries(rewardSections).map(([status, section]) => {
-            const statusRewards = filteredRewards.filter(
-              (reward) => reward.status === status
-            );
-
-            if (statusRewards.length === 0) return null;
-
-            return (
-              <div key={status} className="flex flex-col group">
-                <div className="flex flex-col gap-y-8">
-                  <div className="flex items-center gap-x-3">
-                    <Icon
-                      className="text-brand-secondary"
-                      name={section.icon}
-                    />
-                    <span className="text-lg leading-none font-medium text-secondary">
-                      {t(section.title)}
-                    </span>
-                  </div>
-                  <div
-                    className={classNames(
-                      "grid",
-                      view === "grid"
-                        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "grid-cols-1",
-                      "gap-5"
-                    )}
-                  >
-                    {statusRewards.map((reward) => (
-                      <CourseCard
-                        key={reward.slug}
-                        name={reward.title}
-                        language={reward.language}
-                        difficulty={reward.difficulty}
-                        status={reward.status}
-                        color={reward.color}
-                        className={classNames(
-                          (status === "Claimed" || status === "Locked") &&
-                            "opacity-70"
-                        )}
-                        footer={
-                          <RewardsFooter
-                            status={
-                              reward.status as
-                                | "Claimed"
-                                | "Locked"
-                                | "Unclaimed"
-                            }
-                          />
-                        }
-                      />
-                    ))}
-                  </div>
+          {filteredRewards.map((course) => (
+            <div key={course.slug} className="flex flex-col group">
+              <div className="flex flex-col gap-y-8">
+                <div className="flex items-center gap-x-3">
+                  <Icon
+                    className="text-brand-secondary"
+                    name={course.language}
+                  />
+                  <span className="text-lg leading-none font-medium text-secondary">
+                    {course.title}
+                  </span>
                 </div>
-                <Divider className="my-12 group-last:hidden" />
+                <div
+                  className={classNames(
+                    "grid",
+                    view === "grid"
+                      ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                      : "grid-cols-1",
+                    "gap-5"
+                  )}
+                >
+                  {course.lessons.map((lesson) => (
+                    <CourseCard
+                      key={lesson.slug}
+                      name={lesson.title}
+                      language={course.language}
+                      difficulty={course.difficulty}
+                      status={course.status}
+                      color={course.color}
+                      className={classNames(
+                        course.status === "Locked" && "opacity-50"
+                      )}
+                      footer={
+                        <RewardsFooter
+                          status={
+                            course.status as "Claimed" | "Locked" | "Unclaimed"
+                          }
+                        />
+                      }
+                    />
+                  ))}
+                </div>
               </div>
-            );
-          })}
+              <Divider className="my-12 group-last:hidden" />
+            </div>
+          ))}
         </>
       )}
     </motion.div>

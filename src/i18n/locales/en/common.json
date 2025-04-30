@@ -33,7 +33,7 @@
     "typescript": "Typescript"
   },
   "rewards": {
-    "title": "Claim, View and Share your NFTs",
+    "title": "Claim and View your NFTs",
     "subtitle": "Rewards",
     "Unclaimed": "Unclaimed",
     "claimed": "Claimed",
@@ -41,8 +41,9 @@
     "locked": "Locked",
     "empty_title": "No rewards found",
     "empty_description": "Try changing your filters to see rewards here.",
-    "locked_description": "Complete the Course to Unlock",
-    "claimed_description": "NFT Is Available in your Wallet"
+    "locked_description": "Complete Challenge to Unlock",
+    "claimed_description": "NFT Is Available in your Wallet",
+    "view_nft": "View NFT"
   },
   "shift_goal": {
     "title": "Setup Your Shift Goal",

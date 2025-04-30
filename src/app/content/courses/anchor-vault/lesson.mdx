@@ -56,13 +56,13 @@ Let's look at how the barebone version of our Vault programs looks like, and the
 
 Let's start from the basics:
 
-<ArticleSection name="`declare_id!()`" id="declare_id_macro" level="h3" />
+<ArticleSection name="declare_id!()" isCode={true} id="declare_id_macro" level="h3" />
 
 The `declare_id!()` macro is used to specify the program onchain address. This is a unique pubkey that comes from the keypair stored in the `target` folder of your anchor project that will be used to deploy the `.so` file that represents the logic and all the data of the smart contract itself.
 
 **Note**: It will not be `22222222222222222222222222222222222222222222`, we use this convention in our Blueshift smart contracts examples just because of the way our testing framework works. In a real-world scenario, your onchain program ID will be the one generated for you when you run the Anchor commands to create and build your program.
 
-<ArticleSection name="`#[program]` & `#[derive(Accounts)]`" id="program_and_derive_accounts_macros" level="h3" />
+<ArticleSection name="#[program]` & `#[derive(Accounts)]" isCode id="program_and_derive_accounts_macros" level="h3" />
 
 For each instruction, there is a `context` that tells the smart contract which accounts are going to be used in this instruction. Additionally, there is the possibility of passing custom data inside of it to use within the logic of the instruction.
 

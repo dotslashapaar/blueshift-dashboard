@@ -30,7 +30,7 @@ export default function ReturningCourseFooter({
   return (
     <div
       className={classNames(
-        "flex flex-col items-start gap-y-6",
+        "relative z-10 flex flex-col items-start gap-y-6",
         view === "grid" && "w-full"
       )}
     >

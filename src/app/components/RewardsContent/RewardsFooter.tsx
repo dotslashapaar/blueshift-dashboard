@@ -16,7 +16,7 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
   return (
     <div
       className={classNames(
-        "flex",
+        "relative z-10 flex",
         view === "list" &&
           "ml-auto flex-col items-end gap-y-2.5 justify-center",
         view === "grid" && "w-full justify-between items-end"
@@ -39,9 +39,14 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
         </span>
       )}
       {status === "Claimed" && (
-        <span className="text-tertiary font-medium gap-x-1.5 flex items-center">
-          {t("rewards.claimed_description")}
-        </span>
+        <Button
+          variant="primary"
+          size="md"
+          label={t("rewards.view_nft")}
+          icon="Claim"
+          iconSide="right"
+          className="!w-full !min-w-[150px]"
+        />
       )}
     </div>
   );
