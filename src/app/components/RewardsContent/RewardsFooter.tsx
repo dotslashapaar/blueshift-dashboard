@@ -1,5 +1,5 @@
 import Button from "../Button/Button";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import classNames from "classnames";
 import { usePersistentStore } from "@/stores/store";
 import Icon from "../Icon/Icon";
@@ -9,7 +9,7 @@ type RewardsFooterProps = {
 };
 
 export default function RewardsFooter({ status }: RewardsFooterProps) {
-  const { t } = i18n;
+  const t = useTranslations();
 
   const { view } = usePersistentStore();
 

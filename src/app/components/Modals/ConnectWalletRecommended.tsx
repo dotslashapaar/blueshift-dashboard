@@ -1,10 +1,10 @@
 "use client";
 import Modal from "./Modal";
 import { useStore, usePersistentStore } from "@/stores/store";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import Button from "../Button/Button";
 export default function ConnectWalletRecommended() {
-  const { t } = i18n;
+  const t = useTranslations();
   const { openedModal, closeModal } = useStore();
   const { setConnectionRecommendedViewed } = usePersistentStore();
 

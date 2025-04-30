@@ -2,7 +2,7 @@
 
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
-import i18n from "../../../i18n/client";
+import {useTranslations} from "next-intl";
 import { useStore } from "@/stores/store";
 
 interface SearchInputProps {
@@ -18,7 +18,7 @@ export default function SearchInput({
   onKeyDown,
   className,
 }: SearchInputProps) {
-  const { t } = i18n;
+  const t = useTranslations();
   const { searchValue, setSearchValue } = useStore();
   return (
     <div

@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
@@ -16,6 +17,8 @@ interface FiltersProps {
 }
 
 export default function CourseFilter({ className }: FiltersProps) {
+  const t = useTranslations();
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLElement>(null) as React.RefObject<HTMLElement>;
   const { selectedLanguages, toggleLanguage } = usePersistentStore();
@@ -23,7 +26,7 @@ export default function CourseFilter({ className }: FiltersProps) {
   const allLanguages = Object.keys(courseLanguages) as CourseLanguages[];
   const displayText =
     selectedLanguages.length === allLanguages.length
-      ? "All Languages"
+      ? t("ui.search_language__filter_label")
       : selectedLanguages.length === 1
         ? selectedLanguages[0]
         : `${selectedLanguages.length} Languages`;
@@ -98,7 +101,7 @@ export default function CourseFilter({ className }: FiltersProps) {
                 checked={selectedLanguages.length === allLanguages.length}
               />
               <span className="text-sm font-medium leading-none text-secondary">
-                All
+                {t("ui.search_language_filter__all_languages")}
               </span>
             </button>
             <Divider />

@@ -6,7 +6,7 @@ import Icon from "@/app/components/Icon/Icon";
 import Divider from "@/app/components/Divider/Divider";
 import TableOfContents from "@/app/components/TableOfContents/TableOfContents";
 import CoursePagination from "@/app/components/CoursesContent/CoursePagination";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Button from "@/app/components/Button/Button";
 import CopyClipboard from "@/app/components/CopyClipboard/CopyClipboard";
 import LessonTitle from "@/app/components/LessonTitle/LessonTitle";

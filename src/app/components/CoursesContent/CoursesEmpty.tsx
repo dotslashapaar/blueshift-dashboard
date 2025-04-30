@@ -1,11 +1,11 @@
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 
 type CoursesEmptyProps = {
   type: "no_filters" | "no_results";
 };
 
 export default function CoursesEmpty({ type }: CoursesEmptyProps) {
-  const { t } = i18n;
+  const t = useTranslations();
 
   return (
     <div className="flex flex-col items-center justify-center relative">

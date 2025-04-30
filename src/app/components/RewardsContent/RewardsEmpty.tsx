@@ -1,7 +1,7 @@
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 
 export default function RewardsEmpty() {
-  const { t } = i18n;
+  const t = useTranslations();
 
   return (
     <div className="flex flex-col items-center justify-center relative">

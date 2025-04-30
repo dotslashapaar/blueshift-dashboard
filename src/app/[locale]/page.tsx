@@ -1,14 +1,9 @@
-import { createTranslation } from "@/i18n/server";
-import Courses from "./components/CoursesContent/Courses";
-import HeadingReveal from "./components/HeadingReveal/HeadingReveal";
+import {useTranslations} from 'next-intl';
+import Courses from "../components/CoursesContent/Courses";
+import HeadingReveal from "../components/HeadingReveal/HeadingReveal";
 
-export default async function Home({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const resolvedParams = await params;
-  const { t } = await createTranslation(resolvedParams.locale, "common");
+export default function Home() {
+  const t = useTranslations();
 
   return (
     <div className="flex flex-col w-full gap-y-8">

@@ -4,6 +4,7 @@ import { animate, stagger, anticipate } from "motion";
 import { splitText } from "motion-plus";
 import { useEffect, useRef } from "react";
 import classNames from "classnames";
+import { useSplitLocaleBy } from "@/i18n/hooks";
 
 export default function HeadingReveal({
   text,
@@ -12,7 +13,7 @@ export default function HeadingReveal({
   color = "#EFF1F6",
   cursorColor = "#00FFFF",
   baseDelay = 0,
-  splitBy = "words",
+  splitBy,
 }: {
   text: string;
   headingLevel: "h1" | "h2" | "h3";
@@ -23,6 +24,8 @@ export default function HeadingReveal({
   splitBy?: "words" | "chars";
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const localeSegmentation = useSplitLocaleBy();
+  splitBy ??= localeSegmentation;
 
   useEffect(() => {
     document.fonts.ready.then(() => {

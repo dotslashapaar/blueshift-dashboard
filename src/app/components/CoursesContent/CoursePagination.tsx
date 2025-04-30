@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePersistentStore } from "@/stores/store";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Icon from "../Icon/Icon";
 interface CoursePaginationProps {
   lessons: {

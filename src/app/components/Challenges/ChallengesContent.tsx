@@ -4,11 +4,11 @@ import { useState } from "react";
 import { usePersistentStore } from "@/stores/store";
 import Button from "../Button/Button";
 import Icon from "../Icon/Icon";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import { CourseMetadata } from "@/app/utils/course";
 import ChallengeRequirements from "./ChallengeRequirements";
 import ChallengeTable from "./ChallengeTable";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 import { useChallengeFileUploadVerification } from "@/app/hooks/useChallengeFileUploadVerification";
 
@@ -22,7 +22,7 @@ export default function ChallengesContent({
   // Replace with real connection later
   const [isUserConnected] = useState(true);
   const { courseProgress } = usePersistentStore();
-  const { t } = i18n;
+  const t = useTranslations();
   const isCourseCompleted =
     courseProgress[currentCourse.slug] === currentCourse.lessons.length;
   const lastLessonSlug = useCurrentLessonSlug(currentCourse);

@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import classNames from "classnames";
 import { anticipate, motion } from "motion/react";
 import DecryptedText from "../HeadingReveal/DecryptText";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { usePersistentStore } from "@/stores/store";
 import Icon from "../Icon/Icon";
@@ -23,7 +23,7 @@ export default function ReturningCourseFooter({
   courseName,
   currentLessonSlug,
 }: ReturningLessonFooterProps) {
-  const { t } = i18n;
+  const t = useTranslations();
   const [isHovering, setIsHovering] = useState(false);
   const { view } = usePersistentStore();
 

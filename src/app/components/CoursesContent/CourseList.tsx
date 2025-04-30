@@ -5,7 +5,7 @@ import { usePersistentStore } from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
-import i18n from "@/i18n/client";
+import { useTranslations } from "next-intl";
 import Divider from "../Divider/Divider";
 import CoursesEmpty from "./CoursesEmpty";
 import NewCourseFooter from "./NewCourseFooter";
@@ -46,7 +46,7 @@ export default function CourseList({
   initialCourses,
   courseLessons,
 }: CoursesContentProps) {
-  const { t } = i18n;
+  const t = useTranslations();
   const { view, setView, selectedLanguages, courseProgress } =
     usePersistentStore();
   const { searchValue } = useStore();
