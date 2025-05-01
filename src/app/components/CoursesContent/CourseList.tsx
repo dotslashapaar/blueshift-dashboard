@@ -1,6 +1,6 @@
 "use client";
 
-import { CourseMetadata } from "@/app/utils/course";
+import { CourseMetadata, courseStatus } from "@/app/utils/course";
 import { usePersistentStore } from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
 import classNames from "classnames";
@@ -47,23 +47,28 @@ export default function CourseList({
   courseLessons,
 }: CoursesContentProps) {
   const t = useTranslations();
-  const { view, setView, selectedLanguages, courseProgress } =
+  const { view, setView, selectedLanguages, courseProgress, courseStatus } =
     usePersistentStore();
   const { searchValue } = useStore();
   const isProgressEmpty = Object.keys(courseProgress).length === 0;
 
-  const filteredCourses = initialCourses.filter((course) => {
-    const matchesSearch = t(`courses.${course.slug}`)
-      .toLowerCase()
-      .includes((searchValue || "").toLowerCase());
-    const matchesLanguage =
-      selectedLanguages.length === 0 ||
-      selectedLanguages.includes(course.language);
-    return matchesSearch && matchesLanguage;
-  });
+  const filteredCourses = initialCourses
+    .filter((course) => {
+      const matchesSearch = t(`courses.${course.slug}`)
+        .toLowerCase()
+        .includes((searchValue || "").toLowerCase());
+      const matchesLanguage =
+        selectedLanguages.length === 0 ||
+        selectedLanguages.includes(course.language);
+      return matchesSearch && matchesLanguage;
+    })
+    .sort((a, b) => a.difficulty - b.difficulty);
 
   const hasNoResults = filteredCourses.length === 0;
   const hasNoFilters = !searchValue && selectedLanguages.length === 0;
+  const showGetStarted =
+    hasNoFilters ||
+    selectedLanguages.length === Object.keys(courseSections).length;
 
   // Helper function to get the current lesson slug
   const getCurrentLessonSlug = (courseSlug: string) => {
@@ -108,7 +113,7 @@ export default function CourseList({
       ) : (
         <>
           {/* Featured Courses For New Users */}
-          {isProgressEmpty ? (
+          {isProgressEmpty && showGetStarted ? (
             <div className="flex flex-col gap-y-8">
               <div className="flex items-center gap-x-3">
                 <Icon name="Flag" className="text-brand-secondary" />
@@ -158,7 +163,9 @@ export default function CourseList({
             <div className="flex flex-col gap-y-8">
               {/* Returning Users */}
               {filteredCourses.some(
-                (course) => courseProgress[course.slug] !== undefined
+                (course) =>
+                  courseProgress[course.slug] !== undefined &&
+                  courseStatus[course.slug] === "Locked"
               ) && (
                 <>
                   <div className="flex items-center gap-x-3">
@@ -177,7 +184,9 @@ export default function CourseList({
                   >
                     {filteredCourses
                       .filter(
-                        (course) => courseProgress[course.slug] !== undefined
+                        (course) =>
+                          courseProgress[course.slug] !== undefined &&
+                          courseStatus[course.slug] === "Locked"
                       )
                       .map((course) => {
                         const totalLessons =
@@ -203,6 +212,146 @@ export default function CourseList({
                                 }
                                 totalLessonCount={totalLessons}
                                 currentLessonSlug={currentLessonSlug}
+                                isChallengeCompleted={
+                                  courseStatus[course.slug] !== "Locked"
+                                }
+                              />
+                            }
+                          />
+                        );
+                      })}
+                  </div>
+                  <div className="pt-4 pb-12 relative w-full">
+                    <Divider />
+                  </div>
+                </>
+              )}
+
+              {/* Course Sections */}
+              {Object.entries(courseSections).map(([language, section]) => {
+                const languageCourses = filteredCourses.filter(
+                  (course) =>
+                    course.language === language &&
+                    courseProgress[course.slug] === undefined
+                );
+
+                if (languageCourses.length === 0) return null;
+
+                return (
+                  <div key={language} className="flex flex-col">
+                    <div className="flex flex-col gap-y-8 ">
+                      <div className="flex items-center gap-x-3">
+                        <Icon name={section.icon} />
+                        <span className="text-lg leading-none font-medium text-secondary">
+                          {t(section.title)}
+                        </span>
+                      </div>
+                      <div
+                        className={classNames(
+                          "grid",
+                          view === "grid"
+                            ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                            : "grid-cols-1",
+                          "gap-5"
+                        )}
+                      >
+                        {languageCourses.map((course) => {
+                          const totalLessons =
+                            courseLessons.find((c) => c.slug === course.slug)
+                              ?.totalLessons || 0;
+                          return (
+                            <CourseCard
+                              currentLesson={getCurrentLessonSlug(course.slug)}
+                              currentCourse={course.slug}
+                              key={course.slug}
+                              name={t(`courses.${course.slug}`)}
+                              language={course.language}
+                              color={course.color}
+                              difficulty={course.difficulty}
+                              footer={
+                                <NewCourseFooter
+                                  courseSlug={course.slug}
+                                  lessonCount={totalLessons}
+                                />
+                              }
+                            />
+                          );
+                        })}
+                      </div>
+                      <div className="pt-4 pb-12 relative w-full">
+                        {languageCourses.length > 4 && (
+                          <Button
+                            variant="tertiary"
+                            className="left-1/2 transform -translate-x-1/2 !absolute top-1/2 -translate-y-1/2 z-1"
+                            icon="Chevron"
+                            iconSide="right"
+                            label="Load More"
+                            iconSize={14}
+                          ></Button>
+                        )}
+                        <Divider />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Completed Courses */}
+              {filteredCourses.some(
+                (course) =>
+                  courseProgress[course.slug] !== undefined &&
+                  courseStatus[course.slug] !== "Locked"
+              ) && (
+                <>
+                  <div className="flex items-center gap-x-3">
+                    <Icon
+                      name="SuccessCircle"
+                      className="text-brand-secondary"
+                    />
+                    <span className="text-lg leading-none font-medium text-secondary">
+                      {t("lessons.completed_courses")}
+                    </span>
+                  </div>
+                  <div
+                    className={classNames(
+                      "grid",
+                      view === "grid"
+                        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                        : "grid-cols-1",
+                      "gap-5"
+                    )}
+                  >
+                    {filteredCourses
+                      .filter(
+                        (course) =>
+                          courseProgress[course.slug] !== undefined &&
+                          courseStatus[course.slug] !== "Locked"
+                      )
+                      .map((course) => {
+                        const totalLessons =
+                          courseLessons.find((c) => c.slug === course.slug)
+                            ?.totalLessons || 0;
+                        const currentLessonSlug = getCurrentLessonSlug(
+                          course.slug
+                        );
+                        return (
+                          <CourseCard
+                            currentLesson={currentLessonSlug}
+                            currentCourse={course.slug}
+                            key={course.slug}
+                            name={t(`courses.${course.slug}`)}
+                            language={course.language}
+                            color={course.color}
+                            difficulty={course.difficulty}
+                            footer={
+                              <ReturningCourseFooter
+                                courseName={course.slug}
+                                completedLessonsCount={
+                                  courseProgress[course.slug]
+                                }
+                                totalLessonCount={totalLessons}
+                                currentLessonSlug={currentLessonSlug}
+                                isChallengeCompleted={true}
                               />
                             }
                           />
@@ -216,75 +365,6 @@ export default function CourseList({
               )}
             </div>
           )}
-
-          {/* Course Sections */}
-          {Object.entries(courseSections).map(([language, section]) => {
-            const languageCourses = filteredCourses.filter(
-              (course) =>
-                course.language === language &&
-                courseProgress[course.slug] === undefined
-            );
-
-            if (languageCourses.length === 0) return null;
-
-            return (
-              <div key={language} className="flex flex-col">
-                <div className="flex flex-col gap-y-8 ">
-                  <div className="flex items-center gap-x-3">
-                    <Icon name={section.icon} />
-                    <span className="text-lg leading-none font-medium text-secondary">
-                      {t(section.title)}
-                    </span>
-                  </div>
-                  <div
-                    className={classNames(
-                      "grid",
-                      view === "grid"
-                        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "grid-cols-1",
-                      "gap-5"
-                    )}
-                  >
-                    {languageCourses.map((course) => {
-                      const totalLessons =
-                        courseLessons.find((c) => c.slug === course.slug)
-                          ?.totalLessons || 0;
-                      return (
-                        <CourseCard
-                          currentLesson={getCurrentLessonSlug(course.slug)}
-                          currentCourse={course.slug}
-                          key={course.slug}
-                          name={t(`courses.${course.slug}`)}
-                          language={course.language}
-                          color={course.color}
-                          difficulty={course.difficulty}
-                          footer={
-                            <NewCourseFooter
-                              courseSlug={course.slug}
-                              lessonCount={totalLessons}
-                            />
-                          }
-                        />
-                      );
-                    })}
-                  </div>
-                  <div className="pt-4 pb-12 relative w-full">
-                    {languageCourses.length > 4 && (
-                      <Button
-                        variant="tertiary"
-                        className="left-1/2 transform -translate-x-1/2 !absolute top-1/2 -translate-y-1/2 z-1"
-                        icon="Chevron"
-                        iconSide="right"
-                        label="Load More"
-                        iconSize={14}
-                      ></Button>
-                    )}
-                    <Divider />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </>
       )}
     </motion.div>

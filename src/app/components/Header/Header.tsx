@@ -16,6 +16,11 @@ export default function HeaderContent() {
   const t = useTranslations();
   const { setVisible } = useWalletModal();
 
+  const isRootOrCourses =
+    pathname === "/" ||
+    pathname.split("/").length <= 2 ||
+    pathname.startsWith("/courses");
+
   return (
     <div className="fixed bg-background/80 backdrop-blur-lg z-40 w-full border-b border-b-border">
       <div className="flex w-full items-center justify-between max-w-app mx-auto py-3 px-4 md:px-8">
@@ -37,13 +42,12 @@ export default function HeaderContent() {
               className={classNames(
                 "py-2.5 px-3 relative rounded-xl transition flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",
                 {
-                  " !text-brand-primary":
-                    pathname === "/" || pathname.startsWith("/courses"),
+                  " !text-brand-primary": isRootOrCourses,
                 }
               )}
               href="/"
             >
-              {(pathname === "/" || pathname.startsWith("/courses")) && (
+              {isRootOrCourses && (
                 <motion.div
                   layoutId="nav-desktop"
                   style={{ originY: "0px" }}
@@ -54,14 +58,12 @@ export default function HeaderContent() {
               <Icon
                 name="Lessons"
                 className={classNames("text-text-tertiary", {
-                  "!text-brand-primary":
-                    pathname === "/" || pathname.startsWith("/courses"),
+                  "!text-brand-primary": isRootOrCourses,
                 })}
               />
               <span
                 className={classNames("font-mono text-[15px] pt-0.5", {
-                  "text-brand-secondary":
-                    pathname === "/" || pathname.startsWith("/courses"),
+                  "text-brand-secondary": isRootOrCourses,
                 })}
               >
                 {t("header.courses")}
@@ -71,12 +73,12 @@ export default function HeaderContent() {
               className={classNames(
                 "py-2.5 px-3 relative transition rounded-xl flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",
                 {
-                  "!text-brand-primary": pathname === "/rewards",
+                  "!text-brand-primary": pathname.includes("/rewards"),
                 }
               )}
               href="/rewards"
             >
-              {pathname === "/rewards" && (
+              {pathname.includes("/rewards") && (
                 <motion.div
                   layoutId="nav-desktop"
                   style={{ originY: "0px" }}
@@ -136,13 +138,12 @@ export default function HeaderContent() {
                     className={classNames(
                       "py-2.5 px-3 relative rounded-xl flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",
                       {
-                        " !text-brand-primary":
-                          pathname === "/" || pathname.startsWith("/courses"),
+                        " !text-brand-primary": isRootOrCourses,
                       }
                     )}
                     href="/"
                   >
-                    {(pathname === "/" || pathname.startsWith("/courses")) && (
+                    {isRootOrCourses && (
                       <motion.div
                         layoutId="nav-mobile"
                         transition={{ duration: 0.4, ease: anticipate }}
@@ -152,14 +153,12 @@ export default function HeaderContent() {
                     <Icon
                       name="Lessons"
                       className={classNames("text-text-tertiary", {
-                        "!text-brand-primary":
-                          pathname === "/" || pathname.startsWith("/courses"),
+                        "!text-brand-primary": isRootOrCourses,
                       })}
                     />
                     <span
                       className={classNames("font-mono text-[15px] pt-0.5", {
-                        "text-brand-secondary":
-                          pathname === "/" || pathname.startsWith("/courses"),
+                        "text-brand-secondary": isRootOrCourses,
                       })}
                     >
                       {t("header.courses")}

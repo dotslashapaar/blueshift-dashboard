@@ -139,3 +139,42 @@ h2 code {
 .rehype-pretty-copy {
   @apply opacity-0;
 }
+
+.animate-nft {
+  animation: nft 4s ease-in-out infinite;
+}
+
+@keyframes nft {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.pixelBackground {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  z-index: 50;
+  pointer-events: none;
+  top: 0;
+}
+
+.pixelBackground-row {
+  display: flex;
+  width: 100%;
+  height: 100px;
+}
+
+.pixelBackground-block {
+  width: 100px;
+  height: 100%;
+  background-color: #020303;
+}

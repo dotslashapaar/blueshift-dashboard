@@ -9,6 +9,7 @@ interface VerificationResult {
   compute_units_consumed?: number;
   execution_time?: number;
   program_logs?: string[];
+  message?: string;
 }
 
 export interface VerificationApiResponse {
@@ -101,7 +102,7 @@ export function useChallengeFileUploadVerification({
         } catch (err) {
           console.error("Error verifying file:", err);
           setError(
-            err instanceof Error ? err.message : "An unknown error occurred.",
+            err instanceof Error ? err.message : "An unknown error occurred."
           );
           setVerificationData(null);
         } finally {
@@ -120,7 +121,7 @@ export function useChallengeFileUploadVerification({
   const requirements = useMemo(() => {
     return challenge.requirements.map((req): ChallengeRequirement => {
       const result = verificationData?.results?.find(
-        (res) => res.instruction === req.instructionKey,
+        (res) => res.instruction === req.instructionKey
       );
       if (result) {
         return { ...req, status: result.success ? "passed" : "failed" };

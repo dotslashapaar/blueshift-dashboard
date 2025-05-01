@@ -49,7 +49,7 @@ export default function Modal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: anticipate }}
           className={classNames(
-            "fixed inset-0 h-screen w-full z-10 items-center justify-center flex flex-col",
+            "fixed inset-0 h-screen w-full z-30 items-center justify-center flex flex-col",
             className,
             isOpen && "no-scroll"
           )}

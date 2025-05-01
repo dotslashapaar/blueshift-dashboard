@@ -61,7 +61,7 @@ export const IconComponents = {
   Table: TableIcon,
   Target: TargetIcon,
   Typescript: TypescriptIcon,
-  Unclaimed: UnclaimedIcon,
+  Unlocked: UnclaimedIcon,
   Upload: UploadIcon,
   Wallet: WalletIcon,
   Warning: WarningIcon,

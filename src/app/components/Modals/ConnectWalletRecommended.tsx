@@ -16,6 +16,7 @@ export default function ConnectWalletRecommended() {
       showBackdrop={true}
       width={360}
       closeOnClickOutside={false}
+      cardClassName="!top-20"
     >
       <div className="flex flex-col gap-y-8">
         <div className="flex flex-col gap-y-2 text-center">

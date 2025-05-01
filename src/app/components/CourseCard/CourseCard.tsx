@@ -97,7 +97,7 @@ export default function CourseCard({
                 />
               )}
             </div>
-            <div className="text-xl font-medium text-primary leading-none">
+            <div className="text-xl font-medium text-primary leading-[120%]">
               {name}
             </div>
           </div>

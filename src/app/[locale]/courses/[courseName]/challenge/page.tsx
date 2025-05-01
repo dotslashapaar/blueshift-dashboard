@@ -19,28 +19,32 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
   return (
     <div className="flex flex-col w-full">
       <div
-        className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between"
+        className="w-full"
         style={{
           background: `linear-gradient(180deg, rgb(${courseColors[courseMetadata.language]},0.05) 0%, transparent 100%)`,
         }}
       >
-        <div className="flex flex-col gap-y-2">
-          <div className="flex items-center gap-x-2">
-            <Icon name={courseMetadata.language} />
-            <span
-              className="font-medium text-xl font-mono relative top-0.25"
-              style={{ color: `rgb(${courseColors[courseMetadata.language]})` }}
-            >
-              {courseMetadata.language}
-            </span>
+        <div className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
+          <div className="flex flex-col gap-y-2">
+            <div className="flex items-center gap-x-2">
+              <Icon name={courseMetadata.language} />
+              <span
+                className="font-medium text-xl font-mono relative top-0.25"
+                style={{
+                  color: `rgb(${courseColors[courseMetadata.language]})`,
+                }}
+              >
+                {courseMetadata.language}
+              </span>
+            </div>
+            <span className="sr-only">{courseMetadata.title}</span>
+            <HeadingReveal
+              text={courseMetadata.title}
+              headingLevel="h1"
+              className="text-3xl font-semibold"
+            />
+            <BackToCourseButton course={courseMetadata} />
           </div>
-          <span className="sr-only">{courseMetadata.title}</span>
-          <HeadingReveal
-            text={courseMetadata.title}
-            headingLevel="h1"
-            className="text-3xl font-semibold"
-          />
-          <BackToCourseButton course={courseMetadata} />
         </div>
       </div>
       <Divider />
