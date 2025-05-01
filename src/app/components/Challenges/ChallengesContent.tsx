@@ -11,7 +11,8 @@ import ChallengeTable from "./ChallengeTable";
 import { Link } from "@/i18n/navigation";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 import { useChallengeFileUploadVerification } from "@/app/hooks/useChallengeFileUploadVerification";
-
+import { AnimatePresence, motion } from "motion/react";
+import { anticipate } from "motion";
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ChallengesContent({
@@ -29,9 +30,7 @@ export default function ChallengesContent({
   const challenge = currentCourse.challenge;
 
   if (!apiBaseUrl) {
-    console.error(
-      "API Base URL is not defined in the environment variables.",
-    );
+    console.error("API Base URL is not defined in the environment variables.");
   }
 
   const verificationEndpoint = challenge?.apiPath
@@ -45,6 +44,7 @@ export default function ChallengesContent({
     requirements,
     completedRequirementsCount,
     allIncomplete,
+    verificationData,
   } = useChallengeFileUploadVerification({
     verificationEndpoint: verificationEndpoint,
     challenge: challenge!,
@@ -79,50 +79,57 @@ export default function ChallengesContent({
       ) : (
         <>
           {/* Overlay for locked course */}
-          {!isCourseCompleted && (
-            <div className="absolute z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
-              <div className="flex flex-col gap-y-4 sm:!-mt-24 max-w-[90dvw]">
-                <div className="text-center justify-center text-lg sm:text-xl font-medium leading-none gap-x-2 items-center flex">
-                  <Icon name="Locked" className="text-secondary" />
-                  {t("challenges.locked")}
+          <AnimatePresence>
+            {!isCourseCompleted && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm"
+              >
+                <div className="flex flex-col gap-y-4 sm:!-mt-24 max-w-[90dvw]">
+                  <div className="text-center justify-center text-lg sm:text-xl font-medium leading-none gap-x-2 items-center flex">
+                    <Icon name="Locked" className="text-secondary" />
+                    {t("challenges.locked")}
+                  </div>
+                  <div className="text-center text-secondary mx-auto w-full">
+                    {t("challenges.locked_description")}
+                  </div>
                 </div>
-                <div className="text-center text-secondary mx-auto w-full">
-                  {t("challenges.locked_description")}
-                </div>
-              </div>
-              <Link href={`/courses/${currentCourse.slug}/${lastLessonSlug}`}>
-                <Button
-                  label="Back to Course"
-                  variant="primary"
-                  size="lg"
-                  className="!w-[2/3]"
-                  icon="ArrowLeft"
-                />
-              </Link>
-            </div>
-          )}
-          {/* Display loading state */}
-          {isLoading && (
-            <div className="absolute z-20 flex items-center justify-center top-0 left-0 w-full h-full bg-background/50 backdrop-blur-sm">
-              <p>Verifying...</p> {/* Replace with a proper spinner/loader */}
-            </div>
-          )}
-          {/* Display error state */}
-          {error && (
-            <div className="absolute z-20 flex items-center justify-center top-10 left-1/2 transform -translate-x-1/2 bg-red-500 text-white p-4 rounded shadow-lg">
-              <p>Error: {error}</p>
-            </div>
-          )}
+                <Link href={`/courses/${currentCourse.slug}/${lastLessonSlug}`}>
+                  <Button
+                    label="Back to Course"
+                    variant="primary"
+                    size="lg"
+                    className="!w-[2/3]"
+                    icon="ArrowLeft"
+                  />
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
           {challenge && (
-            <div className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                transition: { duration: 0.4, ease: anticipate },
+              }}
+              exit={{ opacity: 0 }}
+              className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24"
+            >
               <ChallengeRequirements challenge={challenge} />
               <ChallengeTable
+                isLoading={isLoading}
+                error={error}
                 onUploadClick={triggerUpload}
                 requirements={requirements}
                 completedRequirementsCount={completedRequirementsCount}
                 allIncomplete={allIncomplete}
+                verificationData={verificationData}
+                courseSlug={currentCourse.slug}
               />
-            </div>
+            </motion.div>
           )}
         </>
       )}

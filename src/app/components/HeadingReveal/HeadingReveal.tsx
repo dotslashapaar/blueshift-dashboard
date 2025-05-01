@@ -14,6 +14,7 @@ export default function HeadingReveal({
   cursorColor = "#00FFFF",
   baseDelay = 0,
   splitBy,
+  speed = 0.25,
 }: {
   text: string;
   headingLevel: "h1" | "h2" | "h3";
@@ -22,6 +23,7 @@ export default function HeadingReveal({
   cursorColor?: string;
   baseDelay?: number;
   splitBy?: "words" | "chars";
+  speed?: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const localeSegmentation = useSplitLocaleBy();
@@ -61,8 +63,8 @@ export default function HeadingReveal({
         },
         {
           ease: anticipate,
-          duration: 0.25,
-          delay: stagger(0.125, { startDelay: baseDelay }),
+          duration: speed,
+          delay: stagger(speed / 2, { startDelay: baseDelay }),
         }
       );
     });

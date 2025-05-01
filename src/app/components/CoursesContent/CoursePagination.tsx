@@ -23,7 +23,7 @@ export default function CoursePagination({
   className,
   courseSlug,
 }: CoursePaginationProps) {
-  const { setCourseProgress } = usePersistentStore();
+  const { setCourseProgress, courseStatus } = usePersistentStore();
 
   const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -87,32 +87,59 @@ export default function CoursePagination({
             <Link
               href={`/courses/${courseSlug}/${lesson.slug}`}
               key={lesson.slug}
-              className="flex items-center gap-x-4 group"
+              className="flex flex-col gap-y-2 group"
             >
-              <div
-                className={classNames(
-                  "w-[18px] group-last:before:!hidden before:w-[2px] before:bg-mute before:h-[18px] before:content-[''] before:absolute before:left-1/2 before:-translate-x-1/2 before:top-[calc(100%+2px)] h-[18px] relative flex items-center justify-center rounded-full border-2 border-mute",
-                  index === currentLesson - 1 && "!border-brand-secondary"
-                )}
-              >
-                {index === currentLesson - 1 && (
-                  <motion.div
-                    layoutId="lesson-pagination"
-                    transition={{ duration: 0.1, ease: anticipate }}
-                    className={classNames(
-                      "w-[8px] h-[8px] rounded-full bg-brand-secondary"
-                    )}
-                  ></motion.div>
-                )}
+              <div className="flex items-center gap-x-4">
+                <div
+                  className={classNames(
+                    "w-[18px] group-last:before:!hidden before:w-[2px] before:bg-mute before:h-[50px] before:content-[''] before:absolute before:left-1/2 before:-translate-x-1/2 before:top-[calc(100%+2px)] h-[18px] relative flex items-center justify-center rounded-full border-2 border-mute",
+                    index === currentLesson - 1 && "!border-brand-secondary"
+                  )}
+                >
+                  {index === currentLesson - 1 && (
+                    <motion.div
+                      layoutId="lesson-pagination"
+                      transition={{ duration: 0.1, ease: anticipate }}
+                      className={classNames(
+                        "w-[6px] h-[6px] rounded-full bg-brand-secondary"
+                      )}
+                    ></motion.div>
+                  )}
+                </div>
+                <span
+                  className={classNames(
+                    "text-tertiary/70 hover:text-secondary font-medium truncate transition",
+                    index === currentLesson - 1 && "!text-primary"
+                  )}
+                >
+                  {lesson.title}
+                </span>
               </div>
-              <span
-                className={classNames(
-                  "text-tertiary/70 hover:text-secondary font-medium truncate transition",
-                  index === currentLesson - 1 && "!text-primary"
-                )}
-              >
-                {lesson.title}
-              </span>
+              <div className="flex items-center gap-x-2 pl-10">
+                <Icon
+                  name={
+                    courseStatus[courseSlug] !== "Locked"
+                      ? "SuccessCircle"
+                      : "Challenge"
+                  }
+                  size={16 as 14}
+                  className={classNames("-ml-2 text-brand-tertiary", {
+                    "!text-success": courseStatus[courseSlug] !== "Locked",
+                  })}
+                />
+                <span
+                  className={classNames(
+                    "text-sm font-medium text-brand-tertiary",
+                    {
+                      "!text-success": courseStatus[courseSlug] !== "Locked",
+                    }
+                  )}
+                >
+                  {courseStatus[courseSlug] !== "Locked"
+                    ? "Challenge Complete"
+                    : "Challenge Incomplete"}
+                </span>
+              </div>
             </Link>
           ))}
         </div>

@@ -31,8 +31,8 @@ export const courseStatus = {
 } as const;
 
 export const rewardsStatus = {
-  Unclaimed: "Unclaimed",
   Locked: "Locked",
+  Unlocked: "Unlocked",
   Claimed: "Claimed",
 } as const;
 
@@ -43,8 +43,8 @@ export type challengeMetadata = {
     title: string;
     description: string;
     instructionKey: string;
-  }[]
-}
+  }[];
+};
 
 export type CourseMetadata = {
   slug: string;
@@ -69,7 +69,7 @@ export type CourseLanguages = keyof typeof courseLanguages;
 export type CourseDifficulty = keyof typeof courseDifficulty;
 
 /**
-  * Adds a lesson number to each lesson in the course metadata.
+ * Adds a lesson number to each lesson in the course metadata.
  * @param courses
  */
 export function withCourseNumber(
@@ -84,6 +84,6 @@ export function withCourseNumber(
   }));
 }
 
-type CourseMetadataWithoutLessonNumber = Omit<CourseMetadata, 'lessons'> & {
-  lessons: Omit<LessonMetadata, 'lessonNumber'>[];
+type CourseMetadataWithoutLessonNumber = Omit<CourseMetadata, "lessons"> & {
+  lessons: Omit<LessonMetadata, "lessonNumber">[];
 };

@@ -15,6 +15,7 @@ type ReturningLessonFooterProps = {
   completedLessonsCount: number;
   totalLessonCount: number;
   currentLessonSlug: string;
+  isChallengeCompleted: boolean;
 };
 
 export default function ReturningCourseFooter({
@@ -22,6 +23,7 @@ export default function ReturningCourseFooter({
   completedLessonsCount,
   courseName,
   currentLessonSlug,
+  isChallengeCompleted,
 }: ReturningLessonFooterProps) {
   const t = useTranslations();
   const [isHovering, setIsHovering] = useState(false);
@@ -98,20 +100,35 @@ export default function ReturningCourseFooter({
               {completedLessonsCount}/{totalLessonCount}
             </span>
           </div>
-          <Link
-            onMouseOver={() => setIsHovering(true)}
-            onMouseOut={() => setIsHovering(false)}
-            href={`/courses/${courseName}/challenge`}
-            className="text-brand-secondary hover:text-brand-primary transition font-medium flex items-center gap-x-2"
-          >
-            <Button
-              variant="primary"
-              size="md"
-              label={t("lessons.take_challenge")}
-              icon="Challenge"
-              iconSide="left"
-            />
-          </Link>
+          {!isChallengeCompleted ? (
+            <Link
+              onMouseOver={() => setIsHovering(true)}
+              onMouseOut={() => setIsHovering(false)}
+              href={`/courses/${courseName}/challenge`}
+              className="text-brand-secondary hover:text-brand-primary transition font-medium flex items-center gap-x-2"
+            >
+              <Button
+                variant="primary"
+                size="md"
+                label={t("lessons.take_challenge")}
+                icon="Challenge"
+                iconSide="left"
+              />
+            </Link>
+          ) : (
+            <Link
+              onMouseOver={() => setIsHovering(true)}
+              onMouseOut={() => setIsHovering(false)}
+              href={`/courses/${courseName}`}
+              className="text-brand-secondary hover:text-brand-primary transition font-medium flex items-center gap-x-2"
+            >
+              <Button
+                variant="primary"
+                size="md"
+                label={t("lessons.review_course")}
+              />
+            </Link>
+          )}
         </div>
       )}
     </div>

@@ -14,22 +14,6 @@ import { motion } from "motion/react";
 import { anticipate } from "motion";
 import { useWindowSize } from "usehooks-ts";
 import { useEffect } from "react";
-import { getCourseLessons } from "@/app/utils/mdx";
-
-const rewardSections = {
-  Unclaimed: {
-    icon: "Unclaimed",
-    title: "rewards.Unclaimed",
-  },
-  Locked: {
-    icon: "Locked",
-    title: "rewards.locked",
-  },
-  Claimed: {
-    icon: "Claimed",
-    title: "rewards.claimed",
-  },
-} as const;
 
 type RewardsListProps = {
   initialCourses: CourseMetadata[];
@@ -37,14 +21,12 @@ type RewardsListProps = {
 
 export default function RewardsList({ initialCourses }: RewardsListProps) {
   const t = useTranslations();
-  const { view, setView, selectedRewardStatus } = usePersistentStore();
+  const { view, setView, selectedRewardStatus, courseStatus } =
+    usePersistentStore();
 
-  const filteredRewards = initialCourses.filter((course) => {
-    return (
-      selectedRewardStatus.length === 0 ||
-      (course.status && selectedRewardStatus.includes(course.status))
-    );
-  });
+  const filteredRewards = initialCourses.filter((course) =>
+    selectedRewardStatus.includes(courseStatus[course.slug])
+  );
 
   const hasNoResults = filteredRewards.length === 0;
   const hasNoFilters = selectedRewardStatus.length === 0;
@@ -96,17 +78,13 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
                       name={lesson.title}
                       language={course.language}
                       difficulty={course.difficulty}
-                      status={course.status}
+                      status={courseStatus[course.slug]}
                       color={course.color}
                       className={classNames(
-                        course.status === "Locked" && "opacity-50"
+                        courseStatus[course.slug] === "Locked" && "opacity-50"
                       )}
                       footer={
-                        <RewardsFooter
-                          status={
-                            course.status as "Claimed" | "Locked" | "Unclaimed"
-                          }
-                        />
+                        <RewardsFooter status={courseStatus[course.slug]} />
                       }
                     />
                   ))}

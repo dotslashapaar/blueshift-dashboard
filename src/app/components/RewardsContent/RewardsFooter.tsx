@@ -5,7 +5,7 @@ import { usePersistentStore } from "@/stores/store";
 import Icon from "../Icon/Icon";
 
 type RewardsFooterProps = {
-  status: "Claimed" | "Locked" | "Unclaimed";
+  status?: "Locked" | "Claimed" | "Unlocked";
 };
 
 export default function RewardsFooter({ status }: RewardsFooterProps) {
@@ -22,7 +22,13 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
         view === "grid" && "w-full justify-between items-end"
       )}
     >
-      {status === "Unclaimed" && (
+      {status === "Locked" && (
+        <span className="text-tertiary font-medium gap-x-1.5 flex items-center">
+          <Icon name="Locked" />
+          {t("rewards.locked_description")}
+        </span>
+      )}
+      {status === "Unlocked" && (
         <Button
           variant="primary"
           size="md"
@@ -31,12 +37,6 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
           iconSide="right"
           className="!w-full !min-w-[150px]"
         />
-      )}
-      {status === "Locked" && (
-        <span className="text-tertiary font-medium gap-x-1.5 flex items-center">
-          <Icon name="Locked" />
-          {t("rewards.locked_description")}
-        </span>
       )}
       {status === "Claimed" && (
         <Button

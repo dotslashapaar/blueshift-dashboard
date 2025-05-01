@@ -37,6 +37,12 @@ interface PersistentStore {
   courseProgress: Record<string, number>; // key: course slug, value: current lesson number
   setCourseProgress: (courseSlug: string, lessonNumber: number) => void;
 
+  courseStatus: Record<string, "Locked" | "Unlocked" | "Claimed">; // key: course slug, value: status
+  setCourseStatus: (
+    courseSlug: string,
+    status: "Locked" | "Unlocked" | "Claimed"
+  ) => void;
+
   // Filters
   selectedLanguages: CourseLanguages[];
   toggleLanguage: (language: CourseLanguages) => void;
@@ -67,6 +73,13 @@ export const usePersistentStore = create<PersistentStore>()(
             ...state.courseProgress,
             [courseSlug]: lessonNumber,
           },
+        })),
+
+      // Course Status
+      courseStatus: {},
+      setCourseStatus: (courseSlug, status) =>
+        set((state) => ({
+          courseStatus: { ...state.courseStatus, [courseSlug]: status },
         })),
 
       // Filters

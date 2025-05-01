@@ -20,8 +20,10 @@
     "title_returning": "Jump back into a course",
     "get_started": "Get Started",
     "continue_learning": "Continue Learning",
+    "completed_courses": "Completed Courses",
     "start_course": "Start Course",
     "lessons": "lessons",
+    "review_course": "Review Course",
     "empty_results_title": "No results found",
     "empty_results_description": "Try searching for a different course or use filters instead.",
     "empty_filters_title": "You have no filters selected",
@@ -45,8 +47,8 @@
     "title": "Claim and View your NFTs",
     "subtitle": "Rewards",
     "Unclaimed": "Unclaimed",
-    "claimed": "Claimed",
-    "claim": "Claim",
+    "claimed": "Minted",
+    "claim": "Mint",
     "locked": "Locked",
     "empty_title": "No rewards found",
     "empty_description": "Try changing your filters to see rewards here.",
@@ -76,6 +78,11 @@
     "locked": "This challenge is locked",
     "locked_description": "Finish the lessons first to unlock the challenge.",
     "connect_wallet": "Connect Wallet",
-    "connect_wallet_description": "A Solana wallet is required to complete the challenge and unlock NFTs"
+    "connect_wallet_description": "A Solana wallet is required to complete the challenge and unlock NFTs",
+    "challenge_completed": "Congratulations!",
+    "challenge_completed_description": "You've completed the challenge and unlocked an NFT reward!",
+    "challenge_completed_button": "Mint NFT",
+    "challenge_completed_skip": "Skip for now",
+    "challenge_completed_skip_description": "You can see your unlocks on the rewards page."
   }
 }

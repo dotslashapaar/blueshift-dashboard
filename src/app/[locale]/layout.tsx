@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import {NextIntlClientProvider, hasLocale} from 'next-intl';
-import {notFound} from 'next/navigation';
-import {routing} from '@/i18n/routing';
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
 import "@/app/globals.css";
 import Header from "@/app/components/Header/Header";
 import Footer from "@/app/components/Footer/Footer";
@@ -59,32 +59,34 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({
-                                           children,
-                                           params
-                                         }: Readonly<{
+  children,
+  params,
+}: Readonly<{
   children: React.ReactNode;
-  params: Promise<{locale: string}>;
+  params: Promise<{ locale: string }>;
 }>) {
   // Ensure that the incoming `locale` is valid
-  const {locale} = await params;
+  const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
 
   return (
     <html lang={locale}>
-    <body
-      className={`${MontechV2.variable} ${GeistMono.variable} ${FunnelDisplay.variable} ${Switzer.variable} antialiased`}
-    >
-    <NextIntlClientProvider>
-      <WalletProvider>
-        <GlobalModals />
-        <Header />
-        <div className="pt-[69px] min-h-[calc(100dvh-69px)]">{children}</div>
-        <Footer />
-      </WalletProvider>
-    </NextIntlClientProvider>
-    </body>
+      <body
+        className={`${MontechV2.variable} ${GeistMono.variable} ${FunnelDisplay.variable} ${Switzer.variable} antialiased`}
+      >
+        <NextIntlClientProvider>
+          <WalletProvider>
+            <GlobalModals />
+            <Header />
+            <div className="pt-[69px] min-h-[calc(100dvh-69px)]">
+              {children}
+            </div>
+            <Footer />
+          </WalletProvider>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }
