@@ -34,17 +34,13 @@ export const rewardsStatus = ["Locked", "Unlocked", "Claimed"] as const;
 
 export type challengeMetadata = {
   apiPath: string;
-  title: string;
   requirements: {
-    title: string;
-    description: string;
     instructionKey: string;
   }[];
 };
 
 export type CourseMetadata = {
   slug: string;
-  title: string;
   language: CourseLanguages;
   color: string;
   difficulty: CourseDifficulty;
@@ -54,7 +50,6 @@ export type CourseMetadata = {
 };
 
 export type LessonMetadata = {
-  title: string;
   lessonNumber: number;
   slug: string;
 };

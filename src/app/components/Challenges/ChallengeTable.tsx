@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { anticipate } from "motion";
 import Button from "../Button/Button";
 import { motion } from "motion/react";
@@ -9,7 +10,7 @@ import React, { useState, useEffect } from "react";
 import {
   ChallengeRequirement,
   VerificationApiResponse,
-} from "@/app/hooks/useChallengeFileUploadVerification";
+} from "@/hooks/useChallengeFileUploadVerification";
 import Icon from "../Icon/Icon";
 import Divider from "../Divider/Divider";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
@@ -38,6 +39,7 @@ export default function ChallengeTable({
   verificationData,
   courseSlug,
 }: ChallengeTableProps) {
+  const t = useTranslations();
   const [selectedRequirement, setSelectedRequirement] =
     useState<ChallengeRequirement | null>(null);
 
@@ -83,10 +85,10 @@ export default function ChallengeTable({
           >
             <div className="flex flex-col items-center justify-center gap-y-1">
               <span className="text-lg font-medium text-primary">
-                Challenge Complete
+                {t("challenge_page.challenge_completed.title")}
               </span>
               <span className="text-tertiary">
-                You have already completed this challenge.
+                {t("challenge_page.challenge_completed.body")}
               </span>
             </div>
             <Link href="/">
@@ -94,7 +96,7 @@ export default function ChallengeTable({
                 variant="primary"
                 size="md"
                 icon="Lessons"
-                label="View Other Courses"
+                label={t("challenge_page.challenge_completed.view_other_courses")}
               />
             </Link>
           </motion.div>
@@ -106,7 +108,7 @@ export default function ChallengeTable({
         >
           <div className="flex flex-col gap-y-4 w-full sm:w-1/2">
             <span className="font-medium">
-              {completedRequirementsCount}/{requirements.length} Tests Passed
+              {completedRequirementsCount}/{requirements.length} {t("challenge_page.num_tests_passed")}
             </span>
             <div
               className={classNames(
@@ -155,7 +157,7 @@ export default function ChallengeTable({
             variant="primary"
             icon="Upload"
             size="lg"
-            label="Upload Program"
+            label={t("challenge_page.upload_program_btn")}
             className="w-full sm:w-auto"
             onClick={onUploadClick}
           />
@@ -185,13 +187,13 @@ export default function ChallengeTable({
             >
               <div
                 className="flex items-center justify-between"
-                key={requirement.title}
+                key={requirement.instructionKey}
               >
-                <span className="font-medium">{requirement.title}</span>
+                <span className="font-medium">{t(`courses.${courseSlug}.challenge.requirements.${requirement.instructionKey}.title`)}</span>
                 {!isLoading && !error ? (
                   <div className="flex items-center gap-x-4">
                     <ChallengeBadge
-                      label={requirement.status}
+                      label={t(`challenge_page.test_results.${requirement.status}`)}
                       variant={requirement.status}
                     />
                     <Icon

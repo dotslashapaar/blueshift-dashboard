@@ -20,30 +20,79 @@
       "title": "Vault",
       "lessons": {
         "lesson": "Vault"
+      },
+      "challenge": {
+        "title": "Challenge: Anchor Vault",
+        "requirements": {
+          "deposit": {
+            "title": "Challenge 1: Taking deposits",
+            "description": "Your program should allow a user to deposit SOL into their own vault."
+          },
+          "withdraw": {
+            "title": "Challenge 2: Allowing withdrawal",
+            "description": "The vault owner should be able to withdraw SOL from their vault."
+          }
+        }
       }
     },
     "anchor-escrow": {
       "title": "Escrow",
       "lessons": {
         "lesson": " Escrow"
+      },
+      "challenge": {
+        "title": "Challenge: Anchor Escrow",
+        "requirements": {
+          "make": {
+            "title": "Challenge 1: Making an escrow swap deal",
+            "description": "Your program should allow a user to create a swap order secured by an escrow."
+          },
+          "take": {
+            "title": "Challenge 2: Taking an escrow swap deal",
+            "description": "Your program should allow a user to take an escrow swap deal."
+          },
+          "refund": {
+            "title": "Challenge 3: Canceling an escrow swap deal",
+            "description": "Your program should allow a user to cancel an escrow swap deal and refund the maker."
+          }
+        }
       }
     },
     "pinocchio-vault": {
       "title": "Pinocchio Vault",
       "lessons": {
         "lesson": " Pinocchio Vault"
+      },
+      "challenge": {
+        "title": "Challenge: Pinocchio Vault",
+        "requirements": {
+          "deposit": {
+            "title": "Challenge 1: Taking deposits",
+            "description": "Your program should allow a user to deposit SOL into their own vault."
+          },
+          "withdraw": {
+            "title": "Challenge 2: Allowing withdrawal",
+            "description": "The vault owner should be able to withdraw SOL from their vault."
+          }
+        }
       }
     },
     "quantum-vault": {
       "title": "Quantum Vault",
       "lessons": {
         "introduction-to-quantum-vault": " Quantum Vault"
+      },
+      "challenge": {
+        "title": "Challenge: Quantum Vault"
       }
     },
     "your-first-spl-token": {
       "title": "Your First SPL Token",
       "lessons": {
         "understanding-spl-tokens": " Your First SPL Token"
+      },
+      "challenge": {
+        "title": "Challenge: Minting an SPL Token"
       }
     }
   },
@@ -138,5 +187,20 @@
     "challenge_completed_button": "Mint NFT",
     "challenge_completed_skip": "Skip for now",
     "challenge_completed_skip_description": "You can see your unlocks on the rewards page."
+  },
+  "challenge_page": {
+    "requirements_title": "Challenge",
+    "upload_program_btn": "Upload Program",
+    "num_tests_passed": "Tests Passed",
+    "test_result": {
+      "passed": "Passed",
+      "failed": "Failed",
+      "incomplete": "Incomplete"
+    },
+    "challenge_completed": {
+      "title": "Challenge Complete",
+      "body": "You have already completed this challenge.",
+      "view_other_courses": "View Other Courses"
+    }
   }
 }

@@ -20,30 +20,79 @@
       "title": "保險庫",
       "lessons": {
         "lesson": "保險庫"
+      },
+      "challenge": {
+        "title": "挑戰：Anchor 保險庫",
+        "requirements": {
+          "deposit": {
+            "title": "挑戰 1：接收存款",
+            "description": "您的程式應允許使用者將 SOL 存入自己的保險庫。"
+          },
+          "withdraw": {
+            "title": "挑戰 2：允許提款",
+            "description": "保險庫擁有者應能夠從其保險庫中提取 SOL。"
+          }
+        }
       }
     },
     "anchor-escrow": {
       "title": "第三方託管",
       "lessons": {
         "lesson": "第三方託管"
+      },
+      "challenge": {
+        "title": "Challenge: Anchor Escrow",
+        "requirements": {
+          "make": {
+            "title": "Challenge 1: Making an escrow swap deal",
+            "description": "Your program should allow a user to create a swap order secured by an escrow."
+          },
+          "take": {
+            "title": "Challenge 2: Taking an escrow swap deal",
+            "description": "Your program should allow a user to take an escrow swap deal."
+          },
+          "refund": {
+            "title": "Challenge 3: Canceling an escrow swap deal",
+            "description": "Your program should allow a user to cancel an escrow swap deal and refund the maker."
+          }
+        }
       }
     },
     "pinocchio-vault": {
       "title": "Pinocchio 保險庫",
       "lessons": {
         "lesson": "Pinocchio 保險庫"
+      },
+      "challenge": {
+        "title": "Challenge: Pinocchio Vault",
+        "requirements": {
+          "deposit": {
+            "title": "Challenge 1: Taking deposits",
+            "description": "Your program should allow a user to deposit SOL into their own vault."
+          },
+          "withdraw": {
+            "title": "Challenge 2: Allowing withdrawal",
+            "description": "The vault owner should be able to withdraw SOL from their vault."
+          }
+        }
       }
     },
     "quantum-vault": {
       "title": "抗量子保險庫",
       "lessons": {
         "introduction-to-quantum-vault": "抗量子保險庫"
+      },
+      "challenge": {
+        "title": "Challenge: Quantum Vault"
       }
     },
     "your-first-spl-token": {
       "title": "你的第一枚SPL幣",
       "lessons": {
         "understanding-spl-tokens": "你的第一枚SPL幣"
+      },
+      "challenge": {
+        "title": "Challenge: Minting an SPL Token"
       }
     }
   },
@@ -83,7 +132,6 @@
     "search_language_filter__label": "所有語言",
     "search_language_filter__all_languages": "所有",
     "search_language_filter__selected_languages": "種語言"
-
   },
   "languages": {
     "anchor": "Anchor",
@@ -134,10 +182,25 @@
     "locked_description": "先完成課程以解鎖挑戰。",
     "connect_wallet": "連接錢包",
     "connect_wallet_description": "需要 Solana 錢包才能完成挑戰並解鎖 NFT",
-    "challenge_completed": "Congratulations!",
-    "challenge_completed_description": "You've completed the challenge and unlocked an NFT reward!",
-    "challenge_completed_button": "Mint NFT",
-    "challenge_completed_skip": "Skip for now",
-    "challenge_completed_skip_description": "You can see your unlocks on the rewards page."
+    "challenge_completed": "恭喜！",
+    "challenge_completed_description": "您已完成挑戰並解鎖 NFT 獎勵！",
+    "challenge_completed_button": "鑄造 NFT",
+    "challenge_completed_skip": "暫時跳過",
+    "challenge_completed_skip_description": "您可以在獎勵頁面上查看您解鎖的獎勵。"
+  },
+  "challenge_page": {
+    "requirements_title": "挑戰",
+    "upload_program_btn": "上載程式",
+    "num_tests_passed": "測試通過",
+    "test_results": {
+      "passed": "通過",
+      "failed": "失敗",
+      "incomplete": "未完成"
+    },
+    "challenge_completed": {
+      "title": "挑戰完成",
+      "body": "您已完成此挑戰",
+      "view_other_courses": "查看其他課程"
+    }
   }
 }

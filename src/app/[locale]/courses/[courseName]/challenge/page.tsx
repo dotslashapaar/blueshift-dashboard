@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import BackToCourseButton from "@/app/components/Challenges/BackToCourseButton";
 import Divider from "@/app/components/Divider/Divider";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
@@ -14,6 +15,7 @@ interface ChallengePageProps {
 
 export default async function ChallengePage({ params }: ChallengePageProps) {
   const resolvedParams = await params;
+  const t = await getTranslations();
   const courseMetadata = await getCourse(resolvedParams.courseName);
 
   return (
@@ -37,9 +39,9 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
                 {courseMetadata.language}
               </span>
             </div>
-            <span className="sr-only">{courseMetadata.title}</span>
+            <span className="sr-only">{t(`courses.${courseMetadata.slug}.title`)}</span>
             <HeadingReveal
-              text={courseMetadata.title}
+              text={t(`courses.${courseMetadata.slug}.title`)}
               headingLevel="h1"
               className="text-3xl font-semibold"
             />

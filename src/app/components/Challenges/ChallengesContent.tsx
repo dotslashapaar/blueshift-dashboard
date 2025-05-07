@@ -10,9 +10,10 @@ import ChallengeRequirements from "./ChallengeRequirements";
 import ChallengeTable from "./ChallengeTable";
 import { Link } from "@/i18n/navigation";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
-import { useChallengeFileUploadVerification } from "@/app/hooks/useChallengeFileUploadVerification";
+import { useChallengeFileUploadVerification } from "@/hooks/useChallengeFileUploadVerification";
 import { AnimatePresence, motion } from "motion/react";
 import { anticipate } from "motion";
+
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ChallengesContent({
@@ -118,7 +119,7 @@ export default function ChallengesContent({
               exit={{ opacity: 0 }}
               className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24"
             >
-              <ChallengeRequirements challenge={challenge} />
+              <ChallengeRequirements course={currentCourse} />
               <ChallengeTable
                 isLoading={isLoading}
                 error={error}

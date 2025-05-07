@@ -23,7 +23,6 @@ export interface VerificationApiResponse {
 }
 
 export interface ChallengeRequirement {
-  title: string;
   status: "passed" | "failed" | "incomplete";
   instructionKey: string;
 }
