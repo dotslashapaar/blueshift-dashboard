@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import {getTranslations} from 'next-intl/server';
 import localFont from "next/font/local";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
@@ -52,11 +52,22 @@ const FunnelDisplay = Funnel_Display({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Blueshift",
-  description:
-    "Learn how to write your own on-chain programs from the top instructors in the Solana ecosystem.",
-};
+interface RootLayoutProps {
+  params: Promise<{
+    locale: string;
+  }>;
+}
+
+export async function generateMetadata({params}: RootLayoutProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    keywords: t('keywords'),
+  };
+}
 
 export default async function RootLayout({
   children,
