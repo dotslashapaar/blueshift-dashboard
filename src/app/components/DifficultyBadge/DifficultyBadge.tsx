@@ -5,6 +5,7 @@ import {
 } from "@/app/utils/course";
 import { DifficultyIcon } from "../Icon/icons/Difficulty";
 import classNames from "classnames";
+import { useTranslations } from "next-intl";
 
 interface DifficultyBadgeProps {
   difficulty: CourseDifficulty;
@@ -14,6 +15,7 @@ export default function DifficultyBadge({
   difficulty,
   className,
 }: DifficultyBadgeProps) {
+  const t = useTranslations();
   return (
     <div
       className={classNames(
@@ -27,7 +29,7 @@ export default function DifficultyBadge({
         className="text-sm leading-none capitalize font-medium"
         style={{ color: difficultyColors[difficulty] }}
       >
-        {courseDifficulty[difficulty]}
+        {t(`course_levels.${difficulty}`)}
       </span>
     </div>
   );

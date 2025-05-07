@@ -8,7 +8,6 @@ export const courses: CourseMetadata[] = withCourseNumber([
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
-    status: "Unclaimed",
     lessons: [
       {
         slug: "lesson",
@@ -41,7 +40,6 @@ export const courses: CourseMetadata[] = withCourseNumber([
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
-    status: "Unclaimed",
     lessons: [
       {
         slug: "lesson",
@@ -80,7 +78,6 @@ export const courses: CourseMetadata[] = withCourseNumber([
     color: "255,173,102",
     difficulty: 2,
     isFeatured: true,
-    status: "Unclaimed",
     lessons: [
       {
         slug: "lesson",
@@ -113,13 +110,17 @@ export const courses: CourseMetadata[] = withCourseNumber([
     color: "255,173,102",
     difficulty: 4,
     isFeatured: true,
-    status: "Claimed",
     lessons: [
       {
         slug: "introduction-to-quantum-vault",
         title: "Introduction to Quantum Vault",
       },
     ],
+    challenge: {
+      title: "Challenge: Quantum Vault",
+      apiPath: "/v1/verify/quantum/vault",
+      requirements: [],
+    }
   },
   {
     slug: "your-first-spl-token",
@@ -128,12 +129,16 @@ export const courses: CourseMetadata[] = withCourseNumber([
     color: "105,162,241",
     difficulty: 2,
     isFeatured: true,
-    status: "Locked",
     lessons: [
       {
         slug: "understanding-spl-tokens",
         title: "Understanding SPL Tokens",
       },
     ],
+    challenge: {
+      title: "Challenge: Minting an SPL Token",
+      apiPath: "/v1/verify/spl-token/mint",
+      requirements: [],
+    }
   },
 ]);

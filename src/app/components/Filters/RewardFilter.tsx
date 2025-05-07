@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
@@ -18,14 +19,15 @@ export default function RewardFilter({ className }: FiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLElement>(null) as React.RefObject<HTMLElement>;
   const { selectedRewardStatus, toggleRewardStatus } = usePersistentStore();
+  const t = useTranslations();
 
-  const allStatuses = Object.keys(rewardsStatus) as RewardsStatus[];
+  const allStatuses: ReadonlyArray<RewardsStatus> = rewardsStatus;
   const displayText =
     selectedRewardStatus.length === allStatuses.length
-      ? "All Statuses"
+      ? t("rewards.filter__label")
       : selectedRewardStatus.length === 1
         ? selectedRewardStatus[0]
-        : `${selectedRewardStatus.length} Statuses`;
+        : `${selectedRewardStatus.length} ${t("rewards.filter__selected_statuses")}`;
 
   const toggleAllStatuses = () => {
     if (selectedRewardStatus.length === allStatuses.length) {
@@ -97,7 +99,7 @@ export default function RewardFilter({ className }: FiltersProps) {
                 checked={selectedRewardStatus.length === allStatuses.length}
               />
               <span className="text-sm font-medium leading-none text-secondary">
-                All
+                {t("rewards.filter__all_statuses")}
               </span>
             </button>
             <Divider />
@@ -139,7 +141,7 @@ export default function RewardFilter({ className }: FiltersProps) {
                         selectedRewardStatus.includes(status) && "!text-primary"
                       )}
                     >
-                      {status}
+                      {t(`reward_statuses.${status}`)}
                     </span>
                   </div>
                 </button>

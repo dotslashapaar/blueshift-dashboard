@@ -1,4 +1,8 @@
 {
+  "locales_native_name": {
+    "en": "English",
+    "zh-hant": "繁體中文"
+  },
   "header": {
     "lessons": "課程",
     "courses": "課程",
@@ -7,11 +11,42 @@
     "connect_wallet": "連接錢包"
   },
   "courses": {
-    "anchor-vault": "保險庫",
-    "anchor-escrow": "第三方託管",
-    "pinocchio-vault": "Pinocchio 保險庫",
-    "quantum-vault": "抗量子保險庫",
-    "your-first-spl-token": "你的第一枚 SPL 幣"
+    "anchor-vault": {
+      "title": "保險庫",
+      "lessons": {
+        "lesson": "保險庫"
+      }
+    },
+    "anchor-escrow": {
+      "title": "第三方託管",
+      "lessons": {
+        "lesson": "第三方託管"
+      }
+    },
+    "pinocchio-vault": {
+      "title": "Pinocchio 保險庫",
+      "lessons": {
+        "lesson": "Pinocchio 保險庫"
+      }
+    },
+    "quantum-vault": {
+      "title": "抗量子保險庫",
+      "lessons": {
+        "introduction-to-quantum-vault": "抗量子保險庫"
+      }
+    },
+    "your-first-spl-token": {
+      "title": "你的第一枚SPL幣",
+      "lessons": {
+        "understanding-spl-tokens": "你的第一枚SPL幣"
+      }
+    }
+  },
+  "course_levels": {
+    "1": "入門",
+    "2": "中級",
+    "3": "高手",
+    "4": "專家"
   },
   "lessons": {
     "title": "選擇一門課程開始",
@@ -20,21 +55,30 @@
     "title_returning": "返回課程",
     "get_started": "開始",
     "continue_learning": "繼續學習",
+    "completed_courses": "已完成課程",
     "start_course": "開始課程",
     "lessons": "課程",
+    "review_course": "複習課程",
     "empty_results_title": "找不到結果",
     "empty_results_description": "嘗試搜尋不同的課程或使用篩選器。",
     "empty_filters_title": "您沒有選擇任何篩選器",
     "empty_filters_description": "選擇您想學習的語言以在此處查看結果。",
     "continue": "繼續",
-    "completed": "已完成課程",
+    "completed": "課程已完成",
     "all_completed": "所有課程已完成",
-    "take_challenge": "接受挑戰"
+    "take_challenge": "接受挑戰",
+    "challenge_completed": "挑戰已完成",
+    "challenge_incomplete": "挑戰未完成",
+    "take_challenge_cta": "準備好接受挑戰了嗎？",
+    "skip_lesson_divider_title": "或跳到下一課",
+    "skip_lesson": "跳過課程"
   },
   "ui": {
     "search_placeholder": "按名稱、語言或級別搜尋...",
-    "search_language__filter_label": "所有語言",
-    "search_language_filter__all_languages": "所有"
+    "search_language_filter__label": "所有語言",
+    "search_language_filter__all_languages": "所有",
+    "search_language_filter__selected_languages": "種語言"
+
   },
   "languages": {
     "anchor": "Anchor",
@@ -52,7 +96,15 @@
     "empty_description": "嘗試更改您的篩選器以在此處查看獎勵。",
     "locked_description": "完成課程以解鎖",
     "claimed_description": "NFT 已在您的錢包中可用",
-    "view_nft": "查看 NFT"
+    "view_nft": "查看 NFT",
+    "filter__label": "所有狀態",
+    "filter__all_statuses": "所有",
+    "filter__selected_statuses": "種狀態"
+  },
+  "reward_statuses": {
+    "Locked": "已鎖定",
+    "Unlocked": "已鎖",
+    "Claimed": "已領取"
   },
   "shift_goal": {
     "title": "設定您的 Shift 目標",
@@ -76,6 +128,11 @@
     "locked": "此挑戰已鎖定",
     "locked_description": "先完成課程以解鎖挑戰。",
     "connect_wallet": "連接錢包",
-    "connect_wallet_description": "需要 Solana 錢包才能完成挑戰並解鎖 NFT"
+    "connect_wallet_description": "需要 Solana 錢包才能完成挑戰並解鎖 NFT",
+    "challenge_completed": "Congratulations!",
+    "challenge_completed_description": "You've completed the challenge and unlocked an NFT reward!",
+    "challenge_completed_button": "Mint NFT",
+    "challenge_completed_skip": "Skip for now",
+    "challenge_completed_skip_description": "You can see your unlocks on the rewards page."
   }
 }

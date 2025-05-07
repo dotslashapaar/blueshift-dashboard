@@ -54,7 +54,7 @@ export default function CourseList({
 
   const filteredCourses = initialCourses
     .filter((course) => {
-      const matchesSearch = t(`courses.${course.slug}`)
+      const matchesSearch = t(`courses.${course.slug}.title`)
         .toLowerCase()
         .includes((searchValue || "").toLowerCase());
       const matchesLanguage =
@@ -139,7 +139,7 @@ export default function CourseList({
                     return (
                       <CourseCard
                         key={course.slug}
-                        name={t(`courses.${course.slug}`)}
+                        name={t(`courses.${course.slug}.title`)}
                         language={course.language}
                         color={course.color}
                         difficulty={course.difficulty}
@@ -200,7 +200,7 @@ export default function CourseList({
                             currentLesson={currentLessonSlug}
                             currentCourse={course.slug}
                             key={course.slug}
-                            name={t(`courses.${course.slug}`)}
+                            name={t(`courses.${course.slug}.title`)}
                             language={course.language}
                             color={course.color}
                             difficulty={course.difficulty}
@@ -264,7 +264,7 @@ export default function CourseList({
                               currentLesson={getCurrentLessonSlug(course.slug)}
                               currentCourse={course.slug}
                               key={course.slug}
-                              name={t(`courses.${course.slug}`)}
+                              name={t(`courses.${course.slug}.title`)}
                               language={course.language}
                               color={course.color}
                               difficulty={course.difficulty}
@@ -339,7 +339,7 @@ export default function CourseList({
                             currentLesson={currentLessonSlug}
                             currentCourse={course.slug}
                             key={course.slug}
-                            name={t(`courses.${course.slug}`)}
+                            name={t(`courses.${course.slug}.title`)}
                             language={course.language}
                             color={course.color}
                             difficulty={course.difficulty}

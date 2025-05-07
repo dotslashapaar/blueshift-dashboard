@@ -1,4 +1,8 @@
 {
+  "locales_native_name": {
+    "en": "English",
+    "zh-hant": "繁體中文"
+  },
   "header": {
     "lessons": "Lessons",
     "courses": "Courses",
@@ -7,11 +11,42 @@
     "connect_wallet": "Connect Wallet"
   },
   "courses": {
-    "anchor-vault": "Vault",
-    "anchor-escrow": "Escrow",
-    "pinocchio-vault": "Pinocchio Vault",
-    "quantum-vault": "Quantum Vault",
-    "your-first-spl-token": "Your First SPL Token"
+    "anchor-vault": {
+      "title": "Vault",
+      "lessons": {
+        "lesson": "Vault"
+      }
+    },
+    "anchor-escrow": {
+      "title": "Escrow",
+      "lessons": {
+        "lesson": " Escrow"
+      }
+    },
+    "pinocchio-vault": {
+      "title": "Pinocchio Vault",
+      "lessons": {
+        "lesson": " Pinocchio Vault"
+      }
+    },
+    "quantum-vault": {
+      "title": "Quantum Vault",
+      "lessons": {
+        "introduction-to-quantum-vault": " Quantum Vault"
+      }
+    },
+    "your-first-spl-token": {
+      "title": "Your First SPL Token",
+      "lessons": {
+        "understanding-spl-tokens": " Your First SPL Token"
+      }
+    }
+  },
+  "course_levels": {
+    "1": "Beginner",
+    "2": "Intermediate",
+    "3": "Advanced",
+    "4": "Expert"
   },
   "lessons": {
     "title": "Select a course to get started",
@@ -31,12 +66,18 @@
     "continue": "Continue",
     "completed": "Lessons Completed",
     "all_completed": "All Lessons Completed",
-    "take_challenge": "Take Challenge"
+    "take_challenge": "Take Challenge",
+    "challenge_completed": "Challenge Completed",
+    "challenge_incomplete": "Challenge Incomplete",
+    "take_challenge_cta": "Ready to take the challenge?",
+    "skip_lesson_divider_title": "Or skip to next lesson",
+    "skip_lesson": "Skip Lesson"
   },
   "ui": {
     "search_placeholder": "Search by name, language, or level...",
-    "search_language__filter_label": "All Languages",
-    "search_language_filter__all_languages": "All"
+    "search_language_filter__label": "All Languages",
+    "search_language_filter__all_languages": "All",
+    "search_language_filter__selected_languages": "Languages"
   },
   "languages": {
     "anchor": "Anchor",
@@ -54,7 +95,15 @@
     "empty_description": "Try changing your filters to see rewards here.",
     "locked_description": "Complete Challenge to Unlock",
     "claimed_description": "NFT Is Available in your Wallet",
-    "view_nft": "View NFT"
+    "view_nft": "View NFT",
+    "filter__label": "All Statuses",
+    "filter__all_statuses": "All",
+    "filter__selected_statuses": "Statuses"
+  },
+  "reward_statuses": {
+    "Locked": "Locked",
+    "Unlocked": "Unlocked",
+    "Claimed": "Claimed"
   },
   "shift_goal": {
     "title": "Setup Your Shift Goal",

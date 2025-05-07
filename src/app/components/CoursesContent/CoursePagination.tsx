@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { anticipate, motion } from "motion/react";
 import classNames from "classnames";
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ export default function CoursePagination({
   className,
   courseSlug,
 }: CoursePaginationProps) {
+  const t = useTranslations();
   const { setCourseProgress, courseStatus } = usePersistentStore();
 
   const router = useRouter();
@@ -81,7 +83,7 @@ export default function CoursePagination({
         </button>
       </div>
       <div className="flex-col hidden xl:flex gap-y-4 pl-0">
-        <span className="font-mono text-sm pl-1 text-secondary">Lessons</span>
+        <span className="font-mono text-sm pl-1 text-secondary">{t("lessons.lessons")}</span>
         <div className="flex flex-col gap-y-3 pl-0">
           {lessons.map((lesson, index) => (
             <Link
@@ -112,7 +114,7 @@ export default function CoursePagination({
                     index === currentLesson - 1 && "!text-primary"
                   )}
                 >
-                  {lesson.title}
+                  {t(`courses.${courseSlug}.lessons.${lesson.slug}`)}
                 </span>
               </div>
               <div className="flex items-center gap-x-2 pl-10">
@@ -136,8 +138,8 @@ export default function CoursePagination({
                   )}
                 >
                   {courseStatus[courseSlug] !== "Locked"
-                    ? "Challenge Complete"
-                    : "Challenge Incomplete"}
+                    ? t("lessons.challenge_completed")
+                    : t("lessons.challenge_incomplete")}
                 </span>
               </div>
             </Link>

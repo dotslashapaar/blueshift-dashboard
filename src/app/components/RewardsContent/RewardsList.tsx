@@ -60,7 +60,7 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
                     name={course.language}
                   />
                   <span className="text-lg leading-none font-medium text-secondary">
-                    {t(`courses.${course.slug}`)}
+                    {t(`courses.${course.slug}.title`)}
                   </span>
                 </div>
                 <div

@@ -49,7 +49,7 @@ interface PersistentStore {
   clearLanguages: () => void;
 
   // Rewards
-  selectedRewardStatus: RewardsStatus[];
+  selectedRewardStatus: ReadonlyArray<RewardsStatus>;
   toggleRewardStatus: (status: RewardsStatus) => void;
   clearRewardStatus: () => void;
 
@@ -93,7 +93,7 @@ export const usePersistentStore = create<PersistentStore>()(
       clearLanguages: () => set({ selectedLanguages: [] }),
 
       // Rewards
-      selectedRewardStatus: Object.keys(rewardsStatus) as RewardsStatus[],
+      selectedRewardStatus: rewardsStatus,
       toggleRewardStatus: (status) =>
         set((state) => ({
           selectedRewardStatus: state.selectedRewardStatus.includes(status)

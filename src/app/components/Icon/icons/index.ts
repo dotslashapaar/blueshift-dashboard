@@ -31,6 +31,7 @@ import { UploadIcon } from "./Upload";
 import { WalletIcon } from "./Wallet";
 import { WarningIcon } from "./Warning";
 import { XIcon } from "./X";
+import { GlobeIcon } from "./Globe";
 
 export const IconComponents = {
   Anchor: AnchorIcon,
@@ -46,6 +47,7 @@ export const IconComponents = {
   Flag: FlagIcon,
   Flame: FlameIcon,
   Github: GithubIcon,
+  Globe: GlobeIcon,
   GridView: GridViewIcon,
   Lessons: LessonsIcon,
   Link: LinkIcon,

@@ -30,11 +30,7 @@ export const courseStatus = {
   Challenge_Completed: "Challenge_Completed",
 } as const;
 
-export const rewardsStatus = {
-  Locked: "Locked",
-  Unlocked: "Unlocked",
-  Claimed: "Claimed",
-} as const;
+export const rewardsStatus = ["Locked", "Unlocked", "Claimed"] as const;
 
 export type challengeMetadata = {
   apiPath: string;
@@ -53,9 +49,8 @@ export type CourseMetadata = {
   color: string;
   difficulty: CourseDifficulty;
   isFeatured: boolean;
-  status?: RewardsStatus;
   lessons: LessonMetadata[];
-  challenge?: challengeMetadata;
+  challenge: challengeMetadata;
 };
 
 export type LessonMetadata = {
@@ -64,7 +59,7 @@ export type LessonMetadata = {
   slug: string;
 };
 
-export type RewardsStatus = keyof typeof rewardsStatus;
+export type RewardsStatus = (typeof rewardsStatus)[number];
 export type CourseLanguages = keyof typeof courseLanguages;
 export type CourseDifficulty = keyof typeof courseDifficulty;
 
@@ -73,7 +68,7 @@ export type CourseDifficulty = keyof typeof courseDifficulty;
  * @param courses
  */
 export function withCourseNumber(
-  courses: CourseMetadataWithoutLessonNumber[]
+  courses: CourseMetadataWithoutLessonNumber[],
 ): CourseMetadata[] {
   return courses.map((course) => ({
     ...course,

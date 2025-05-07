@@ -26,10 +26,10 @@ export default function CourseFilter({ className }: FiltersProps) {
   const allLanguages = Object.keys(courseLanguages) as CourseLanguages[];
   const displayText =
     selectedLanguages.length === allLanguages.length
-      ? t("ui.search_language__filter_label")
+      ? t("ui.search_language_filter__label")
       : selectedLanguages.length === 1
         ? selectedLanguages[0]
-        : `${selectedLanguages.length} Languages`;
+        : `${selectedLanguages.length} ${t("ui.search_language_filter__selected_languages")}`;
 
   const toggleAllLanguages = () => {
     if (selectedLanguages.length === allLanguages.length) {
