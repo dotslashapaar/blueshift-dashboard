@@ -81,7 +81,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             courseSlug={courseMetadata.slug}
             currentLesson={currentLessonIndex + 1}
             lessons={allLessons.map((lesson) => ({
-              title: lesson.title,
+              title: t(`courses.${courseMetadata.slug}.lessons.${lesson.slug}`),
               slug: lesson.slug,
             }))}
           />

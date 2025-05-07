@@ -75,7 +75,7 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
                   {course.lessons.map((lesson) => (
                     <CourseCard
                       key={lesson.slug}
-                      name={lesson.title}
+                      name={t(`courses.${course.slug}.lessons.${lesson.slug}`)}
                       language={course.language}
                       difficulty={course.difficulty}
                       status={courseStatus[course.slug]}
