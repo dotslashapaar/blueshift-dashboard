@@ -192,7 +192,7 @@
     "requirements_title": "Challenge",
     "upload_program_btn": "Upload Program",
     "num_tests_passed": "Tests Passed",
-    "test_result": {
+    "test_results": {
       "passed": "Passed",
       "failed": "Failed",
       "incomplete": "Incomplete"
