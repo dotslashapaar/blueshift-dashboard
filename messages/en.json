@@ -92,7 +92,13 @@
         "understanding-spl-tokens": " Your First SPL Token"
       },
       "challenge": {
-        "title": "Challenge: Minting an SPL Token"
+        "title": "Challenge: Minting an SPL Token",
+        "requirements": {
+          "create_mint": {
+            "title": "Challenge 1: Creating an SPL mint",
+            "description": "Your code should create an SPL mint with 6 decimal places."
+          }
+        }
       }
     }
   },
@@ -191,6 +197,8 @@
   "challenge_page": {
     "requirements_title": "Challenge",
     "upload_program_btn": "Upload Program",
+    "run_program_btn": "Run Program",
+    "running_program_btn": "Running...",
     "num_tests_passed": "Tests Passed",
     "test_results": {
       "passed": "Passed",

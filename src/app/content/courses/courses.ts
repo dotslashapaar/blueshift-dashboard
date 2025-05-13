@@ -77,8 +77,10 @@ export const courses: CourseMetadata[] = withCourseNumber([
       { slug: "understanding-spl-tokens" },
     ],
     challenge: {
-      apiPath: "/v1/verify/spl-token/mint",
-      requirements: [],
+      apiPath: "/v1/verify/typescript/create-mint",
+      requirements: [
+        { instructionKey: "create_mint" },
+      ],
     }
   },
 ]);

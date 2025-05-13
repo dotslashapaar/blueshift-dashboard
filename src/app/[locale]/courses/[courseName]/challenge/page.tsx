@@ -5,7 +5,9 @@ import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
 import Icon from "@/app/components/Icon/Icon";
 import { courseColors } from "@/app/utils/course";
 import { getCourse } from "@/app/utils/mdx";
-import ChallengeContent from "@/app/components/Challenges/ChallengesContent";
+import ProgramChallengesContent from "@/app/components/Challenges/ProgramChallengesContent";
+import ClientChallengesContent from "@/app/components/Challenges/ClientChallengesContent";
+import { EsbuildProvider } from "@/contexts/EsbuildContext";
 
 interface ChallengePageProps {
   params: Promise<{
@@ -51,7 +53,13 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       </div>
       <Divider />
 
-      <ChallengeContent currentCourse={courseMetadata} />
+      {courseMetadata.language === "Typescript" ? (
+        <EsbuildProvider>
+          <ClientChallengesContent currentCourse={courseMetadata} />
+        </EsbuildProvider>
+      ) : (
+        <ProgramChallengesContent currentCourse={courseMetadata} />
+      )}
     </div>
   );
 }

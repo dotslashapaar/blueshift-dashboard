@@ -92,7 +92,13 @@
         "understanding-spl-tokens": "你的第一枚SPL幣"
       },
       "challenge": {
-        "title": "Challenge: Minting an SPL Token"
+        "title": "Challenge: Minting an SPL Token",
+        "requirements": {
+          "create_mint": {
+            "title": "Challenge 1: Creating an SPL mint",
+            "description": "Your code should create an SPL mint with 6 decimal places."
+          }
+        }
       }
     }
   },
@@ -191,6 +197,8 @@
   "challenge_page": {
     "requirements_title": "挑戰",
     "upload_program_btn": "上載程式",
+    "run_program_btn": "執行程式",
+    "running_program_btn": "執行中...",
     "num_tests_passed": "測試通過",
     "test_results": {
       "passed": "通過",

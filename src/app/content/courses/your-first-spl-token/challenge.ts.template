@@ -1,0 +1,26 @@
+import { Keypair, Connection } from "@solana/web3.js";
+import { createMint } from "@solana/spl-token";
+import bs58 from "bs58";
+
+// Import our keypair from the wallet file
+const keypair = Keypair.fromSecretKey(
+  bs58.decode(process.env.SECRET)
+);
+
+//Create a Solana devnet connection
+const connection = new Connection(
+  process.env.RPC_ENDPOINT,
+  "confirmed"
+);
+
+// Entry point of your TypeScript code (we will call this)
+async function main() {
+  try {
+    // Start here
+    // const mint = ???
+  
+    console.log(`Mint ID: ${mint.toBase58()}`);
+  } catch (error) {
+    console.error(`Oops, something went wrong: ${error}`);
+  }
+}
