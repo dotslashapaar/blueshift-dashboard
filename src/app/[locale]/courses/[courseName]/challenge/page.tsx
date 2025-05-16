@@ -7,7 +7,6 @@ import { courseColors } from "@/app/utils/course";
 import { getCourse } from "@/app/utils/mdx";
 import ProgramChallengesContent from "@/app/components/Challenges/ProgramChallengesContent";
 import ClientChallengesContent from "@/app/components/Challenges/ClientChallengesContent";
-import { EsbuildProvider } from "@/contexts/EsbuildContext";
 
 interface ChallengePageProps {
   params: Promise<{
@@ -54,9 +53,7 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       <Divider />
 
       {courseMetadata.language === "Typescript" ? (
-        <EsbuildProvider>
-          <ClientChallengesContent currentCourse={courseMetadata} />
-        </EsbuildProvider>
+        <ClientChallengesContent currentCourse={courseMetadata} />
       ) : (
         <ProgramChallengesContent currentCourse={courseMetadata} />
       )}

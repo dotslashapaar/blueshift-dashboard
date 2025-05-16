@@ -2,9 +2,7 @@ interface ConsoleMessage {
   type:
     | "LOG"
     | "ERROR"
-    | "WARN"
     | "INFO"
-    | "DEBUG"
     | "EXECUTION_ERROR"
     | "WORKER_ERROR"
     | "READY";
@@ -14,7 +12,6 @@ interface ConsoleMessage {
 // Store original console methods at the top level of the worker scope
 const originalConsoleLog = self.console.log;
 const originalConsoleError = self.console.error;
-const originalConsoleWarn = self.console.warn;
 const originalConsoleInfo = self.console.info;
 
 self.onmessage = (event: MessageEvent<string>) => {
@@ -28,10 +25,6 @@ self.onmessage = (event: MessageEvent<string>) => {
     self.console.error = (...args: any[]) => {
       self.postMessage({ type: "ERROR", payload: args } as ConsoleMessage);
       originalConsoleError.apply(self.console, args);
-    };
-    self.console.warn = (...args: any[]) => {
-      self.postMessage({ type: "WARN", payload: args } as ConsoleMessage);
-      originalConsoleWarn.apply(self.console, args);
     };
     self.console.info = (...args: any[]) => {
       self.postMessage({ type: "INFO", payload: args } as ConsoleMessage);

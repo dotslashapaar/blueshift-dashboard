@@ -1,6 +1,8 @@
+"use client";
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createCdnPlugin } from "@/lib/challenges/esbuild-package-plugin";
-import { useEsbuild } from "@/contexts/EsbuildContext";
+import { useEsbuild } from "@/hooks/useEsbuild";
 
 export interface LogMessage {
   type:
@@ -23,8 +25,11 @@ export interface UseEsbuildRunnerProps {
 }
 
 export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
-  const { esbuild, esBuildInitializationState, esbuildInitializationError } =
-    useEsbuild();
+  const {
+    esbuild,
+    initState: esBuildInitializationState,
+    initError: esbuildInitializationError,
+  } = useEsbuild();
 
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<LogMessage[]>([]);
@@ -41,10 +46,10 @@ export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
   useEffect(() => {
     if (esBuildInitializationState === "initializing") {
       addLog("SYSTEM", "Build system initialization in progress...");
-    } else if (esBuildInitializationState === "error") {
+    } else if (esBuildInitializationState === "failed") {
       addLog(
         "SYSTEM",
-        `Build system initialization failed: ${esbuildInitializationError}`,
+        `Build system initialization failed: ${esbuildInitializationError?.message}`,
       );
     } else if (esBuildInitializationState === "initialized") {
       addLog("SYSTEM", "Build system is initialized.");
@@ -63,10 +68,10 @@ export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
           "SYSTEM",
           `Run attempt failed: Build system is still initializing. Please wait.`,
         );
-      } else if (esBuildInitializationState === "error") {
+      } else if (esBuildInitializationState === "failed") {
         addLog(
           "SYSTEM",
-          `Run attempt failed: Build system initialization error: ${esbuildInitializationError}`,
+          `Run attempt failed: Build system initialization error: ${esbuildInitializationError?.message}`,
         );
       }
 
@@ -181,17 +186,17 @@ self.fetch = async function(...args) {
   console.debug('[Patched Fetch] Processing fetch call. URL:', url);
 
   if (typeof url === 'string' && url === rpcEndpointForWorker) {
-    console.log('[Patched Fetch] Intercepted call to RPC_ENDPOINT:', url);
+    console.debug('[Patched Fetch] Intercepted call to RPC_ENDPOINT:', url);
     if (options && options.body && typeof options.body === 'string') {
       try {
         requestBody = JSON.parse(options.body); // Store parsed body
         if (requestBody && requestBody.method) {
           rpcMethod = requestBody.method;
-          console.log('[Patched Fetch] RPC Method:', rpcMethod);
-          console.log('[Patched Fetch] RPC Body:', requestBody);
+          console.debug('[Patched Fetch] RPC Method:', rpcMethod);
+          console.debug('[Patched Fetch] RPC Body:', requestBody);
 
           // Send message to main thread
-          console.log('[Patched Fetch] Attempting to post INTERCEPTED_RPC_CALL message to main thread.');
+          console.debug('[Patched Fetch] Attempting to post INTERCEPTED_RPC_CALL message to main thread.');
 
           self.postMessage({
             type: 'INTERCEPTED_RPC_CALL',
@@ -207,7 +212,7 @@ self.fetch = async function(...args) {
               body: requestBody 
             }
           });
-          console.log('[Patched Fetch] Successfully posted INTERCEPTED_RPC_CALL message.');
+          console.debug('[Patched Fetch] Successfully posted INTERCEPTED_RPC_CALL message.');
         }
       } catch (e) {
         console.warn('[Patched Fetch] Could not parse request body:', e);
@@ -219,11 +224,11 @@ self.fetch = async function(...args) {
 
   if (typeof url === 'string' && url === rpcEndpointForWorker) {
     return promise.then(async (response) => {
-      console.log('[Patched Fetch] Response from RPC_ENDPOINT for method ', rpcMethod, 'status:', response.status);
+      console.debug('[Patched Fetch] Response from RPC_ENDPOINT for method ', rpcMethod, 'status:', response.status);
       const clonedResponse = response.clone();
       try {
         const responseBody = await clonedResponse.json();
-        console.log('[Patched Fetch] Response Body for method ', rpcMethod, ':', responseBody);
+        console.debug('[Patched Fetch] Response Body for method ', rpcMethod, ':', responseBody);
       } catch (e) {
         console.warn('[Patched Fetch] Could not parse response body for method ', rpcMethod, ':', e);
       }
