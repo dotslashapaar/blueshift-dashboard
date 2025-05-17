@@ -54,12 +54,19 @@ export default async function LessonPage({ params }: LessonPageProps) {
           background: `linear-gradient(180deg, rgb(${courseColors[courseMetadata.language]},0.05) 0%, transparent 100%)`,
         }}
       >
-        <div className="px-4 py-14 md:px-8 lg:px-14 max-w-app w-full mx-auto flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
+        <div className="px-4 py-14 pb-20 md:px-8 lg:px-14 max-w-app w-full mx-auto flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
           <div className="flex flex-col gap-y-2">
             <div className="flex items-center gap-x-2">
-              <Icon name={courseMetadata.language} />
+              <div
+                className="w-[24px] h-[24px] rounded-sm flex items-center justify-center"
+                style={{
+                  backgroundColor: `rgb(${courseColors[courseMetadata.language]},0.10)`,
+                }}
+              >
+                <Icon name={courseMetadata.language} size={16 as 14} />
+              </div>
               <span
-                className="font-medium text-xl font-mono relative top-0.25"
+                className="font-medium text-lg font-mono relative top-0.25"
                 style={{
                   color: `rgb(${courseColors[courseMetadata.language]})`,
                 }}
@@ -67,7 +74,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 {courseMetadata.language}
               </span>
             </div>
-            <span className="sr-only">{t(`courses.${courseMetadata.slug}.title`)}</span>
+            <span className="sr-only">
+              {t(`courses.${courseMetadata.slug}.title`)}
+            </span>
             <LessonTitle title={t(`courses.${courseMetadata.slug}.title`)} />
           </div>
         </div>{" "}
@@ -125,7 +134,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
                         Next Lesson
                       </span>
                       <span className="font-medium text-primary">
-                        {t(`courses.${courseMetadata.slug}.lessons.${nextLessonSlug}`)}
+                        {t(
+                          `courses.${courseMetadata.slug}.lessons.${nextLessonSlug}`
+                        )}
                       </span>
                     </div>
                     <Icon

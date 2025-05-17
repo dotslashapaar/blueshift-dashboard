@@ -117,9 +117,11 @@ export default function ChallengesContent({
                 transition: { duration: 0.4, ease: anticipate },
               }}
               exit={{ opacity: 0 }}
-              className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24"
+              className="px-4 py-14 relative max-w-app md:px-8 lg:px-14 mx-auto w-full min-h-[calc(100dvh-250px)] grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24"
             >
+              <div className="hidden lg:block absolute top-0 right-0 w-1/2 h-full border-l border-border bg-gradient-to-b from-background-card/50 to-transparent"></div>
               <ChallengeRequirements course={currentCourse} />
+
               <ChallengeTable
                 isLoading={isLoading}
                 error={error}

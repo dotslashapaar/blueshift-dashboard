@@ -26,7 +26,7 @@ export default function DifficultyBadge({
     >
       <DifficultyIcon difficulty={difficulty} />
       <span
-        className="text-sm leading-none capitalize font-medium"
+        className="text-sm leading-none capitalize font-medium font-mono pt-[2px]"
         style={{ color: difficultyColors[difficulty] }}
       >
         {t(`course_levels.${difficulty}`)}

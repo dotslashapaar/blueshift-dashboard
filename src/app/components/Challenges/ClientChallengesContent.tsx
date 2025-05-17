@@ -46,11 +46,11 @@ export default function ChallengesContent({
 
   // Example: Intercept 'sendTransaction' and mock its response
   const handleRpcCallForDecision = async (
-    rpcData: InterceptedRpcCallData,
+    rpcData: InterceptedRpcCallData
   ): Promise<FetchDecision> => {
     console.log(
       "[ClientChallengesContent] Intercepted RPC Call, Awaiting Decision:",
-      rpcData,
+      rpcData
     );
 
     if (rpcData.rpcMethod === "sendTransaction") {
@@ -62,14 +62,14 @@ export default function ChallengesContent({
         // even if we are about to mock the client-side response.
         // The verifier might operate independently of the client's view of the transaction result.
         console.log(
-          "[ClientChallengesContent] Uploading transaction for verification before mocking response.",
+          "[ClientChallengesContent] Uploading transaction for verification before mocking response."
         );
         // Not awaiting this intentionally, as we want to return the decision quickly.
         // The verification can happen in the background.
         uploadTransaction(base64EncodedTx).catch((err) => {
           console.error(
             "[ClientChallengesContent] Error uploading transaction during mock decision:",
-            err,
+            err
           );
         });
       }
@@ -78,7 +78,7 @@ export default function ChallengesContent({
       const mockSignature = bs58.encode(tx?.signature ?? []);
 
       console.debug(
-        `[ClientChallengesContent] Mocking successful response for sendTransaction. Signature: ${mockSignature}`,
+        `[ClientChallengesContent] Mocking successful response for sendTransaction. Signature: ${mockSignature}`
       );
 
       return {
@@ -142,7 +142,7 @@ export default function ChallengesContent({
      */
 
     console.debug(
-      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`,
+      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`
     );
 
     // For all other calls, or if rpcMethod is null, proceed as normal
@@ -164,7 +164,7 @@ export default function ChallengesContent({
   useEffect(() => {
     if (!apiBaseUrl) {
       console.error(
-        "API Base URL is not defined in the environment variables.",
+        "API Base URL is not defined in the environment variables."
       );
     }
   }, []);
@@ -181,7 +181,7 @@ export default function ChallengesContent({
       } catch (err) {
         console.error("Failed to load challenge template:", err);
         setEditorCode(
-          "// Failed to load challenge template. Please check console.",
+          "// Failed to load challenge template. Please check console."
         );
       }
     };
@@ -199,7 +199,7 @@ export default function ChallengesContent({
       (log) =>
         log.type === "SYSTEM" &&
         Array.isArray(log.payload) &&
-        log.payload[0] === "Execution complete.",
+        log.payload[0] === "Execution complete."
     );
 
     if (
@@ -314,26 +314,28 @@ export default function ChallengesContent({
                 transition: { duration: 0.4, ease: anticipate },
               }}
               exit={{ opacity: 0 }}
-              className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24"
+              className="px-4 py-14 pb-20 max-w-app grid grid-cols-1 md:px-8 lg:px-14 mx-auto w-full gap-y-12 lg:gap-x-24"
             >
-              <ClientChallengeRequirements
-                course={currentCourse}
-                currentCode={editorCode}
-                onCodeChange={setEditorCode}
-              />
-              <ClientChallengeTable
-                onRunCodeClick={handleRunCode}
-                requirements={requirements}
-                completedRequirementsCount={completedRequirementsCount}
-                allIncomplete={allIncomplete}
-                isLoading={isVerificationLoading}
-                error={verificationHookError}
-                verificationData={verificationData}
-                courseSlug={currentCourse.slug}
-                isCodeRunning={isCodeRunning}
-                runnerLogs={runnerLogs}
-                isEsbuildReady={esBuildInitializationState === "initialized"}
-              />
+              <div className="flex flex-col relative w-full h-full">
+                <ClientChallengeRequirements
+                  course={currentCourse}
+                  currentCode={editorCode}
+                  onCodeChange={setEditorCode}
+                />
+                <ClientChallengeTable
+                  onRunCodeClick={handleRunCode}
+                  requirements={requirements}
+                  completedRequirementsCount={completedRequirementsCount}
+                  allIncomplete={allIncomplete}
+                  isLoading={isVerificationLoading}
+                  error={verificationHookError}
+                  verificationData={verificationData}
+                  courseSlug={currentCourse.slug}
+                  isCodeRunning={isCodeRunning}
+                  runnerLogs={runnerLogs}
+                  isEsbuildReady={esBuildInitializationState === "initialized"}
+                />
+              </div>
             </motion.div>
           )}
         </>

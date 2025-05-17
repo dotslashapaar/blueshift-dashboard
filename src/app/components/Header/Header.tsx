@@ -10,6 +10,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useOnClickOutside } from "usehooks-ts";
 import { useRouter, usePathname, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import Logo from "../Logo/Logo";
 
 export default function HeaderContent() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,10 +25,13 @@ export default function HeaderContent() {
 
   const isRootOrCourses =
     pathname === "/" ||
-    pathname.split("/").length <= 2 ||
-    pathname.startsWith("/courses");
+    pathname === `/${currentLocale}` ||
+    pathname.startsWith("/courses") ||
+    pathname.startsWith(`/${currentLocale}/courses`);
 
-  useOnClickOutside(languageDropdownRef as RefObject<HTMLDivElement>, () => setIsLanguageDropdownOpen(false));
+  useOnClickOutside(languageDropdownRef as RefObject<HTMLDivElement>, () =>
+    setIsLanguageDropdownOpen(false)
+  );
 
   const handleLanguageChange = (newLocale: string) => {
     router.replace(pathname, { locale: newLocale });
@@ -38,12 +42,11 @@ export default function HeaderContent() {
     <div className="fixed bg-background/80 backdrop-blur-lg z-40 w-full border-b border-b-border">
       <div className="flex w-full items-center justify-between max-w-app mx-auto py-3 px-4 md:px-8">
         <div className="flex gap-x-16 items-center">
-          <Link href="/">
-            <img
-              src="/branding/logo-primary.svg"
-              className="h-4"
-              alt="Blueshift Logo Primary"
-            ></img>
+          <Link href="/" className="md:hidden flex">
+            <Logo showText={false} height={18} />
+          </Link>
+          <Link href="/" className="hidden md:flex">
+            <Logo showText={true} height={18} />
           </Link>
 
           {/* Desktop Header */}
@@ -118,10 +121,7 @@ export default function HeaderContent() {
 
         <div className="flex gap-x-2 md:gap-x-3 items-center">
           {/* Language Switcher */}
-          <div 
-            className="relative" 
-            ref={languageDropdownRef}
-          >
+          <div className="relative" ref={languageDropdownRef}>
             <Button
               variant="tertiary"
               icon="Globe"
@@ -143,13 +143,18 @@ export default function HeaderContent() {
                       onClick={() => handleLanguageChange(locale)}
                       className={classNames(
                         "flex items-center relative gap-x-4 py-3 px-4 rounded-lg transition hover:bg-background-card-foreground",
-                        locale === currentLocale && "bg-background-card-foreground"
+                        locale === currentLocale &&
+                          "bg-background-card-foreground"
                       )}
                     >
-                      <span className={classNames(
-                        "text-sm font-medium leading-none",
-                        locale === currentLocale ? "text-primary" : "text-secondary"
-                      )}>
+                      <span
+                        className={classNames(
+                          "text-sm font-medium leading-none",
+                          locale === currentLocale
+                            ? "text-primary"
+                            : "text-secondary"
+                        )}
+                      >
                         {t(`locales_native_name.${locale}`)}
                       </span>
                     </button>

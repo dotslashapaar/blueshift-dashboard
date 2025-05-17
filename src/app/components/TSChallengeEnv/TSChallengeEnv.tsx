@@ -5,10 +5,12 @@ import "./style.css";
 import Editor from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useMonaco } from "@/hooks/useMonaco";
+import Icon from "../Icon/Icon";
 
 interface TSChallengeEnvProps {
   initialCode: string;
   onCodeChange: (code: string) => void;
+  challengeTitle: string;
 }
 
 const processEnvTypes = `
@@ -26,6 +28,7 @@ declare var process: {
 export default function TSChallengeEnv({
   initialCode,
   onCodeChange,
+  challengeTitle,
 }: TSChallengeEnvProps) {
   const editorRefInternal = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monaco = useMonaco();
@@ -35,14 +38,14 @@ export default function TSChallengeEnv({
 
     monaco.languages.typescript.typescriptDefaults.addExtraLib(
       processEnvTypes,
-      "file:///node_modules/@types/node/index.d.ts",
+      "file:///node_modules/@types/node/index.d.ts"
     );
 
     const addMonacoTypesForModule = async (
       moduleName: string,
       dtsImportPromise: Promise<{ default: string }>,
       monacoTypesPath: string,
-      monacoModulePath: string,
+      monacoModulePath: string
     ) => {
       try {
         const dtsModule = await dtsImportPromise;
@@ -50,12 +53,12 @@ export default function TSChallengeEnv({
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
           dtsContent,
-          monacoTypesPath,
+          monacoTypesPath
         );
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
           `declare module '${moduleName}' { export * from '${monacoTypesPath}'; export { default } from '${monacoTypesPath}'; }`,
-          monacoModulePath,
+          monacoModulePath
         );
       } catch (error) {
         console.error(`Error adding ${moduleName} types:`, error);
@@ -66,21 +69,21 @@ export default function TSChallengeEnv({
       "@solana/web3.js",
       import("@solana/web3.js/lib/index.d.ts?raw"),
       "file:///node_modules/@types/@solana/web3.js/index.d.ts",
-      "file:///node_modules/@solana/web3.js/index.d.ts",
+      "file:///node_modules/@solana/web3.js/index.d.ts"
     );
 
     addMonacoTypesForModule(
       "@solana/spl-token",
       import("./types/spl-token.d.ts?raw"),
       "file:///node_modules/@types/@solana/spl-token/index.d.ts",
-      "file:///node_modules/@solana/spl-token/index.d.ts",
+      "file:///node_modules/@solana/spl-token/index.d.ts"
     );
 
     addMonacoTypesForModule(
       "bs58",
       import("./types/bs58.d.ts?raw"),
       "file:///node_modules/@types/bs58/index.d.ts",
-      "file:///node_modules/bs58/index.d.ts",
+      "file:///node_modules/bs58/index.d.ts"
     );
 
     monaco.editor.defineTheme("dracula", {
@@ -88,7 +91,7 @@ export default function TSChallengeEnv({
       inherit: true,
       rules: [
         {
-          background: "282a36",
+          background: "1A1E26",
           token: "",
         },
         {
@@ -286,10 +289,10 @@ export default function TSChallengeEnv({
         },
       ],
       colors: {
+        "editor.background": "#1A1E2650",
         "editor.foreground": "#f8f8f2",
-        "editor.background": "#282a36",
-        "editor.selectionBackground": "#44475a",
-        "editor.lineHighlightBackground": "#44475a",
+        "editor.selectionBackground": "#585E6C",
+        "editor.lineHighlightBackground": "#1A1E26",
         "editorCursor.foreground": "#f8f8f0",
         "editorWhitespace.foreground": "#3B3A32",
         "editorIndentGuide.activeBackground": "#9D550FB0",
@@ -301,7 +304,7 @@ export default function TSChallengeEnv({
   }, [monaco, initialCode]);
 
   const handleEditorDidMount = (
-    editorInstance: editor.IStandaloneCodeEditor,
+    editorInstance: editor.IStandaloneCodeEditor
   ) => {
     editorRefInternal.current = editorInstance;
     editorInstance.onDidChangeModelContent(() => {
@@ -310,17 +313,32 @@ export default function TSChallengeEnv({
   };
 
   return (
-    <div className="flex flex-col h-full flex-grow">
-      <div id="editor-container">
+    <div className="flex flex-col h-full w-full">
+      <div className="w-full h-full flex flex-col rounded-t-xl lg:rounded-xl overflow-hidden max-h-[35dvh] lg:max-h-[65dvh] border border-border">
+        <div className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-xl flex items-center border-b border-border">
+          <div className="flex items-center gap-x-2">
+            <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
+            <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
+            <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
+          </div>
+          <div className="text-sm font-medium text-secondary absolute left-1/2 -translate-x-1/2 flex items-center gap-x-1.5">
+            <Icon name="Challenge" size={12} className="hidden sm:block" />
+            <span className="flex-shrink-0">{challengeTitle}</span>
+          </div>
+        </div>
         <Editor
           height="100%"
           width="100%"
+          className="bg-transparent"
           defaultLanguage="typescript"
           defaultValue={initialCode}
           options={{
             automaticLayout: true,
             minimap: {
-              enabled: true,
+              enabled: false,
+            },
+            stickyScroll: {
+              enabled: false,
             },
             wordWrap: "on", // Optional: for better readability of long lines
             renderLineHighlight: "all", // Highlight the current line

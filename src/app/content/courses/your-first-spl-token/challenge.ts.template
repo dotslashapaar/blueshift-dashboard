@@ -1,3 +1,7 @@
+// Challenge 1: Creating an SPL Mint
+
+// Your code should create an SPL mint with 6 decimal places.
+
 import { Keypair, Connection } from "@solana/web3.js";
 import { createMint } from "@solana/spl-token";
 import bs58 from "bs58";
