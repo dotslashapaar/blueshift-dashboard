@@ -16,6 +16,7 @@ import { LessonsIcon } from "./Lessons";
 import { LinkIcon } from "./Link";
 import { ListViewIcon } from "./ListView";
 import { LockedIcon } from "./Locked";
+import { PlayIcon } from "./Play";
 import { ProgressIcon } from "./Progress";
 import { RewardsIcon } from "./Rewards";
 import { RustIcon } from "./Rust";
@@ -53,6 +54,7 @@ export const IconComponents = {
   Link: LinkIcon,
   ListView: ListViewIcon,
   Locked: LockedIcon,
+  Play: PlayIcon,
   Progress: ProgressIcon,
   Rewards: RewardsIcon,
   Rust: RustIcon,

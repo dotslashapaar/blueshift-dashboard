@@ -395,7 +395,7 @@ export default function ChallengeTable({
         <div className="order-1 lg:order-2 flex items-center justify-between gap-x-8 lg:pt-8 lg:border-t lg:border-border">
           <Button
             variant="primary"
-            icon={"Upload"}
+            icon={"Play"}
             size="md"
             label={
               isCodeRunning
