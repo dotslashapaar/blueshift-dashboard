@@ -11,9 +11,15 @@ import { Link } from "@/i18n/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { anticipate } from "motion";
 import ClientChallengeRequirements from "./ClientChallengeRequirements";
-import { useEsbuildRunner } from "@/hooks/useEsbuildRunner";
+import {
+  useEsbuildRunner,
+  FetchDecision,
+  InterceptedRpcCallData,
+} from "@/hooks/useEsbuildRunner";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 import { useChallengeVerifier } from "@/hooks/useChallengeVerifier";
+import { Transaction } from "@solana/web3.js";
+import bs58 from "bs58";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -38,17 +44,109 @@ export default function ChallengesContent({
     setVerificationFailureMessageLogged,
   ] = useState(false);
 
-  const handleInterceptedRpcCall = async (rpcData: any) => {
-    console.log("Intercepted RPC Call in ClientChallengesContent:", rpcData);
+  // Example: Intercept 'sendTransaction' and mock its response
+  const handleRpcCallForDecision = async (
+    rpcData: InterceptedRpcCallData,
+  ): Promise<FetchDecision> => {
+    console.log(
+      "[ClientChallengesContent] Intercepted RPC Call, Awaiting Decision:",
+      rpcData,
+    );
 
     if (rpcData.rpcMethod === "sendTransaction") {
-      setWasSendTransactionIntercepted(true);
-      const base64EncodedTx = rpcData.body.params[0];
+      setWasSendTransactionIntercepted(true); // Keep this if useful for UI feedback
+      const base64EncodedTx = rpcData.body?.params?.[0];
 
-      if (uploadTransaction) {
-        await uploadTransaction(base64EncodedTx);
+      if (uploadTransaction && base64EncodedTx) {
+        // We can still call uploadTransaction for verification purposes,
+        // even if we are about to mock the client-side response.
+        // The verifier might operate independently of the client's view of the transaction result.
+        console.log(
+          "[ClientChallengesContent] Uploading transaction for verification before mocking response.",
+        );
+        // Not awaiting this intentionally, as we want to return the decision quickly.
+        // The verification can happen in the background.
+        uploadTransaction(base64EncodedTx).catch((err) => {
+          console.error(
+            "[ClientChallengesContent] Error uploading transaction during mock decision:",
+            err,
+          );
+        });
       }
+
+      const tx = Transaction.from(Buffer.from(base64EncodedTx, "base64"));
+      const mockSignature = bs58.encode(tx?.signature ?? []);
+
+      console.debug(
+        `[ClientChallengesContent] Mocking successful response for sendTransaction. Signature: ${mockSignature}`,
+      );
+
+      return {
+        decision: "MOCK_SUCCESS",
+        responseData: {
+          body: {
+            jsonrpc: "2.0",
+            result: mockSignature, // The fake transaction signature
+            id: rpcData.body?.id || "mocked-id", // Try to use original id or a placeholder
+          },
+          status: 200,
+          statusText: "OK",
+          headers: { "Content-Type": "application/json" },
+        },
+      };
     }
+    /*
+    else if (rpcData.rpcMethod === "getSignatureStatuses") {
+      // If the intercepted call is for getSignatureStatuses, we can mock a response
+      // to indicate that the transaction was confirmed.
+      const mockResponse = {
+        jsonrpc: "2.0",
+        result: {
+          context: { slot: 123456 },
+          value: [
+            {
+              "slot": 123456,
+              "confirmations": 10,
+              "err": null,
+              "status": {
+                "Ok": null
+              },
+              "confirmationStatus": "processed"
+            },
+            null
+
+            // {
+            //   confirmationStatus: "processed",
+            //   err: null,
+            //   slot: 123456,
+            // },
+          ],
+        },
+        id: rpcData.body?.id || "mocked-id",
+      };
+
+      console.debug(
+        `[ClientChallengesContent] Mocking successful response for getSignatureStatuses.`,
+      );
+
+      return {
+        decision: "MOCK_SUCCESS",
+        responseData: {
+          body: mockResponse,
+          status: 200,
+          statusText: "OK",
+          headers: { "Content-Type": "application/json" },
+        },
+      };
+    }
+     */
+
+    console.debug(
+      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`,
+    );
+
+    // For all other calls, or if rpcMethod is null, proceed as normal
+    return { decision: "PROCEED" };
   };
 
   const {
@@ -59,7 +157,9 @@ export default function ChallengesContent({
     addLog,
     runCode,
     clearLogs: clearRunnerLogs,
-  } = useEsbuildRunner({ onRpcCallIntercepted: handleInterceptedRpcCall });
+  } = useEsbuildRunner({
+    onRpcCallInterceptedForDecision: handleRpcCallForDecision,
+  });
 
   useEffect(() => {
     if (!apiBaseUrl) {

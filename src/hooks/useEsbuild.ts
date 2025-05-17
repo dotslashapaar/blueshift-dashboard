@@ -23,7 +23,6 @@ let state: {
 
 function notifyListeners() {
   for (const listener of listeners) {
-    console.log("notifying listener");
     listener();
   }
 }
@@ -33,7 +32,6 @@ function updateInitState(newState: EsbuildInitializationState) {
     ...state,
     initState: newState,
   };
-  console.log("esbuild init state:", newState);
   notifyListeners();
 }
 
@@ -44,7 +42,6 @@ if (typeof window !== "undefined") {
       worker: true,
     })
     .then(() => {
-      console.log("DONE")
       updateInitState("initialized");
     })
     .catch((error) => {

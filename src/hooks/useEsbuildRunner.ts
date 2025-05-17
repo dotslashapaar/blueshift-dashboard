@@ -14,14 +14,41 @@ export interface LogMessage {
     | "EXECUTION_ERROR"
     | "WORKER_ERROR"
     | "SYSTEM"
-    | "INTERCEPTED_RPC_CALL"
     | "VERIFICATION_ERROR";
   payload: any[];
   timestamp: Date;
 }
 
+export interface FetchDecision {
+  decision: "PROCEED" | "MOCK_SUCCESS" | "MOCK_ERROR";
+  responseData?: {
+    body: any;
+    status?: number;
+    statusText?: string;
+    headers?: Record<string, string>;
+  };
+  errorData?: {
+    message: string;
+  };
+}
+
+export interface InterceptedRpcCallOptions {
+  method?: string;
+  headers?: Record<string, string>;
+}
+
+export interface InterceptedRpcCallData {
+  requestId: string;
+  url: string;
+  options: InterceptedRpcCallOptions;
+  rpcMethod: string | null;
+  body: any | null; // Parsed body
+}
+
 export interface UseEsbuildRunnerProps {
-  onRpcCallIntercepted?: (rpcCallData: any) => void;
+  onRpcCallInterceptedForDecision?: (
+    rpcCallData: InterceptedRpcCallData,
+  ) => Promise<FetchDecision>;
 }
 
 export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
@@ -177,6 +204,42 @@ const rpcEndpointForWorker = typeof process !== 'undefined' && process.env && pr
 const originalFetch = self.fetch;
 console.debug('[FetchPatcher] Original self.fetch stored. Targeting endpoint:', rpcEndpointForWorker);
 
+let fetchRequestIdCounter = 0;
+const pendingFetches = new Map();
+
+self.addEventListener('message', (event) => {
+  const { type, payload } = event.data;
+  if (type === 'FETCH_DECISION_RESPONSE') {
+    const { requestId, decision, responseData, errorData } = payload;
+    const pending = pendingFetches.get(requestId);
+    if (pending) {
+      pendingFetches.delete(requestId);
+      if (decision === 'PROCEED') {
+        console.debug('[FetchPatcher] Decision: PROCEED. Calling original fetch for requestId:', requestId);
+        originalFetch.apply(self, pending.originalArgs)
+          .then(pending.resolve)
+          .catch(pending.reject);
+      } else if (decision === 'MOCK_SUCCESS') {
+        console.debug('[FetchPatcher] Decision: MOCK_SUCCESS for requestId:', requestId, responseData);
+        const mockedResponse = new Response(responseData.body ? JSON.stringify(responseData.body) : null, {
+          status: responseData.status || 200,
+          statusText: responseData.statusText || 'OK',
+          headers: new Headers(responseData.headers || {}),
+        });
+        pending.resolve(mockedResponse);
+      } else if (decision === 'MOCK_ERROR') {
+        console.warn('[FetchPatcher] Decision: MOCK_ERROR for requestId:', requestId, errorData);
+        pending.reject(new Error(errorData?.message || 'Mocked fetch error'));
+      } else {
+        console.error('[FetchPatcher] Unknown decision for requestId:', requestId, decision);
+        pending.reject(new Error('Unknown decision from main thread for fetch'));
+      }
+    } else {
+      console.warn('[FetchPatcher] Received decision for unknown requestId:', requestId);
+    }
+  }
+});
+
 self.fetch = async function(...args) {
   const [url, options] = args;
   let rpcMethod = null;
@@ -192,37 +255,48 @@ self.fetch = async function(...args) {
         requestBody = JSON.parse(options.body); // Store parsed body
         if (requestBody && requestBody.method) {
           rpcMethod = requestBody.method;
-          console.debug('[Patched Fetch] RPC Method:', rpcMethod);
-          console.debug('[Patched Fetch] RPC Body:', requestBody);
-
-          // Send message to main thread
-          console.debug('[Patched Fetch] Attempting to post INTERCEPTED_RPC_CALL message to main thread.');
-
-          self.postMessage({
-            type: 'INTERCEPTED_RPC_CALL',
-            payload: {
-              url: url,
-              // Let's try sending only specific, known-safe parts of options first
-              // If this works, we can selectively add more back.
-              // For now, let's exclude the full 'options' object if it's problematic.
-              // options: options, 
-              //method: options?.method, // example of sending a specific part
-              // headers: JSON.parse(JSON.stringify(options?.headers || {})), // Deep clone headers
-              rpcMethod: rpcMethod,
-              body: requestBody 
-            }
-          });
-          console.debug('[Patched Fetch] Successfully posted INTERCEPTED_RPC_CALL message.');
+          console.debug('[Patched Fetch] RPC Method for decision:', rpcMethod);
         }
       } catch (e) {
-        console.warn('[Patched Fetch] Could not parse request body:', e);
+        console.warn('[Patched Fetch] Could not parse request body for decision:', e);
       }
     }
+
+    const requestId = \`fetch-\${fetchRequestIdCounter++}\`;
+    
+    const serializableOptions = {
+      method: options?.method,
+      headers: {}
+    };
+    if (options && options.headers) {
+      if (options.headers instanceof Headers) {
+        options.headers.forEach((value, key) => { serializableOptions.headers[key] = value; });
+      } else if (typeof options.headers === 'object' && !Array.isArray(options.headers)) {
+        serializableOptions.headers = options.headers;
+      }
+    }
+    
+    console.debug('[Patched Fetch] Posting INTERCEPTED_RPC_CALL_AWAIT_DECISION for requestId:', requestId);
+    self.postMessage({
+      type: 'INTERCEPTED_RPC_CALL_AWAIT_DECISION',
+      payload: {
+        requestId,
+        url: url,
+        options: serializableOptions,
+        rpcMethod: rpcMethod,
+        body: requestBody 
+      }
+    });
+
+    return new Promise((resolve, reject) => {
+      pendingFetches.set(requestId, { resolve, reject, originalArgs: args });
+    });
   }
 
+  // For non-intercepted calls
   const promise = originalFetch.apply(self, args);
-
-  if (typeof url === 'string' && url === rpcEndpointForWorker) {
+  // Optional: keep logging for non-intercepted calls if desired
+  if (typeof url === 'string' && url === rpcEndpointForWorker) { // This block might be redundant if already handled by interception
     return promise.then(async (response) => {
       console.debug('[Patched Fetch] Response from RPC_ENDPOINT for method ', rpcMethod, 'status:', response.status);
       const clonedResponse = response.clone();
@@ -312,13 +386,68 @@ console.debug('[FetchPatcher] self.fetch has been patched for RPC endpoint:', rp
               case "EXECUTION_COMPLETE":
                 addLog("SYSTEM", "Execution complete.");
                 setIsRunning(false);
-
+                // Note: Worker termination is handled by main try-catch or useEffect cleanup
                 break;
-              case "INTERCEPTED_RPC_CALL":
-                if (props?.onRpcCallIntercepted) {
-                  props.onRpcCallIntercepted(message.payload);
+              case "INTERCEPTED_RPC_CALL_AWAIT_DECISION":
+                const decisionPayload =
+                  message.payload as InterceptedRpcCallData;
+                console.debug(
+                  "[FetchPatcher] Received INTERCEPTED_RPC_CALL_AWAIT_DECISION for requestId:",
+                  {
+                    method: decisionPayload.rpcMethod,
+                    url: decisionPayload.url,
+                  },
+                );
+
+                if (props?.onRpcCallInterceptedForDecision) {
+                  props
+                    .onRpcCallInterceptedForDecision(decisionPayload)
+                    .then((decision) => {
+                      if (workerRef.current) {
+                        // Ensure worker is still active
+                        workerRef.current.postMessage({
+                          type: "FETCH_DECISION_RESPONSE",
+                          payload: {
+                            requestId: decisionPayload.requestId,
+                            ...decision,
+                          },
+                        });
+                      }
+                    })
+                    .catch((err) => {
+                      console.error(
+                        "Error in onRpcCallInterceptedForDecision callback:",
+                        err,
+                      );
+                      if (workerRef.current) {
+                        // Ensure worker is still active
+                        workerRef.current.postMessage({
+                          // Default to PROCEED on error
+                          type: "FETCH_DECISION_RESPONSE",
+                          payload: {
+                            requestId: decisionPayload.requestId,
+                            decision: "PROCEED",
+                          },
+                        });
+                      }
+                    });
+                } else {
+                  // No callback provided, default to proceed
+                  if (workerRef.current) {
+                    // Ensure worker is still active
+                    workerRef.current.postMessage({
+                      type: "FETCH_DECISION_RESPONSE",
+                      payload: {
+                        requestId: decisionPayload.requestId,
+                        decision: "PROCEED",
+                      },
+                    });
+                  }
                 }
                 break;
+              // The old INTERCEPTED_RPC_CALL case is removed as this new mechanism supersedes it.
+              // If props?.onRpcCallIntercepted was used for pure logging, that can be adapted.
+              // For now, the new 'addLog' above for INTERCEPTED_RPC_CALL_AWAIT_DECISION serves a similar logging purpose.
               default:
                 addLog("SYSTEM", "Unknown message from worker:", message);
             }

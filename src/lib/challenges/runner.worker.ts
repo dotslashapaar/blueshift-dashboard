@@ -14,26 +14,33 @@ const originalConsoleLog = self.console.log;
 const originalConsoleError = self.console.error;
 const originalConsoleInfo = self.console.info;
 
+// Override console methods to post messages to the main thread
+self.console.log = (...args: any[]) => {
+  self.postMessage({ type: "LOG", payload: args } as ConsoleMessage);
+  originalConsoleLog.apply(self.console, args); // Also log in worker's own console
+};
+self.console.error = (...args: any[]) => {
+  self.postMessage({ type: "ERROR", payload: args } as ConsoleMessage);
+  originalConsoleError.apply(self.console, args);
+};
+self.console.info = (...args: any[]) => {
+  self.postMessage({ type: "INFO", payload: args } as ConsoleMessage);
+  originalConsoleInfo.apply(self.console, args);
+};
+
+let codeLoaded = false;
+
 self.onmessage = (event: MessageEvent<string>) => {
   const code = event.data;
-  try {
-    // Override console methods to post messages to the main thread
-    self.console.log = (...args: any[]) => {
-      self.postMessage({ type: "LOG", payload: args } as ConsoleMessage);
-      originalConsoleLog.apply(self.console, args); // Also log in worker's own console
-    };
-    self.console.error = (...args: any[]) => {
-      self.postMessage({ type: "ERROR", payload: args } as ConsoleMessage);
-      originalConsoleError.apply(self.console, args);
-    };
-    self.console.info = (...args: any[]) => {
-      self.postMessage({ type: "INFO", payload: args } as ConsoleMessage);
-      originalConsoleInfo.apply(self.console, args);
-    };
 
-    // Execute the bundled code.
-    // 'self' is passed to make the worker's global scope available to the code.
-    new Function("self", code)(self);
+  try {
+    if (!codeLoaded) {
+      codeLoaded = true;
+
+      // Execute the bundled code.
+      // 'self' is passed to make the worker's global scope available to the code.
+      new Function("self", code)(self);
+    }
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);
     self.postMessage({
