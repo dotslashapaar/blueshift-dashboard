@@ -15,13 +15,19 @@ import {
   useEsbuildRunner,
   FetchDecision,
   InterceptedRpcCallData,
+  InterceptedWsSendData,
+  WsSendDecision,
+  InterceptedWsReceiveData,
+  WsReceiveDecision
 } from "@/hooks/useEsbuildRunner";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 import { useChallengeVerifier } from "@/hooks/useChallengeVerifier";
-import { Transaction } from "@solana/web3.js";
+import { Connection, Keypair, Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
+import { createMint } from "@solana/spl-token";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+const rpcEndpoint = process.env.NEXT_PUBLIC_CHALLENGE_RPC_ENDPOINT;
 
 export default function ChallengesContent({
   currentCourse,
@@ -149,6 +155,75 @@ export default function ChallengesContent({
     return { decision: "PROCEED" };
   };
 
+  const handleWsSendForDecision = async (
+    wsSendData: InterceptedWsSendData,
+  ): Promise<WsSendDecision> => {
+    console.log(
+      "[ClientChallengesContent] Intercepted WebSocket Send, Awaiting Decision:",
+      wsSendData,
+    );
+
+    const targetHost = new URL(rpcEndpoint!).host;
+
+    if (wsSendData.url.includes(targetHost)) {
+      if (typeof wsSendData.data === 'string' && wsSendData.data.includes("signatureSubscribe")) {
+        console.log("[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe");
+        
+
+        const data = JSON.parse(wsSendData.data);
+
+        // random subscription id as integer
+        const subscriptionId = Math.floor(Math.random() * 1000000);
+        // random slot number as integer
+        const slot = Math.floor(Math.random() * 1000000);
+
+        const subscriptionConfirmation = {
+          "jsonrpc": "2.0",
+          "result": subscriptionId,
+          "id": data.id
+        };
+
+        const signatureNotification = {
+          "jsonrpc": "2.0",
+          "method": "signatureNotification",
+          "params": {
+            "result": {
+              "context": {
+                "slot": slot
+              },
+              "value": {
+                "err": null
+              }
+            },
+            "subscription": subscriptionId
+          }
+        };
+        
+        return {
+          decision: "BLOCK",
+          mockedReceives: [
+            JSON.stringify(subscriptionConfirmation),
+            JSON.stringify(signatureNotification),
+          ],
+        };
+      }
+    }
+
+    console.log("[ClientChallengesContent] WebSocket send allowed to PROCEED:", wsSendData);
+    return { decision: "PROCEED" };
+  };
+
+  const handleWsReceiveForDecision = async (
+    wsReceiveData: InterceptedWsReceiveData,
+  ): Promise<WsReceiveDecision> => {
+    console.log(
+      "[ClientChallengesContent] Intercepted WebSocket Receive, Awaiting Decision:",
+      wsReceiveData,
+    );
+
+    return { decision: "PROCEED" };
+  };
+
   const {
     esBuildInitializationState,
     isRunning: isCodeRunning,
@@ -159,6 +234,8 @@ export default function ChallengesContent({
     clearLogs: clearRunnerLogs,
   } = useEsbuildRunner({
     onRpcCallInterceptedForDecision: handleRpcCallForDecision,
+    onWsSendInterceptedForDecision: handleWsSendForDecision,
+    onWsReceiveInterceptedForDecision: handleWsReceiveForDecision,
   });
 
   useEffect(() => {
