@@ -7,10 +7,10 @@ import type { editor } from "monaco-editor";
 import { useMonaco } from "@/hooks/useMonaco";
 import Icon from "../Icon/Icon";
 
-interface TSChallengeEnvProps {
+interface BlueshiftTSEditorProps {
   initialCode: string;
   onCodeChange: (code: string) => void;
-  challengeTitle: string;
+  title: string;
 }
 
 const processEnvTypes = `
@@ -25,11 +25,11 @@ declare var process: {
 };
 `;
 
-export default function TSChallengeEnv({
+export default function BlueshiftEditor({
   initialCode,
   onCodeChange,
-  challengeTitle,
-}: TSChallengeEnvProps) {
+  title,
+}: BlueshiftTSEditorProps) {
   const editorRefInternal = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monaco = useMonaco();
 
@@ -323,7 +323,7 @@ export default function TSChallengeEnv({
           </div>
           <div className="text-sm font-medium text-secondary absolute left-1/2 -translate-x-1/2 flex items-center gap-x-1.5">
             <Icon name="Challenge" size={12} className="hidden sm:block" />
-            <span className="flex-shrink-0">{challengeTitle}</span>
+            <span className="flex-shrink-0">{title}</span>
           </div>
         </div>
         <Editor

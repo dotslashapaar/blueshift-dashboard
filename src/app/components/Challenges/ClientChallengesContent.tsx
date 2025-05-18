@@ -10,7 +10,6 @@ import ClientChallengeTable from "./ClientChallengeTable";
 import { Link } from "@/i18n/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { anticipate } from "motion";
-import ClientChallengeRequirements from "./ClientChallengeRequirements";
 import {
   useEsbuildRunner,
   FetchDecision,
@@ -20,6 +19,7 @@ import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 import { useChallengeVerifier } from "@/hooks/useChallengeVerifier";
 import { Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
+import BlueshiftEditor from "@/app/components/TSChallengeEnv/BlueshiftEditor";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -317,11 +317,14 @@ export default function ChallengesContent({
               className="px-4 py-14 pb-20 max-w-app grid grid-cols-1 md:px-8 lg:px-14 mx-auto w-full gap-y-12 lg:gap-x-24"
             >
               <div className="flex flex-col relative w-full h-full">
-                <ClientChallengeRequirements
-                  course={currentCourse}
-                  currentCode={editorCode}
-                  onCodeChange={setEditorCode}
-                />
+                <div className="flex flex-col gap-y-12 w-full h-full min-h-[35dvh] lg:min-h-[65dvh]">
+                  <BlueshiftEditor
+                    initialCode={editorCode}
+                    onCodeChange={setEditorCode}
+                    title={t(`courses.${currentCourse.slug}.challenge.title`)}
+                  />
+                </div>
+
                 <ClientChallengeTable
                   onRunCodeClick={handleRunCode}
                   requirements={requirements}
