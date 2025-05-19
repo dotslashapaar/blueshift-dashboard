@@ -46,7 +46,7 @@ export const courses: CourseMetadata[] = withCourseNumber([
       { slug: "lesson" },
     ],
     challenge: {
-      apiPath: "/v1/verify/native/vault",
+      apiPath: "/v1/verify/pinocchio/vault",
       requirements: [
         { instructionKey: "deposit" },
         { instructionKey: "withdraw" },
@@ -77,7 +77,7 @@ export const courses: CourseMetadata[] = withCourseNumber([
       { slug: "understanding-spl-tokens" },
     ],
     challenge: {
-      apiPath: "/v1/verify/typescript/create-mint",
+      apiPath: "/v1/verify/spf-token/create-mint",
       requirements: [
         { instructionKey: "create_mint" },
       ],
