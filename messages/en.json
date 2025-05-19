@@ -198,6 +198,7 @@
     "requirements_title": "Challenge",
     "upload_program_btn": "Upload Program",
     "run_program_btn": "Execute",
+    "view_logs_btn": "View Logs",
     "running_program_btn": "Running...",
     "num_tests_passed": "Tests Passed",
     "test_results": {

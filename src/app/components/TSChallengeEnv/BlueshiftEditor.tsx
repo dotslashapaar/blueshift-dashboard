@@ -289,7 +289,7 @@ export default function BlueshiftEditor({
         },
       ],
       colors: {
-        "editor.background": "#1A1E2650",
+        "editor.background": "#1A1E2680",
         "editor.foreground": "#f8f8f2",
         "editor.selectionBackground": "#585E6C",
         "editor.lineHighlightBackground": "#1A1E26",
@@ -313,39 +313,26 @@ export default function BlueshiftEditor({
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="w-full h-full flex flex-col rounded-t-xl lg:rounded-xl overflow-hidden max-h-[35dvh] lg:max-h-[65dvh] border border-border">
-        <div className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-xl flex items-center border-b border-border">
-          <div className="flex items-center gap-x-2">
-            <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
-            <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
-            <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
-          </div>
-          <div className="text-sm font-medium text-secondary absolute left-1/2 -translate-x-1/2 flex items-center gap-x-1.5">
-            <Icon name="Challenge" size={12} className="hidden sm:block" />
-            <span className="flex-shrink-0">{title}</span>
-          </div>
-        </div>
-        <Editor
-          height="100%"
-          width="100%"
-          className="bg-transparent"
-          defaultLanguage="typescript"
-          defaultValue={initialCode}
-          options={{
-            automaticLayout: true,
-            minimap: {
-              enabled: false,
-            },
-            stickyScroll: {
-              enabled: false,
-            },
-            wordWrap: "on", // Optional: for better readability of long lines
-            renderLineHighlight: "all", // Highlight the current line
-          }}
-          onMount={handleEditorDidMount}
-        />
-      </div>
+    <div className="flex flex-col h-full w-full overflow-hidden min-h-[350px]">
+      <Editor
+        width="100%"
+        height="100%"
+        className="bg-transparent h-full left-0 relative top-[42px]"
+        defaultLanguage="typescript"
+        defaultValue={initialCode}
+        options={{
+          automaticLayout: true,
+          minimap: {
+            enabled: false,
+          },
+          stickyScroll: {
+            enabled: false,
+          },
+          wordWrap: "on", // Optional: for better readability of long lines
+          renderLineHighlight: "all", // Highlight the current line
+        }}
+        onMount={handleEditorDidMount}
+      />
     </div>
   );
 }

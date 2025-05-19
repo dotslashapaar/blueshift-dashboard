@@ -11,11 +11,11 @@ interface ButtonProps {
   className?: string;
   onClick?: () => void;
   disabled?: boolean;
-  variant?: "primary" | "secondary" | "tertiary";
+  variant?: "primary" | "secondary" | "tertiary" | "link";
   icon?: IconName;
   iconSide?: "left" | "right";
-  size?: "md" | "lg";
-  iconSize?: 18 | 14 | 12;
+  size?: "sm" | "md" | "lg";
+  iconSize?: 18 | 14 | 12 | 8;
 }
 
 export default function Button({
@@ -41,6 +41,7 @@ export default function Button({
 
         // Sizes
         {
+          "px-2 py-1 rounded-xl text-xs leading-none": size === "sm",
           "px-4.5 py-3 rounded-xl text-sm leading-none": size === "md",
           "px-6 py-4 rounded-2xl text-base leading-none": size === "lg",
         },
@@ -52,6 +53,7 @@ export default function Button({
             variant === "secondary",
           "transition bg-[linear-gradient(180deg,_#171A20_0%,_rgba(23,_26,_32,_0)_100%),linear-gradient(0deg,#0B0E14_0%,_#0B0E14_100%)] text-secondary before:bg-[linear-gradient(180deg,_rgba(206,213,228,0.2)_0%,_rgba(206,213,228,0.1)_100%)]":
             variant === "tertiary",
+          "text-secondary": variant === "link",
         },
 
         className

@@ -198,6 +198,7 @@
     "requirements_title": "挑戰",
     "upload_program_btn": "上載程式",
     "run_program_btn": "執行程式",
+    "view_logs_btn": "查看記錄",
     "running_program_btn": "執行中...",
     "num_tests_passed": "測試通過",
     "test_results": {

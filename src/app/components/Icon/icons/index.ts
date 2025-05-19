@@ -33,6 +33,8 @@ import { WalletIcon } from "./Wallet";
 import { WarningIcon } from "./Warning";
 import { XIcon } from "./X";
 import { GlobeIcon } from "./Globe";
+import { MinimizeIcon } from "./Minimize";
+import { ExpandIcon } from "./Expand";
 
 export const IconComponents = {
   Anchor: AnchorIcon,
@@ -70,6 +72,8 @@ export const IconComponents = {
   Wallet: WalletIcon,
   Warning: WarningIcon,
   X: XIcon,
+  Minimize: MinimizeIcon,
+  Expand: ExpandIcon,
 } as const;
 
 export type IconName = keyof typeof IconComponents;
