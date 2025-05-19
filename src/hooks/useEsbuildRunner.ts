@@ -483,8 +483,6 @@ self.addEventListener('message', function(event) {
 });
 
 self.WebSocket = WebSocketProxy;
-
-self.postMessage({ type: 'WS_PATCHER_LOG', payload: ['WebSocket Patcher fully initialized.'] });
 `;
 
           const codeToExecuteInWorker = `\n${fetchPatcher}\n${webSocketPatcher}\n${bundledCode}\n`; // EXECUTION_COMPLETE logic is now bundled
@@ -617,15 +615,8 @@ self.postMessage({ type: 'WS_PATCHER_LOG', payload: ['WebSocket Patcher fully in
                   }
                 }
                 break;
-              // The old INTERCEPTED_RPC_CALL case is removed as this new mechanism supersedes it.
-              // If props?.onRpcCallIntercepted was used for pure logging, that can be adapted.
-              // For now, the new 'addLog' above for INTERCEPTED_RPC_CALL_AWAIT_DECISION serves a similar logging purpose.
-              
-              // New WebSocket message handlers
-              case "WS_PATCHER_LOG":
-                addLog("DEBUG", "[WsPatcher]", ...(Array.isArray(message.payload) ? message.payload : [message.payload]));
-                break;
-              case "INTERCEPTED_WS_SEND_AWAIT_DECISION":
+
+                case "INTERCEPTED_WS_SEND_AWAIT_DECISION":
                 const wsSendData = message.payload as InterceptedWsSendData;
                 if (props?.onWsSendInterceptedForDecision) {
                   props.onWsSendInterceptedForDecision(wsSendData)
