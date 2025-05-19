@@ -1,12 +1,12 @@
 import { redirect } from "@/i18n/navigation";
 
 interface CourseRedirectPageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  }
+  }>
 }
 
-export default function CourseRedirectPage({params}: CourseRedirectPageProps) {
-  const { locale } = params;
+export default async function CourseRedirectPage({params}: CourseRedirectPageProps) {
+  const { locale } = await params;
   redirect({ href: "/", locale })
 }
