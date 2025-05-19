@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { usePersistentStore } from "@/stores/store";
 import Button from "../Button/Button";
 import Icon from "../Icon/Icon";
@@ -16,11 +16,15 @@ import { anticipate } from "motion";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
+interface ChallengeContentProps {
+  currentCourse: CourseMetadata;
+  content: ReactNode;
+}
+
 export default function ChallengesContent({
   currentCourse,
-}: {
-  currentCourse: CourseMetadata;
-}) {
+  content
+}: ChallengeContentProps) {
   // Replace with real connection later
   const [isUserConnected] = useState(true);
   const { courseProgress } = usePersistentStore();
@@ -119,7 +123,7 @@ export default function ChallengesContent({
               exit={{ opacity: 0 }}
               className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24"
             >
-              <ChallengeRequirements course={currentCourse} />
+              <ChallengeRequirements content={content} />
               <ChallengeTable
                 isLoading={isLoading}
                 error={error}

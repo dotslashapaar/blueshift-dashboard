@@ -37,6 +37,22 @@ export const courses: CourseMetadata[] = withCourseNumber([
     },
   },
   {
+    slug: "anchor-memo",
+    language: "Anchor",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    lessons: [
+      { slug: "lesson" },
+    ],
+    challenge: {
+      apiPath: "/v1/verify/anchor/memo",
+      requirements: [
+        { instructionKey: "log", },
+      ],
+    },
+  },
+  {
     slug: "pinocchio-vault",
     language: "Rust",
     color: "255,173,102",
@@ -50,6 +66,38 @@ export const courses: CourseMetadata[] = withCourseNumber([
       requirements: [
         { instructionKey: "deposit" },
         { instructionKey: "withdraw" },
+      ],
+    },
+  },
+  {
+    slug: "pinocchio-memo",
+    language: "Rust",
+    color: "255,173,102",
+    difficulty: 2,
+    isFeatured: true,
+    lessons: [
+      { slug: "lesson" },
+    ],
+    challenge: {
+      apiPath: "/v1/verify/pinocchio/memo",
+      requirements: [
+        { instructionKey: "log" },
+      ],
+    },
+  },
+  {
+    slug: "assembly-memo",
+    language: "Assembly",
+    color: "140,255,102",
+    difficulty: 2,
+    isFeatured: true,
+    lessons: [
+      { slug: "lesson" },
+    ],
+    challenge: {
+      apiPath: "/v1/verify/assembly/memo",
+      requirements: [
+        { instructionKey: "log" },
       ],
     },
   },

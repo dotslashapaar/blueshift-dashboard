@@ -1,6 +1,7 @@
 import { AnchorIcon } from "./Anchor";
 import { ArrowLeftIcon } from "./ArrowLeft";
 import { ArrowRightIcon } from "./ArrowRight";
+import { AssemblyIcon } from "./Assembly";
 import { ChallengeIcon } from "./Challenge";
 import { ChevronIcon } from "./Chevron";
 import { ClaimIcon } from "./Claim";
@@ -37,6 +38,7 @@ export const IconComponents = {
   Anchor: AnchorIcon,
   ArrowLeft: ArrowLeftIcon,
   ArrowRight: ArrowRightIcon,
+  Assembly: AssemblyIcon,
   Challenge: ChallengeIcon,
   Chevron: ChevronIcon,
   Claim: ClaimIcon,

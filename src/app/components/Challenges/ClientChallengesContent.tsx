@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { usePersistentStore } from "@/stores/store";
 import Button from "../Button/Button";
 import Icon from "../Icon/Icon";
@@ -18,22 +18,25 @@ import {
   InterceptedWsSendData,
   WsSendDecision,
   InterceptedWsReceiveData,
-  WsReceiveDecision
+  WsReceiveDecision,
 } from "@/hooks/useEsbuildRunner";
 import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 import { useChallengeVerifier } from "@/hooks/useChallengeVerifier";
-import { Connection, Keypair, Transaction } from "@solana/web3.js";
+import { Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
-import { createMint } from "@solana/spl-token";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const rpcEndpoint = process.env.NEXT_PUBLIC_CHALLENGE_RPC_ENDPOINT;
 
-export default function ChallengesContent({
-  currentCourse,
-}: {
+interface ChallengesContentProps {
   currentCourse: CourseMetadata;
-}) {
+  content: ReactNode;
+}
+
+export default function ChallengesContent({
+  content,
+  currentCourse,
+}: ChallengesContentProps) {
   const [isUserConnected] = useState(true);
   const { courseProgress } = usePersistentStore();
   const t = useTranslations();
@@ -101,51 +104,6 @@ export default function ChallengesContent({
         },
       };
     }
-    /*
-    else if (rpcData.rpcMethod === "getSignatureStatuses") {
-      // If the intercepted call is for getSignatureStatuses, we can mock a response
-      // to indicate that the transaction was confirmed.
-      const mockResponse = {
-        jsonrpc: "2.0",
-        result: {
-          context: { slot: 123456 },
-          value: [
-            {
-              "slot": 123456,
-              "confirmations": 10,
-              "err": null,
-              "status": {
-                "Ok": null
-              },
-              "confirmationStatus": "processed"
-            },
-            null
-
-            // {
-            //   confirmationStatus: "processed",
-            //   err: null,
-            //   slot: 123456,
-            // },
-          ],
-        },
-        id: rpcData.body?.id || "mocked-id",
-      };
-
-      console.debug(
-        `[ClientChallengesContent] Mocking successful response for getSignatureStatuses.`,
-      );
-
-      return {
-        decision: "MOCK_SUCCESS",
-        responseData: {
-          body: mockResponse,
-          status: 200,
-          statusText: "OK",
-          headers: { "Content-Type": "application/json" },
-        },
-      };
-    }
-     */
 
     console.debug(
       `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`,
@@ -166,9 +124,13 @@ export default function ChallengesContent({
     const targetHost = new URL(rpcEndpoint!).host;
 
     if (wsSendData.url.includes(targetHost)) {
-      if (typeof wsSendData.data === 'string' && wsSendData.data.includes("signatureSubscribe")) {
-        console.log("[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe");
-        
+      if (
+        typeof wsSendData.data === "string" &&
+        wsSendData.data.includes("signatureSubscribe")
+      ) {
+        console.log(
+          "[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe",
+        );
 
         const data = JSON.parse(wsSendData.data);
 
@@ -178,27 +140,27 @@ export default function ChallengesContent({
         const slot = Math.floor(Math.random() * 1000000);
 
         const subscriptionConfirmation = {
-          "jsonrpc": "2.0",
-          "result": subscriptionId,
-          "id": data.id
+          jsonrpc: "2.0",
+          result: subscriptionId,
+          id: data.id,
         };
 
         const signatureNotification = {
-          "jsonrpc": "2.0",
-          "method": "signatureNotification",
-          "params": {
-            "result": {
-              "context": {
-                "slot": slot
+          jsonrpc: "2.0",
+          method: "signatureNotification",
+          params: {
+            result: {
+              context: {
+                slot: slot,
               },
-              "value": {
-                "err": null
-              }
+              value: {
+                err: null,
+              },
             },
-            "subscription": subscriptionId
-          }
+            subscription: subscriptionId,
+          },
         };
-        
+
         return {
           decision: "BLOCK",
           mockedReceives: [
@@ -209,7 +171,10 @@ export default function ChallengesContent({
       }
     }
 
-    console.log("[ClientChallengesContent] WebSocket send allowed to PROCEED:", wsSendData);
+    console.log(
+      "[ClientChallengesContent] WebSocket send allowed to PROCEED:",
+      wsSendData,
+    );
     return { decision: "PROCEED" };
   };
 
@@ -394,7 +359,7 @@ export default function ChallengesContent({
               className="px-4 py-14 max-w-app md:px-8 lg:px-14 mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-24"
             >
               <ClientChallengeRequirements
-                course={currentCourse}
+                content={content}
                 currentCode={editorCode}
                 onCodeChange={setEditorCode}
               />
