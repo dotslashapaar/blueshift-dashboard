@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import CopyClipboard from "../CopyClipboard/CopyClipboard";
 import Icon from "../Icon/Icon";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 
 export function ArticleSection({
   name,

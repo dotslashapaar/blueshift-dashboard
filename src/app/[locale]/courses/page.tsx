@@ -1,5 +1,12 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 
-export default function CourseRedirectPage() {
-  redirect(`/`);
+interface CourseRedirectPageProps {
+  params: {
+    locale: string;
+  }
+}
+
+export default function CourseRedirectPage({params}: CourseRedirectPageProps) {
+  const { locale } = params;
+  redirect({ href: "/", locale })
 }
