@@ -79,7 +79,7 @@ export default function ChallengeTable({
         isOpen={isCompletedModalOpen}
         onClose={() => setIsCompletedModalOpen(false)}
       />
-      <div className="bg-background-card/50 rounded-b-xl lg:rounded-none w-full min-w-full lg:min-w-[400px] px-4 lg:px-6 lg:right-4 lg:border-l border-l-border lg:pt-12 flex flex-col lg:gap-y-8 justify-between overflow-hidden pb-6">
+      <div className="bg-background-card/50 rounded-b-xl lg:rounded-none w-full min-w-full lg:min-w-[400px] px-4 lg:px-6 lg:right-4 lg:border-l border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden pb-6">
         {(courseStatus[courseSlug] === "Unlocked" ||
           courseStatus[courseSlug] === "Claimed") && (
           <motion.div
