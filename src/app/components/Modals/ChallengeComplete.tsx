@@ -72,6 +72,7 @@ export default function ChallengeCompleted({
             icon="Claimed"
             className="!w-full !flex-shrink"
             onClick={closeModal}
+            disabled
           />
           <div
             onClick={closeModal}

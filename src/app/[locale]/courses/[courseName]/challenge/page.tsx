@@ -9,6 +9,7 @@ import { getCourse } from "@/app/utils/mdx";
 import ProgramChallengesContent from "@/app/components/Challenges/ProgramChallengesContent";
 import ClientChallengesContent from "@/app/components/Challenges/ClientChallengesContent";
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
+import { notFound } from "next/navigation";
 
 interface ChallengePageProps {
   params: Promise<{
@@ -22,9 +23,15 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
   const t = await getTranslations();
   const courseMetadata = await getCourse(courseName);
 
-  const { default: ChallengeContent } = await import(
-    `@/app/content/courses/${courseMetadata.slug}/challenge/${locale}.mdx`
-  );
+  let ChallengeContent;
+  try {
+    const challengeModule = await import(
+      `@/app/content/courses/${courseMetadata.slug}/challenge/${locale}.mdx`
+    );
+    ChallengeContent = challengeModule.default;
+  } catch {
+    notFound();
+  }
 
   return (
     <div className="flex flex-col w-full">

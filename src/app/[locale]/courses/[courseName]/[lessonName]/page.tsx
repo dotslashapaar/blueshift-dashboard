@@ -10,6 +10,8 @@ import { Link } from "@/i18n/navigation";
 import Button from "@/app/components/Button/Button";
 import LessonTitle from "@/app/components/LessonTitle/LessonTitle";
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
+import { notFound } from "next/navigation";
+
 interface LessonPageProps {
   params: Promise<{
     courseName: string;
@@ -21,9 +23,17 @@ interface LessonPageProps {
 export default async function LessonPage({ params }: LessonPageProps) {
   const t = await getTranslations();
   const { courseName, lessonName, locale } = await params;
-  const { default: Lesson } = await import(
-    `@/app/content/courses/${courseName}/${lessonName}/${locale}.mdx`
-  );
+
+  let Lesson;
+  try {
+    const lessonModule = await import(
+      `@/app/content/courses/${courseName}/${lessonName}/${locale}.mdx`
+      );
+    Lesson = lessonModule.default;
+  } catch {
+    notFound();
+  }
+
   const courseMetadata = await getCourse(courseName);
 
   // Get all lessons for the course
