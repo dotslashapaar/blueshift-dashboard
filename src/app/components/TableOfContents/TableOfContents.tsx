@@ -161,7 +161,7 @@ export default function TableOfContents() {
                           transition={{ duration: 0.4, ease: anticipate }}
                         />
                       )}
-                      <span className="truncate max-w-[80%]">
+                      <span /*className="truncate max-w-[80%]"*/>
                         {subsection.text}
                       </span>
                     </a>
