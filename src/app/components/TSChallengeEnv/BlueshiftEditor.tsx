@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import "./style.css";
-import Editor from "@monaco-editor/react";
+import Editor, { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import { useMonaco } from "@/hooks/useMonaco";
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
 
@@ -13,6 +12,7 @@ interface BlueshiftTSEditorProps {
   onCodeChange: (code: string) => void;
   title?: string;
   className?: string;
+  fileName?: string;
 }
 
 const processEnvTypes = `
@@ -31,12 +31,23 @@ export default function BlueshiftEditor({
   initialCode,
   onCodeChange,
   className,
+  fileName
 }: BlueshiftTSEditorProps) {
   const editorRefInternal = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const monaco = useMonaco();
+  const handleEditorWillMount = (monaco: Monaco) => {
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({isolatedModules: true});
+  }
 
-  useEffect(() => {
-    if (!monaco) return;
+  const handleEditorDidMount = (
+    editorInstance: editor.IStandaloneCodeEditor,
+    monaco: Monaco
+  ) => {
+    if (editorRefInternal.current) return;
+
+    editorRefInternal.current = editorInstance;
+    editorInstance.onDidChangeModelContent(() => {
+      onCodeChange(editorInstance.getValue());
+    });
 
     monaco.languages.typescript.typescriptDefaults.addExtraLib(
       processEnvTypes,
@@ -303,15 +314,9 @@ export default function BlueshiftEditor({
     });
 
     monaco.editor.setTheme("dracula");
-  }, [monaco, initialCode]);
 
-  const handleEditorDidMount = (
-    editorInstance: editor.IStandaloneCodeEditor
-  ) => {
-    editorRefInternal.current = editorInstance;
-    editorInstance.onDidChangeModelContent(() => {
-      onCodeChange(editorInstance.getValue());
-    });
+    console.log(editorInstance.getValue())
+    console.log(fileName)
   };
 
   return (
@@ -328,8 +333,8 @@ export default function BlueshiftEditor({
         height="100%"
         width="100%"
         className="bg-transparent min-h-[400px]"
-        defaultLanguage="typescript"
-        defaultValue={initialCode}
+        language="typescript"
+        value={initialCode}
         options={{
           automaticLayout: true,
           minimap: {
@@ -341,6 +346,8 @@ export default function BlueshiftEditor({
           wordWrap: "on", // Optional: for better readability of long lines
           renderLineHighlight: "all", // Highlight the current line
         }}
+        path={fileName ? `file:///${fileName}` : undefined}
+        beforeMount={handleEditorWillMount}
         onMount={handleEditorDidMount}
       />
     </div>

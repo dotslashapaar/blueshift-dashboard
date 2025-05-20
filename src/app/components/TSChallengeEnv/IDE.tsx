@@ -4,36 +4,218 @@ import classNames from "classnames";
 import { anticipate } from "motion";
 import BlueshiftEditor from "@/app/components/TSChallengeEnv/BlueshiftEditor";
 import { motion } from "motion/react";
-import { useEsbuildRunner } from "@/hooks/useEsbuildRunner";
+import {
+  FetchDecision,
+  InterceptedRpcCallData, InterceptedWsReceiveData,
+  InterceptedWsSendData,
+  useEsbuildRunner, WsReceiveDecision, WsSendDecision
+} from "@/hooks/useEsbuildRunner";
 import { TestRequirement } from "@/app/components/TSChallengeEnv/types/test-requirements";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Icon from "../Icon/Icon";
 import Button from "../Button/Button";
 import LogoGlyph from "../Logo/LogoGlyph";
 import { useTranslations } from "next-intl";
 
+import { Transaction } from "@solana/web3.js";
+import bs58 from "bs58";
+
+const rpcEndpoint = process.env.NEXT_PUBLIC_CHALLENGE_RPC_ENDPOINT;
+
 interface IDEProps {
   initialCode: string;
-  challengeTitle: string;
+  fileName?: string;
+  title: string;
 }
 
-export default function IDE() {
+export default function IDE({initialCode, title, fileName}: IDEProps) {
   const [ideView, setIdeView] = useState<"minified" | "expanded">("minified");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  const [editorCode, setEditorCode] = useState<string>(initialCode);
+  const [wasSendTransactionIntercepted, setWasSendTransactionIntercepted] =
+    useState(false);
+  const [
+    verificationFailureMessageLogged,
+    setVerificationFailureMessageLogged,
+  ] = useState(false);
+
+  const handleRpcCallForDecision = async (
+    rpcData: InterceptedRpcCallData
+  ): Promise<FetchDecision> => {
+    console.log(
+      "[ClientChallengesContent] Intercepted RPC Call, Awaiting Decision:",
+      rpcData
+    );
+
+    if (rpcData.rpcMethod === "sendTransaction") {
+      setWasSendTransactionIntercepted(true); // Keep this if useful for UI feedback
+      const base64EncodedTx = rpcData.body?.params?.[0];
+
+      console.log("got tx")
+
+      const tx = Transaction.from(Buffer.from(base64EncodedTx, "base64"));
+      const mockSignature = bs58.encode(tx?.signature ?? []);
+
+      console.debug(
+        `[ClientChallengesContent] Mocking successful response for sendTransaction. Signature: ${mockSignature}`
+      );
+
+      return {
+        decision: "MOCK_SUCCESS",
+        responseData: {
+          body: {
+            jsonrpc: "2.0",
+            result: mockSignature, // The fake transaction signature
+            id: rpcData.body?.id || "mocked-id", // Try to use original id or a placeholder
+          },
+          status: 200,
+          statusText: "OK",
+          headers: { "Content-Type": "application/json" },
+        },
+      };
+    }
+
+    console.debug(
+      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`,
+    );
+
+    // For all other calls, or if rpcMethod is null, proceed as normal
+    return { decision: "PROCEED" };
+  };
+
+  const handleWsSendForDecision = async (
+    wsSendData: InterceptedWsSendData,
+  ): Promise<WsSendDecision> => {
+    console.log(
+      "[ClientChallengesContent] Intercepted WebSocket Send, Awaiting Decision:",
+      wsSendData,
+    );
+
+    const targetHost = new URL(rpcEndpoint!).host;
+
+    if (wsSendData.url.includes(targetHost)) {
+      if (
+        typeof wsSendData.data === "string" &&
+        wsSendData.data.includes("signatureSubscribe")
+      ) {
+        console.log(
+          "[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe",
+        );
+
+        const data = JSON.parse(wsSendData.data);
+
+        // random subscription id as integer
+        const subscriptionId = Math.floor(Math.random() * 1000000);
+        // random slot number as integer
+        const slot = Math.floor(Math.random() * 1000000);
+
+        const subscriptionConfirmation = {
+          jsonrpc: "2.0",
+          result: subscriptionId,
+          id: data.id,
+        };
+
+        const signatureNotification = {
+          jsonrpc: "2.0",
+          method: "signatureNotification",
+          params: {
+            result: {
+              context: {
+                slot: slot,
+              },
+              value: {
+                err: null,
+              },
+            },
+            subscription: subscriptionId,
+          },
+        };
+
+        return {
+          decision: "BLOCK",
+          mockedReceives: [
+            JSON.stringify(subscriptionConfirmation),
+            JSON.stringify(signatureNotification),
+          ],
+        };
+      }
+    }
+
+    console.log(
+      "[ClientChallengesContent] WebSocket send allowed to PROCEED:",
+      wsSendData,
+    );
+    return { decision: "PROCEED" };
+  };
+
+  const handleWsReceiveForDecision = async (
+    wsReceiveData: InterceptedWsReceiveData,
+  ): Promise<WsReceiveDecision> => {
+    console.log(
+      "[ClientChallengesContent] Intercepted WebSocket Receive, Awaiting Decision:",
+      wsReceiveData,
+    );
+
+    return { decision: "PROCEED" };
+  };
+
   const {
     esBuildInitializationState,
     isRunning: isCodeRunning,
     logs: runnerLogs,
-  } = useEsbuildRunner();
+    error: runnerError,
+    addLog,
+    runCode,
+    clearLogs: clearRunnerLogs,
+  } = useEsbuildRunner({
+    onRpcCallInterceptedForDecision: handleRpcCallForDecision,
+    onWsSendInterceptedForDecision: handleWsSendForDecision,
+    onWsReceiveInterceptedForDecision: handleWsReceiveForDecision,
+  });
 
-  const initialCode = `
-async function main() {
-  console.log("Hello, Solana!");
-}
-`;
-  const handleCodeUpdate = () => console.log("Code updated");
+  // Effect to check for missing sendTransaction after code execution
+  useEffect(() => {
+    // Check specifically when isCodeRunning transitions from true to false
+    // and if there's a system log indicating successful completion.
+    const executionCompletedLog = runnerLogs.find(
+      (log) =>
+        log.type === "SYSTEM" &&
+        Array.isArray(log.payload) &&
+        log.payload[0] === "Execution complete."
+    );
 
-  const editorTitle = "Blueshift Learning Environment";
+    if (
+      !isCodeRunning &&
+      executionCompletedLog &&
+      !runnerError &&
+      !wasSendTransactionIntercepted &&
+      !verificationFailureMessageLogged
+    ) {
+      const errorMessage = "No transaction was sent by the solution code.";
+      addLog("VERIFICATION_ERROR", errorMessage);
+      setVerificationFailureMessageLogged(true);
+    }
+  }, [
+    isCodeRunning,
+    runnerLogs,
+    runnerError,
+    wasSendTransactionIntercepted,
+    verificationFailureMessageLogged,
+    addLog,
+  ]);
+
+  const handleRunCode = () => {
+    if (esBuildInitializationState !== "initialized") {
+      // TODO Consider using a toast notification or inline message instead of alert
+      alert("Code runner is not ready yet. Please wait a moment.");
+      return;
+    }
+    clearRunnerLogs();
+    setWasSendTransactionIntercepted(false); // Reset flag before new run
+    setVerificationFailureMessageLogged(false); // Reset verification failure flag
+    runCode(editorCode).catch(console.error);
+  };
 
   // Test requirements
   const requirements: TestRequirement[] = [
@@ -120,7 +302,7 @@ async function main() {
             </div>
             <div className="text-sm font-medium text-secondary absolute left-1/2 -translate-x-1/2 flex items-center gap-x-1.5">
               <Icon name="Challenge" size={12} className="hidden sm:block" />
-              <span className="flex-shrink-0">{editorTitle}</span>
+              <span className="flex-shrink-0">{title}</span>
             </div>
           </div>
           <div className="w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
@@ -163,12 +345,13 @@ async function main() {
           </div>
           <BlueshiftEditor
             initialCode={initialCode}
-            onCodeChange={handleCodeUpdate}
+            onCodeChange={setEditorCode}
+            fileName={fileName}
           />
           {/* TODO: Extract execution logs and execution components out of Right Panel */}
           {/* <RightPanel
             isPanelOpen={isPanelOpen}
-            onRunCodeClick={() => console.log("execute pressed")}
+            onRunCodeClick={handleRunCode}
             requirements={requirements}
             course={course}
             isLoading={isVerificationLoading}

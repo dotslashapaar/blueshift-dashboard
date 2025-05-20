@@ -48,7 +48,6 @@ export default function ChallengesContent({
     setVerificationFailureMessageLogged,
   ] = useState(false);
 
-  // Example: Intercept 'sendTransaction' and mock its response
   const handleRpcCallForDecision = async (
     rpcData: InterceptedRpcCallData
   ): Promise<FetchDecision> => {
@@ -209,7 +208,6 @@ export default function ChallengesContent({
   useEffect(() => {
     const fetchSolutionsTemplate = async () => {
       try {
-        // The dynamic import with ?raw needs to be handled correctly by the bundler.
         const codeModule = await import(
           `@/app/content/challenges/${currentChallenge.slug}/challenge.ts.template?raw`
         );
