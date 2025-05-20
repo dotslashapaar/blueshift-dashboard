@@ -2,12 +2,14 @@ export const courseLanguages = {
   Anchor: "Anchor",
   Rust: "Rust",
   Typescript: "TypeScript",
+  Assembly: "Assembly",
 } as const;
 
 export const courseColors = {
   Anchor: "221,234,224",
   Rust: "255,173,102",
   Typescript: "105,162,241",
+  Assembly: "140,255,102",
 } as const;
 
 export const courseDifficulty = {

@@ -6,7 +6,7 @@ import { usePersistentStore } from "@/stores/store";
 import DifficultyBadge from "../DifficultyBadge/DifficultyBadge";
 import { motion } from "motion/react";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 type CourseCardProps = {
   name: string;

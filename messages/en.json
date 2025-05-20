@@ -22,15 +22,12 @@
         "lesson": "Vault"
       },
       "challenge": {
-        "title": "Challenge: Anchor Vault",
         "requirements": {
           "deposit": {
-            "title": "Challenge 1: Taking deposits",
-            "description": "Your program should allow a user to deposit SOL into their own vault."
+            "title": "Challenge 1: Taking deposits"
           },
           "withdraw": {
-            "title": "Challenge 2: Allowing withdrawal",
-            "description": "The vault owner should be able to withdraw SOL from their vault."
+            "title": "Challenge 2: Allowing withdrawal"
           }
         }
       }
@@ -38,22 +35,31 @@
     "anchor-escrow": {
       "title": "Escrow",
       "lessons": {
-        "lesson": " Escrow"
+        "lesson": "Escrow"
       },
       "challenge": {
-        "title": "Challenge: Anchor Escrow",
         "requirements": {
           "make": {
-            "title": "Challenge 1: Making an escrow swap deal",
-            "description": "Your program should allow a user to create a swap order secured by an escrow."
+            "title": "Challenge 1: Making an escrow swap deal"
           },
           "take": {
-            "title": "Challenge 2: Taking an escrow swap deal",
-            "description": "Your program should allow a user to take an escrow swap deal."
+            "title": "Challenge 2: Taking an escrow swap deal"
           },
           "refund": {
-            "title": "Challenge 3: Canceling an escrow swap deal",
-            "description": "Your program should allow a user to cancel an escrow swap deal and refund the maker."
+            "title": "Challenge 3: Canceling an escrow swap deal"
+          }
+        }
+      }
+    },
+    "anchor-memo": {
+      "title": "Memo",
+      "lessons": {
+        "lesson": "Memo"
+      },
+      "challenge": {
+        "requirements": {
+          "log": {
+            "title": "Challenge 1: Logs `instruction_data` to program log"
           }
         }
       }
@@ -64,15 +70,38 @@
         "lesson": " Pinocchio Vault"
       },
       "challenge": {
-        "title": "Challenge: Pinocchio Vault",
         "requirements": {
           "deposit": {
-            "title": "Challenge 1: Taking deposits",
-            "description": "Your program should allow a user to deposit SOL into their own vault."
+            "title": "Challenge 1: Taking deposits"
           },
           "withdraw": {
-            "title": "Challenge 2: Allowing withdrawal",
-            "description": "The vault owner should be able to withdraw SOL from their vault."
+            "title": "Challenge 2: Allowing withdrawal"
+          }
+        }
+      }
+    },
+    "pinocchio-memo": {
+      "title": "Pinocchio Memo",
+      "lessons": {
+        "lesson": "Pinocchio Memo"
+      },
+      "challenge": {
+        "requirements": {
+          "log": {
+            "title": "Challenge 1: Logs instruction data to program log"
+          }
+        }
+      }
+    },
+    "assembly-memo": {
+      "title": "Assembly Memo",
+      "lessons": {
+        "lesson": "Assembly Memo"
+      },
+      "challenge": {
+        "requirements": {
+          "log": {
+            "title": "Challenge 1: Logs the instruction data to program log"
           }
         }
       }
@@ -82,9 +111,7 @@
       "lessons": {
         "introduction-to-quantum-vault": " Quantum Vault"
       },
-      "challenge": {
-        "title": "Challenge: Quantum Vault"
-      }
+      "challenge": {}
     },
     "your-first-spl-token": {
       "title": "Your First SPL Token",
@@ -142,7 +169,8 @@
   "languages": {
     "anchor": "Anchor",
     "rust": "Rust",
-    "typescript": "Typescript"
+    "typescript": "Typescript",
+    "assembly": "Assembly"
   },
   "rewards": {
     "title": "Claim and View your NFTs",

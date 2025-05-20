@@ -1,15 +1,15 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 import { getCourseLessons } from "@/app/utils/mdx";
 
 interface CoursePageProps {
   params: Promise<{
     courseName: string;
-  }>;
-}
+    locale: string;
+  }>;}
 
 export default async function CoursePage({ params }: CoursePageProps) {
-  const resolvedParams = await params;
-  const lessons = await getCourseLessons(resolvedParams.courseName);
+  const { courseName, locale } = await params;
+  const lessons = await getCourseLessons(courseName);
 
   // Sort lessons by lessonNumber and get the first one
   const firstLesson = lessons.sort(
@@ -18,10 +18,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
   if (!firstLesson) {
     // Handle case where no lessons are found
-    redirect("/courses");
+    redirect({href: "/courses", locale});
   }
 
   // Convert lesson title to URL-friendly slug
   const firstLessonSlug = firstLesson.slug.toLowerCase().replace(/\s+/g, "-");
-  redirect(`/courses/${resolvedParams.courseName}/${firstLessonSlug}`);
+  redirect({href: `/courses/${courseName}/${firstLessonSlug}`, locale});
 }

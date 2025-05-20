@@ -2,7 +2,7 @@
 
 import CopyClipboard from "../CopyClipboard/CopyClipboard";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 
 export default function LessonTitle({ title }: { title: string }) {

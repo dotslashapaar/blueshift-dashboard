@@ -16,7 +16,7 @@ import Divider from "../Divider/Divider";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
 import { usePersistentStore } from "@/stores/store";
 import ChallengeCompleted from "../Modals/ChallengeComplete";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 interface ChallengeTableProps {
   onUploadClick: () => void;

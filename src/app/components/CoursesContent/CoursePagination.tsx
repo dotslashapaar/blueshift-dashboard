@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { anticipate, motion } from "motion/react";
 import classNames from "classnames";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { usePersistentStore } from "@/stores/store";
 import { Link } from "@/i18n/navigation";
 import Icon from "../Icon/Icon";

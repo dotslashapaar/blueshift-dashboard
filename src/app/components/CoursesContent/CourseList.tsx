@@ -1,6 +1,6 @@
 "use client";
 
-import { courseColors, CourseMetadata, courseStatus } from "@/app/utils/course";
+import { courseColors, CourseMetadata } from "@/app/utils/course";
 import { usePersistentStore } from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
 import classNames from "classnames";
@@ -30,6 +30,10 @@ const courseSections = {
     icon: "Typescript",
     title: "languages.typescript",
   },
+  Assembly: {
+    icon: "Assembly",
+    title: "languages.assembly",
+  }
 } as const;
 
 type CoursesContentProps = {

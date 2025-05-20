@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import MdxLayout from "@/app/mdx-layout";
 import BackToCourseButton from "@/app/components/Challenges/BackToCourseButton";
 import Divider from "@/app/components/Divider/Divider";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
@@ -11,13 +12,18 @@ import ClientChallengesContent from "@/app/components/Challenges/ClientChallenge
 interface ChallengePageProps {
   params: Promise<{
     courseName: string;
+    locale: string;
   }>;
 }
 
 export default async function ChallengePage({ params }: ChallengePageProps) {
-  const resolvedParams = await params;
+  const { courseName, locale } = await params;
   const t = await getTranslations();
-  const courseMetadata = await getCourse(resolvedParams.courseName);
+  const courseMetadata = await getCourse(courseName);
+
+  const { default: ChallengeContent } = await import(
+    `@/app/content/courses/${courseMetadata.slug}/challenge/${locale}.mdx`
+  );
 
   return (
     <div className="flex flex-col w-full">
@@ -62,9 +68,23 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       <Divider />
 
       {courseMetadata.language === "Typescript" ? (
-        <ClientChallengesContent currentCourse={courseMetadata} />
+        <ClientChallengesContent
+          currentCourse={courseMetadata}
+          content={
+            <MdxLayout>
+              <ChallengeContent />
+            </MdxLayout>
+          }
+        />
       ) : (
-        <ProgramChallengesContent currentCourse={courseMetadata} />
+        <ProgramChallengesContent
+          currentCourse={courseMetadata}
+          content={
+            <MdxLayout>
+              <ChallengeContent />
+            </MdxLayout>
+          }
+        />
       )}
     </div>
   );

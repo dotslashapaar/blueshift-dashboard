@@ -37,6 +37,22 @@ export const courses: CourseMetadata[] = withCourseNumber([
     },
   },
   {
+    slug: "anchor-memo",
+    language: "Anchor",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    lessons: [
+      { slug: "lesson" },
+    ],
+    challenge: {
+      apiPath: "/v1/verify/anchor/memo",
+      requirements: [
+        { instructionKey: "log", },
+      ],
+    },
+  },
+  {
     slug: "pinocchio-vault",
     language: "Rust",
     color: "255,173,102",
@@ -46,10 +62,42 @@ export const courses: CourseMetadata[] = withCourseNumber([
       { slug: "lesson" },
     ],
     challenge: {
-      apiPath: "/v1/verify/native/vault",
+      apiPath: "/v1/verify/pinocchio/vault",
       requirements: [
         { instructionKey: "deposit" },
         { instructionKey: "withdraw" },
+      ],
+    },
+  },
+  {
+    slug: "pinocchio-memo",
+    language: "Rust",
+    color: "255,173,102",
+    difficulty: 2,
+    isFeatured: true,
+    lessons: [
+      { slug: "lesson" },
+    ],
+    challenge: {
+      apiPath: "/v1/verify/pinocchio/memo",
+      requirements: [
+        { instructionKey: "log" },
+      ],
+    },
+  },
+  {
+    slug: "assembly-memo",
+    language: "Assembly",
+    color: "140,255,102",
+    difficulty: 2,
+    isFeatured: true,
+    lessons: [
+      { slug: "lesson" },
+    ],
+    challenge: {
+      apiPath: "/v1/verify/assembly/memo",
+      requirements: [
+        { instructionKey: "log" },
       ],
     },
   },
@@ -77,7 +125,7 @@ export const courses: CourseMetadata[] = withCourseNumber([
       { slug: "understanding-spl-tokens" },
     ],
     challenge: {
-      apiPath: "/v1/verify/typescript/create-mint",
+      apiPath: "/v1/verify/spf-token/create-mint",
       requirements: [
         { instructionKey: "create_mint" },
       ],

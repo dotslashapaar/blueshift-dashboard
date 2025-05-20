@@ -45,10 +45,45 @@ export interface InterceptedRpcCallData {
   body: any | null; // Parsed body
 }
 
+// New types for WebSocket Interception
+export interface InterceptedWsSendData {
+  wsRequestId: string; // Unique ID for this send request
+  url: string; // WebSocket server URL
+  data: any; // Data being sent (potentially serialized)
+}
+
+export interface WsSendDecision {
+  decision: "PROCEED" | "BLOCK" | "MOCK_ERROR";
+  errorMessage?: string; // For MOCK_ERROR
+  /**
+   * If provided, these messages will be dispatched as MessageEvents to the WebSocket instance
+   * after the send (if PROCEED) or instead of the send (if BLOCK).
+   */
+  mockedReceives?: any[];
+}
+
+export interface InterceptedWsReceiveData {
+  wsRequestId: string; // Unique ID for this receive event
+  url: string; // WebSocket server URL
+  data: any; // Data received from server (potentially serialized)
+}
+
+export interface WsReceiveDecision {
+  decision: "PROCEED" | "BLOCK" | "MOCK_TO_CLIENT";
+  mockedData?: any; // For MOCK_TO_CLIENT
+}
+// End of new WebSocket types
+
 export interface UseEsbuildRunnerProps {
   onRpcCallInterceptedForDecision?: (
     rpcCallData: InterceptedRpcCallData,
   ) => Promise<FetchDecision>;
+  onWsSendInterceptedForDecision?: ( // New prop for ws.send()
+    wsSendData: InterceptedWsSendData,
+  ) => Promise<WsSendDecision>;
+  onWsReceiveInterceptedForDecision?: ( // New prop for messages from server
+    wsReceiveData: InterceptedWsReceiveData,
+  ) => Promise<WsReceiveDecision>;
 }
 
 export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
@@ -316,7 +351,141 @@ self.fetch = async function(...args) {
 };
 console.debug('[FetchPatcher] self.fetch has been patched for RPC endpoint:', rpcEndpointForWorker);`;
 
-          const codeToExecuteInWorker = `\n${fetchPatcher}\n${bundledCode}\n`; // EXECUTION_COMPLETE logic is now bundled
+          const webSocketPatcher = `
+self.console.debug('[WsPatcher] Initializing WebSocket Patcher');
+
+const OriginalWebSocket = self.WebSocket;
+let wsRequestIdCounter = 0;
+const pendingWsSendRequests = new Map();
+const pendingWsReceiveRequests = new Map();
+
+function dispatchMockedReceives(ws, mockedReceives) {
+  if (!Array.isArray(mockedReceives)) return;
+  mockedReceives.forEach(function(mockData) {
+    var mockEvent = new MessageEvent('message', { data: mockData });
+    if (typeof ws.onmessage === 'function') {
+      ws.onmessage.call(ws, mockEvent);
+    }
+    ws.dispatchEvent(mockEvent);
+  });
+}
+
+const WebSocketProxy = new Proxy(OriginalWebSocket, {
+  construct(target, args) {
+    const ws = new target(...args);
+
+    // Intercept send
+    ws.send = function(data) {
+      const wsRequestId = 'ws-send-' + (wsRequestIdCounter++);
+      return new Promise(function(resolve, reject) {
+        pendingWsSendRequests.set(wsRequestId, { wsInstance: ws, originalSendData: data, resolve, reject });
+        self.postMessage({
+          type: 'INTERCEPTED_WS_SEND_AWAIT_DECISION',
+          payload: { wsRequestId, url: ws.url, data }
+        });
+      });
+    };
+
+    // Intercept onmessage property
+    let userOnMessage = null;
+    Object.defineProperty(ws, 'onmessage', {
+      set: function(func) { userOnMessage = func; },
+      get: function() { return userOnMessage; }
+    });
+
+    // Intercept addEventListener for 'message'
+    const origAddEventListener = ws.addEventListener;
+    ws.addEventListener = function(type, listener, options) {
+      if (type === 'message') {
+        const wrappedListener = function(event) {
+          const wsRequestId = 'ws-recv-' + (wsRequestIdCounter++);
+          pendingWsReceiveRequests.set(wsRequestId, { originalEvent: event, wsInstancePatched: ws, listener });
+          self.postMessage({
+            type: 'INTERCEPTED_WS_RECEIVE_AWAIT_DECISION',
+            payload: { wsRequestId, url: ws.url, data: event.data }
+          });
+        };
+        origAddEventListener.call(ws, type, wrappedListener, options);
+      } else {
+        origAddEventListener.call(ws, type, listener, options);
+      }
+    };
+
+    // Internal handler for native message events
+    ws._internalMessageHandler = function(event) {
+      const wsRequestId = 'ws-recv-' + (wsRequestIdCounter++);
+      pendingWsReceiveRequests.set(wsRequestId, { originalEvent: event, wsInstancePatched: ws });
+      self.postMessage({
+        type: 'INTERCEPTED_WS_RECEIVE_AWAIT_DECISION',
+        payload: { wsRequestId, url: ws.url, data: event.data }
+      });
+    };
+    origAddEventListener.call(ws, 'message', ws._internalMessageHandler);
+
+    return ws;
+  }
+});
+
+self.addEventListener('message', function(event) {
+  var type = event.data.type;
+  var payload = event.data.payload;
+  if (type === 'WS_SEND_DECISION_RESPONSE') {
+    var requestId = payload.requestId;
+    var decision = payload.decision;
+    var errorMessage = payload.errorMessage;
+    var mockedReceives = payload.mockedReceives;
+    var pending = pendingWsSendRequests.get(requestId);
+    if (pending) {
+      pendingWsSendRequests.delete(requestId);
+      if (decision === 'PROCEED') {
+        try {
+          OriginalWebSocket.prototype.send.call(pending.wsInstance, pending.originalSendData);
+          dispatchMockedReceives(pending.wsInstance, mockedReceives);
+          pending.resolve();
+        } catch (e) {
+          pending.reject(e);
+        }
+      } else if (decision === 'BLOCK') {
+        dispatchMockedReceives(pending.wsInstance, mockedReceives);
+        pending.resolve();
+      } else if (decision === 'MOCK_ERROR') {
+        pending.reject(new Error(errorMessage || 'WebSocket send mocked error'));
+      }
+    }
+  } else if (type === 'WS_RECEIVE_DECISION_RESPONSE') {
+    var requestId = payload.requestId;
+    var decision = payload.decision;
+    var mockedData = payload.mockedData;
+    var pending = pendingWsReceiveRequests.get(requestId);
+    if (pending) {
+      pendingWsReceiveRequests.delete(requestId);
+      var originalEvent = pending.originalEvent;
+      var wsInstancePatched = pending.wsInstancePatched;
+      var listener = pending.listener;
+      // Prefer addEventListener handler if present, else onmessage
+      if (decision === 'PROCEED') {
+        if (listener) {
+          listener.call(wsInstancePatched, originalEvent);
+        } else if (wsInstancePatched.onmessage) {
+          wsInstancePatched.onmessage.call(wsInstancePatched, originalEvent);
+        }
+      } else if (decision === 'MOCK_TO_CLIENT') {
+        var mockEvent = new MessageEvent('message', { data: mockedData });
+        if (listener) {
+          listener.call(wsInstancePatched, mockEvent);
+        } else if (wsInstancePatched.onmessage) {
+          wsInstancePatched.onmessage.call(wsInstancePatched, mockEvent);
+        }
+      }
+      // BLOCK: do nothing
+    }
+  }
+});
+
+self.WebSocket = WebSocketProxy;
+`;
+
+          const codeToExecuteInWorker = `\n${fetchPatcher}\n${webSocketPatcher}\n${bundledCode}\n`; // EXECUTION_COMPLETE logic is now bundled
 
           const workerInstance = new Worker(
             new URL("@/lib/challenges/runner.worker.ts", import.meta.url),
@@ -403,6 +572,7 @@ console.debug('[FetchPatcher] self.fetch has been patched for RPC endpoint:', rp
                   props
                     .onRpcCallInterceptedForDecision(decisionPayload)
                     .then((decision) => {
+                      console.debug("[FetchPatcher] FETCH_DECISION", { requestId: decisionPayload.requestId, url: decisionPayload.url, rpcMethod: decisionPayload.rpcMethod, decision });
                       if (workerRef.current) {
                         // Ensure worker is still active
                         workerRef.current.postMessage({
@@ -445,9 +615,70 @@ console.debug('[FetchPatcher] self.fetch has been patched for RPC endpoint:', rp
                   }
                 }
                 break;
-              // The old INTERCEPTED_RPC_CALL case is removed as this new mechanism supersedes it.
-              // If props?.onRpcCallIntercepted was used for pure logging, that can be adapted.
-              // For now, the new 'addLog' above for INTERCEPTED_RPC_CALL_AWAIT_DECISION serves a similar logging purpose.
+
+                case "INTERCEPTED_WS_SEND_AWAIT_DECISION":
+                const wsSendData = message.payload as InterceptedWsSendData;
+                if (props?.onWsSendInterceptedForDecision) {
+                  props.onWsSendInterceptedForDecision(wsSendData)
+                    .then(decision => {
+                      console.debug("[WsPatcher] WS_SEND_DECISION", { wsRequestId: wsSendData.wsRequestId, url: wsSendData.url, decision });
+                      if (workerRef.current) { // Check if worker is still active
+                        workerRef.current.postMessage({
+                          type: "WS_SEND_DECISION_RESPONSE",
+                          payload: { requestId: wsSendData.wsRequestId, ...decision },
+                        });
+                      }
+                    })
+                    .catch(err => {
+                      console.error("Error in onWsSendInterceptedForDecision callback:", err);
+                      if (workerRef.current) { // Default to PROCEED on error
+                        workerRef.current.postMessage({
+                          type: "WS_SEND_DECISION_RESPONSE",
+                          payload: { requestId: wsSendData.wsRequestId, decision: "PROCEED" },
+                        });
+                      }
+                    });
+                } else { // No callback, default to PROCEED
+                  if (workerRef.current) {
+                    workerRef.current.postMessage({
+                      type: "WS_SEND_DECISION_RESPONSE",
+                      payload: { requestId: wsSendData.wsRequestId, decision: "PROCEED" },
+                    });
+                  }
+                }
+                break;
+              case "INTERCEPTED_WS_RECEIVE_AWAIT_DECISION":
+                const wsReceiveData = message.payload as InterceptedWsReceiveData;
+                if (props?.onWsReceiveInterceptedForDecision) {
+                  props.onWsReceiveInterceptedForDecision(wsReceiveData)
+                    .then(decision => {
+                      console.debug("[WsPatcher] WS_RECEIVE_DECISION", { wsRequestId: wsReceiveData.wsRequestId, url: wsReceiveData.url, decision });
+                      if (workerRef.current) { // Check if worker is still active
+                        workerRef.current.postMessage({
+                          type: "WS_RECEIVE_DECISION_RESPONSE",
+                          payload: { requestId: wsReceiveData.wsRequestId, ...decision },
+                        });
+                      }
+                    })
+                    .catch(err => {
+                      console.error("Error in onWsReceiveInterceptedForDecision callback:", err);
+                      if (workerRef.current) { // Default to PROCEED on error
+                        workerRef.current.postMessage({
+                          type: "WS_RECEIVE_DECISION_RESPONSE",
+                          payload: { requestId: wsReceiveData.wsRequestId, decision: "PROCEED" },
+                        });
+                      }
+                    });
+                } else { // No callback, default to PROCEED
+                  if (workerRef.current) {
+                    workerRef.current.postMessage({
+                      type: "WS_RECEIVE_DECISION_RESPONSE",
+                      payload: { requestId: wsReceiveData.wsRequestId, decision: "PROCEED" },
+                    });
+                  }
+                }
+                break;
+              // End of new WebSocket message handlers
               default:
                 addLog("SYSTEM", "Unknown message from worker:", message);
             }
