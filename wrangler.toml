@@ -7,9 +7,6 @@ routes = [
     { pattern = "learn.blueshift.gg", custom_domain = true }
 ]
 
-[vars]
-NEXT_PUBLIC_APP_URL = "https://learn.blueshift.gg"
-
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
