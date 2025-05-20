@@ -231,10 +231,11 @@ export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
         if (result.outputFiles && result.outputFiles.length > 0) {
           const bundledCode = result.outputFiles[0].text;
           const fetchPatcher = `
-// RPC_ENDPOINT should be globally available here due to esbuild 'define' on process.env.RPC_ENDPOINT
-const rpcEndpointForWorker = typeof process !== 'undefined' && process.env && process.env.RPC_ENDPOINT 
-  ? process.env.RPC_ENDPOINT 
-  : 'https://api.devnet.solana.com'; // Fallback if define didn't work as expected for some reason
+const rpcEndpointForWorker = "${process.env.NEXT_PUBLIC_RPC_ENDPOINT}";
+
+if (!rpcEndpointForWorker) {
+  throw new Error("RPC endpoint is not defined. Please set NEXT_PUBLIC_RPC_ENDPOINT environment variable.");
+}
 
 const originalFetch = self.fetch;
 console.debug('[FetchPatcher] Original self.fetch stored. Targeting endpoint:', rpcEndpointForWorker);
