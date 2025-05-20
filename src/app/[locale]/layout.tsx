@@ -1,4 +1,4 @@
-import {getTranslations} from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 import localFont from "next/font/local";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
@@ -9,6 +9,7 @@ import Footer from "@/app/components/Footer/Footer";
 import GlobalModals from "@/app/components/Modals/GlobalModals";
 import WalletProvider from "@/app/contexts/WalletProvider";
 import { Geist_Mono, Funnel_Display } from "next/font/google";
+import type { Metadata } from "next";
 
 const GeistMono = Geist_Mono({
   subsets: ["latin"],
@@ -58,14 +59,27 @@ interface RootLayoutProps {
   }>;
 }
 
-export async function generateMetadata({params}: RootLayoutProps) {
+export async function generateMetadata({ params }: RootLayoutProps) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'metadata' });
+  const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
-    title: t('title'),
-    description: t('description'),
-    keywords: t('keywords'),
+    title: t("title"),
+    description: t("description"),
+    keywords: t("keywords"),
+    openGraph: {
+      title: t("title"),
+      description: t("description"),
+      url: "https://learn.blueshift.gg",
+      siteName: t("title"),
+      images: [
+        {
+          url: "https://learn.blueshift.gg/graphics/meta-image.png",
+          width: 1200,
+          height: 628,
+        },
+      ],
+    },
   };
 }
 

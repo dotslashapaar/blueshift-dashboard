@@ -1,6 +1,6 @@
 "use client";
 
-import { CourseMetadata } from "@/app/utils/course";
+import { courseColors, CourseMetadata } from "@/app/utils/course";
 
 import { usePersistentStore } from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
@@ -55,10 +55,17 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
             <div key={course.slug} className="flex flex-col group">
               <div className="flex flex-col gap-y-8">
                 <div className="flex items-center gap-x-3">
-                  <Icon
-                    className="text-brand-secondary"
-                    name={course.language}
-                  />
+                  <div
+                    className="w-[24px] h-[24px] rounded-sm flex items-center justify-center"
+                    style={{
+                      backgroundColor: `rgb(${courseColors[course.language]},0.10)`,
+                    }}
+                  >
+                    <Icon
+                      className="text-brand-secondary"
+                      name={course.language}
+                    />
+                  </div>
                   <span className="text-lg leading-none font-medium text-secondary">
                     {t(`courses.${course.slug}.title`)}
                   </span>

@@ -116,7 +116,7 @@ export default function TableOfContents() {
                     .getElementById(section.id)
                     ?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className={`relative font-medium text-secondary transition hover:text-primary`}
+                className={`relative text-sm font-medium text-secondary transition hover:text-primary`}
               >
                 {activeSection === section.id && (
                   <motion.div

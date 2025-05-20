@@ -21,7 +21,7 @@ export default function ShiftGoal() {
         </div>
         <Button
           label={t("shift_goal.connect_discord")}
-          variant="secondary"
+          variant="tertiary"
           icon="Discord"
           size="lg"
           className="!w-full"

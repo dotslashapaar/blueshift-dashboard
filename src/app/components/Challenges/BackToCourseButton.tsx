@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from '@/i18n/navigation';
+import { Link } from "@/i18n/navigation";
 import Button from "../Button/Button";
 import { useTranslations } from "next-intl";
 import { CourseMetadata } from "@/app/utils/course";
@@ -21,7 +21,7 @@ export default function BackToCourseButton({
       <Button
         label={t("challenges.back_to_lessons")}
         icon="ArrowLeft"
-        variant="secondary"
+        variant="tertiary"
       />
     </Link>
   );

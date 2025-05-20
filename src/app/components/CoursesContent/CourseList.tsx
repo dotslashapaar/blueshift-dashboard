@@ -1,6 +1,6 @@
 "use client";
 
-import { CourseMetadata } from "@/app/utils/course";
+import { courseColors, CourseMetadata } from "@/app/utils/course";
 import { usePersistentStore } from "@/stores/store";
 import CourseCard from "../CourseCard/CourseCard";
 import classNames from "classnames";
@@ -245,7 +245,14 @@ export default function CourseList({
                   <div key={language} className="flex flex-col">
                     <div className="flex flex-col gap-y-8 ">
                       <div className="flex items-center gap-x-3">
-                        <Icon name={section.icon} />
+                        <div
+                          className="w-[24px] h-[24px] rounded-sm flex items-center justify-center"
+                          style={{
+                            backgroundColor: `rgb(${courseColors[section.icon]},0.10)`,
+                          }}
+                        >
+                          <Icon name={section.icon} size={16 as 14} />
+                        </div>
                         <span className="text-lg leading-none font-medium text-secondary">
                           {t(section.title)}
                         </span>
@@ -361,9 +368,6 @@ export default function CourseList({
                           />
                         );
                       })}
-                  </div>
-                  <div className="pt-4 pb-12 relative w-full">
-                    <Divider />
                   </div>
                 </>
               )}

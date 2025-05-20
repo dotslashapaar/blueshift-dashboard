@@ -17,7 +17,7 @@ export default function Badge({
       transition={{ duration: 0.2, ease: anticipate }}
       key={variant}
       className={classNames(
-        "px-3 h-[36px] rounded-full font-medium capitalize text-sm flex items-center gap-x-2",
+        "px-2.5 py-1.5 rounded-full font-medium capitalize font-mono text-[13px] flex items-center gap-x-2",
         variant === "incomplete" &&
           "bg-background-card-foreground text-secondary",
         variant === "passed" && "bg-success/8 text-success",
@@ -29,7 +29,7 @@ export default function Badge({
       {variant === "loading" ? (
         <>
           <Loading className="text-brand-primary" />
-          <span className="text-brand-primary">Testing</span>
+          <span className="text-brand-primary pt-[4px]">Testing</span>
         </>
       ) : (
         <span>{label}</span>

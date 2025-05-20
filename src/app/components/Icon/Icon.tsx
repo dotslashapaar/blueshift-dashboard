@@ -4,7 +4,7 @@ export interface IconProps {
   /** Name of Icon */
   name: IconName;
   /** Size of Icon */
-  size?: 18 | 14 | 12;
+  size?: 18 | 14 | 12 | 8;
   /** Custom Classnames / Icon Color */
   className?: string;
 }

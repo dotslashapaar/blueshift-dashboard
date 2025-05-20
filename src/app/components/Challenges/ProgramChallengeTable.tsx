@@ -96,19 +96,22 @@ export default function ChallengeTable({
                 variant="primary"
                 size="md"
                 icon="Lessons"
-                label={t("challenge_page.challenge_completed.view_other_courses")}
+                label={t(
+                  "challenge_page.challenge_completed.view_other_courses"
+                )}
               />
             </Link>
           </motion.div>
         )}
         <div
           className={classNames(
-            "gap-y-6 sm:gap-y-0 flex sm:flex-row flex-col items-center justify-between px-6 py-5 rounded-[10px] bg-background-card-foreground"
+            "gap-y-6 sm:gap-y-0 flex sm:flex-row flex-col items-center justify-between px-4 sm:px-6 py-4 sm:py-5 rounded-[10px] bg-background-card-foreground"
           )}
         >
           <div className="flex flex-col gap-y-4 w-full sm:w-1/2">
             <span className="font-medium">
-              {completedRequirementsCount}/{requirements.length} {t("challenge_page.num_tests_passed")}
+              {completedRequirementsCount}/{requirements.length}{" "}
+              {t("challenge_page.num_tests_passed")}
             </span>
             <div
               className={classNames(
@@ -176,7 +179,7 @@ export default function ChallengeTable({
               disabled={requirement.status === "incomplete"}
               type="button"
               className={classNames(
-                "flex flex-col gap-y-4 group px-4 enabled:hover:cursor-pointer py-3 rounded-xl transition duration-200 enabled:hover:bg-background-card-foreground/50",
+                "flex flex-col gap-y-4 group sm:px-4 enabled:hover:cursor-pointer py-3 rounded-xl transition duration-200 enabled:hover:bg-background-card-foreground/50",
                 selectedRequirement === requirement &&
                   "pb-6 bg-background-card-foreground/50",
                 selectedRequirement !== null &&
@@ -189,11 +192,17 @@ export default function ChallengeTable({
                 className="flex items-center justify-between"
                 key={requirement.instructionKey}
               >
-                <span className="font-medium">{t(`courses.${courseSlug}.challenge.requirements.${requirement.instructionKey}.title`)}</span>
+                <span className="font-medium text-sm sm:text-base truncate max-w-[60%]">
+                  {t(
+                    `courses.${courseSlug}.challenge.requirements.${requirement.instructionKey}.title`
+                  )}
+                </span>
                 {!isLoading && !error ? (
                   <div className="flex items-center gap-x-4">
                     <ChallengeBadge
-                      label={t(`challenge_page.test_results.${requirement.status}`)}
+                      label={t(
+                        `challenge_page.test_results.${requirement.status}`
+                      )}
                       variant={requirement.status}
                     />
                     <Icon

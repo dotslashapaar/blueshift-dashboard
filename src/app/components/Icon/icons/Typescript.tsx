@@ -1,6 +1,6 @@
 export interface IconProps {
   className?: string;
-  size?: 18 | 14 | 12;
+  size?: 18 | 14 | 12 | 8;
 }
 
 export const TypescriptIcon = ({ className, size = 18 }: IconProps) => {
