@@ -121,7 +121,6 @@ async function main() {
           <BlueshiftEditor
             initialCode={initialCode}
             onCodeChange={handleCodeUpdate}
-            title={editorTitle}
           />
           {/* TODO: Extract execution logs and execution components out of Right Panel */}
           <RightPanel
