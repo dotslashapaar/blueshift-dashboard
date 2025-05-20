@@ -34,10 +34,7 @@ interface ChallengeTableProps {
 }
 
 export default function ChallengeTable({
-  onRunCodeClick,
   requirements,
-  completedRequirementsCount,
-  allIncomplete,
   isLoading,
   error,
   verificationData,
@@ -82,7 +79,7 @@ export default function ChallengeTable({
         isOpen={isCompletedModalOpen}
         onClose={() => setIsCompletedModalOpen(false)}
       />
-      <div className="bg-background-card rounded-b-xl lg:rounded-none border lg:border-r-0 lg:border-t-0 lg:border-b-0 border-border min-w-full lg:min-w-[400px] lg:absolute top-[1px] px-4 lg:px-6 h-full lg:right-4 lg:border-l border-l-border pt-12 flex flex-col lg:gap-y-8 w-max justify-between lg:bg-background/50 backdrop-blur-sm overflow-hidden pb-6">
+      <div className="bg-background-card/50 rounded-b-xl lg:rounded-none w-full min-w-full lg:min-w-[400px] px-4 lg:px-6 lg:right-4 lg:border-l border-l-border lg:pt-12 flex flex-col lg:gap-y-8 justify-between overflow-hidden pb-6">
         {(courseStatus[courseSlug] === "Unlocked" ||
           courseStatus[courseSlug] === "Claimed") && (
           <motion.div
@@ -112,7 +109,7 @@ export default function ChallengeTable({
           </motion.div>
         )}
 
-        <div className="order-2 lg:order-1 flex flex-col gap-y-4 border-t border-border pt-8 lg:pt-0 lg:border-t-0">
+        <div className="order-2 lg:order-1 flex flex-col gap-y-4 pt-8 lg:pt-0 lg:border-t-0">
           {runnerLogs.length > 0 && (
             <div className="flex flex-col gap-y-2">
               <div className="flex flex-col gap-y-4 items-start overflow-hidden bg-background pt-4 px-1 pb-1 rounded-xl border border-border">
@@ -390,66 +387,6 @@ export default function ChallengeTable({
               </motion.button>
             ))}
           </div>
-        </div>
-
-        <div className="order-1 lg:order-2 flex items-center justify-between gap-x-8 lg:pt-8 lg:border-t lg:border-border">
-          <Button
-            variant="primary"
-            icon={"Play"}
-            size="md"
-            label={
-              isCodeRunning
-                ? t("challenge_page.running_program_btn")
-                : t("challenge_page.run_program_btn")
-            }
-            className="w-full"
-            onClick={onRunCodeClick}
-            disabled={overallIsLoading}
-          />
-          {/* <div className="flex flex-col gap-y-4 w-full">
-            <span className="font-medium font-mono text-sm">
-              {completedRequirementsCount}/{requirements.length}{" "}
-              {t("challenge_page.num_tests_passed")}
-            </span>
-            <div
-              className={classNames(
-                "h-[8px] w-full flex items-center gap-x-0.5 justify-start relative p-px bg-background rounded-full"
-              )}
-            >
-              {!allIncomplete ? (
-                <>
-                  {requirements.map((requirement, index) => (
-                    <motion.div
-                      key={requirement.instructionKey}
-                      className={classNames(
-                        "first:rounded-l-full last:rounded-r-full left-[1px]",
-                        requirement.status === "passed" &&
-                          "[background:linear-gradient(180deg,rgba(255,255,255,0.5)_0%,rgba(255,255,255,0)_100%),#00E66B]",
-                        requirement.status === "failed" &&
-                          "[background:linear-gradient(180deg,rgba(255,255,255,0.5)_0%,rgba(255,255,255,0)_100%),#FF285A]",
-                        requirement.status === "incomplete" && "bg-transparent"
-                      )}
-                      initial={{
-                        width: `0%`,
-                        height: 6,
-                      }}
-                      animate={{
-                        width: `${100 / requirements.length}%`,
-                        height: 6,
-                      }}
-                      transition={{
-                        duration: 0.4,
-                        ease: anticipate,
-                        delay: 0.2 * index,
-                      }}
-                    />
-                  ))}
-                </>
-              ) : (
-                <div className="w-4 h-1.5 [background:linear-gradient(180deg,rgba(255,255,255,0.5)_0%,rgba(255,255,255,0)_100%),#ADB9D2] rounded-l-full" />
-              )}
-            </div>
-          </div> */}
         </div>
       </div>
     </div>

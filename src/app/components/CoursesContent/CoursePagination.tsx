@@ -65,9 +65,7 @@ export default function CoursePagination({
         >
           <Icon name="ArrowLeft" />
         </button>
-        <span className="font-semibold">
-          {lessons[currentLesson - 1].title}
-        </span>
+        <span className="font-medium">{lessons[currentLesson - 1].title}</span>
         <button
           onClick={() => {
             router.push(
@@ -83,7 +81,9 @@ export default function CoursePagination({
         </button>
       </div>
       <div className="flex-col hidden xl:flex gap-y-4 pl-0">
-        <span className="font-mono text-sm pl-1 text-secondary">{t("lessons.lessons")}</span>
+        <span className="font-mono text-sm pl-1 text-secondary">
+          {t("lessons.lessons")}
+        </span>
         <div className="flex flex-col gap-y-3 pl-0">
           {lessons.map((lesson, index) => (
             <Link

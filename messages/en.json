@@ -137,8 +137,8 @@
   },
   "lessons": {
     "title": "Select a course to get started",
-    "subtitle": "Welcome,",
-    "subtitle_returning": "Welcome back,",
+    "subtitle": "Welcome",
+    "subtitle_returning": "Welcome back",
     "title_returning": "Jump back into a course",
     "get_started": "Get Started",
     "continue_learning": "Continue Learning",
@@ -227,6 +227,7 @@
     "upload_program_btn": "Upload Program",
     "run_program_btn": "Execute",
     "view_logs_btn": "View Logs",
+    "back_to_editor_btn": "Back to Editor",
     "running_program_btn": "Running...",
     "num_tests_passed": "Tests Passed",
     "test_results": {

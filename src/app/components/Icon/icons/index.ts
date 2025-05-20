@@ -20,6 +20,7 @@ import { LockedIcon } from "./Locked";
 import { PlayIcon } from "./Play";
 import { ProgressIcon } from "./Progress";
 import { RewardsIcon } from "./Rewards";
+import { RefreshIcon } from "./Refresh";
 import { RustIcon } from "./Rust";
 import { SearchIcon } from "./Search";
 import { ShiftArrowIcon } from "./ShiftArrow";
@@ -61,6 +62,7 @@ export const IconComponents = {
   Play: PlayIcon,
   Progress: ProgressIcon,
   Rewards: RewardsIcon,
+  Refresh: RefreshIcon,
   Rust: RustIcon,
   Search: SearchIcon,
   ShiftArrow: ShiftArrowIcon,

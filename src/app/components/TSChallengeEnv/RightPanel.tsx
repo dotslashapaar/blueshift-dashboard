@@ -15,8 +15,6 @@ import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { LogMessage } from "@/hooks/useEsbuildRunner";
 import { TestRequirement } from "@/app/components/TSChallengeEnv/types/test-requirements";
 import { AnimatePresence } from "motion/react";
-import Logo from "../Logo/Logo";
-import LogoGlyph from "../Logo/LogoGlyph";
 
 interface ChallengeTableProps {
   onRunCodeClick: () => void;
@@ -27,6 +25,7 @@ interface ChallengeTableProps {
   isCodeRunning: boolean;
   runnerLogs: LogMessage[];
   isEsbuildReady: boolean;
+  isPanelOpen: boolean;
 }
 
 export default function RightPanel({
@@ -38,12 +37,11 @@ export default function RightPanel({
   isCodeRunning,
   runnerLogs,
   isEsbuildReady,
+  isPanelOpen,
 }: ChallengeTableProps) {
   const t = useTranslations();
   const [selectedRequirement, setSelectedRequirement] =
     useState<TestRequirement | null>(null);
-
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
   useEffect(() => {
@@ -66,47 +64,6 @@ export default function RightPanel({
         onClose={() => setIsCompletedModalOpen(false)}
       />
       <div>
-        <div className="absolute left-[1px] top-9 w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
-          <LogoGlyph width={16} />
-          <div className="flex items-center gap-x-2.5">
-            {!isPanelOpen ? (
-              <>
-                <Button
-                  variant="link"
-                  icon={"Play"}
-                  iconSize={12}
-                  size="sm"
-                  label={
-                    isCodeRunning
-                      ? t("challenge_page.running_program_btn")
-                      : t("challenge_page.run_program_btn")
-                  }
-                  className="w-max"
-                  onClick={() => {
-                    setIsPanelOpen(true);
-                    onRunCodeClick();
-                  }}
-                  disabled={overallIsLoading}
-                />
-                <Button
-                  variant="link"
-                  size="sm"
-                  label={t("challenge_page.view_logs_btn")}
-                  className="w-max"
-                  onClick={() => setIsPanelOpen(true)}
-                />
-              </>
-            ) : (
-              <Button
-                variant="link"
-                size="sm"
-                label="Back to Editor"
-                className="w-max"
-                onClick={() => setIsPanelOpen(false)}
-              />
-            )}
-          </div>
-        </div>
         <AnimatePresence>
           {isPanelOpen && (
             <motion.div

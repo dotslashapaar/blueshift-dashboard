@@ -24,6 +24,8 @@ import { useChallengeVerifier } from "@/hooks/useChallengeVerifier";
 import { Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
 import BlueshiftEditor from "@/app/components/TSChallengeEnv/BlueshiftEditor";
+import LogoGlyph from "../Logo/LogoGlyph";
+import RightPanel from "../TSChallengeEnv/RightPanel";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const rpcEndpoint = process.env.NEXT_PUBLIC_CHALLENGE_RPC_ENDPOINT;
@@ -106,7 +108,7 @@ export default function ChallengesContent({
     }
 
     console.debug(
-      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`,
+      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`
     );
 
     // For all other calls, or if rpcMethod is null, proceed as normal
@@ -114,11 +116,11 @@ export default function ChallengesContent({
   };
 
   const handleWsSendForDecision = async (
-    wsSendData: InterceptedWsSendData,
+    wsSendData: InterceptedWsSendData
   ): Promise<WsSendDecision> => {
     console.log(
       "[ClientChallengesContent] Intercepted WebSocket Send, Awaiting Decision:",
-      wsSendData,
+      wsSendData
     );
 
     const targetHost = new URL(rpcEndpoint!).host;
@@ -129,7 +131,7 @@ export default function ChallengesContent({
         wsSendData.data.includes("signatureSubscribe")
       ) {
         console.log(
-          "[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe",
+          "[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe"
         );
 
         const data = JSON.parse(wsSendData.data);
@@ -173,17 +175,17 @@ export default function ChallengesContent({
 
     console.log(
       "[ClientChallengesContent] WebSocket send allowed to PROCEED:",
-      wsSendData,
+      wsSendData
     );
     return { decision: "PROCEED" };
   };
 
   const handleWsReceiveForDecision = async (
-    wsReceiveData: InterceptedWsReceiveData,
+    wsReceiveData: InterceptedWsReceiveData
   ): Promise<WsReceiveDecision> => {
     console.log(
       "[ClientChallengesContent] Intercepted WebSocket Receive, Awaiting Decision:",
-      wsReceiveData,
+      wsReceiveData
     );
 
     return { decision: "PROCEED" };
@@ -359,27 +361,75 @@ export default function ChallengesContent({
               className="px-4 py-14 pb-20 max-w-app grid grid-cols-1 md:px-8 lg:px-14 mx-auto w-full gap-y-12 lg:gap-x-24"
             >
               <div className="flex flex-col relative w-full h-full">
-                <div className="flex flex-col gap-y-12 w-full h-full min-h-[35dvh] lg:min-h-[65dvh]">
-                  <BlueshiftEditor
-                    initialCode={editorCode}
-                    onCodeChange={setEditorCode}
-                    title={t(`courses.${currentCourse.slug}.challenge.title`)}
-                  />
+                <div className="flex flex-col w-full h-full min-h-[35dvh] lg:min-h-[65dvh]">
+                  <div className="w-full h-full flex flex-col rounded-xl overflow-hidden border border-border">
+                    <div className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-xl flex items-center border-b border-border">
+                      <div className="flex items-center gap-x-2">
+                        <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
+                        <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
+                        <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
+                      </div>
+                      <div className="text-sm font-medium text-secondary absolute left-1/2 -translate-x-1/2 flex items-center gap-x-1.5">
+                        <Icon
+                          name="Challenge"
+                          size={12}
+                          className="hidden sm:block"
+                        />
+                        <span className="flex-shrink-0">
+                          {t(`courses.${currentCourse.slug}.challenge.title`)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="left-[1px] w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
+                      <LogoGlyph width={16} />
+                      <div className="flex items-center gap-x-2.5">
+                        <>
+                          <Button
+                            variant="link"
+                            icon={"Play"}
+                            iconSize={12}
+                            size="sm"
+                            label={
+                              isCodeRunning
+                                ? t("challenge_page.running_program_btn")
+                                : t("challenge_page.run_program_btn")
+                            }
+                            className="w-max !text-brand-primary"
+                            onClick={() => {
+                              handleRunCode();
+                            }}
+                            disabled={isVerificationLoading}
+                          />
+                        </>
+                      </div>
+                    </div>
+                    <div className="flex flex-col lg:grid lg:grid-cols-3 w-full h-full">
+                      <BlueshiftEditor
+                        initialCode={editorCode}
+                        onCodeChange={setEditorCode}
+                        className="col-span-2"
+                        title={t(
+                          `courses.${currentCourse.slug}.challenge.title`
+                        )}
+                      />
+                      <ClientChallengeTable
+                        onRunCodeClick={handleRunCode}
+                        requirements={requirements}
+                        completedRequirementsCount={completedRequirementsCount}
+                        allIncomplete={allIncomplete}
+                        isLoading={isVerificationLoading}
+                        error={verificationHookError}
+                        verificationData={verificationData}
+                        courseSlug={currentCourse.slug}
+                        isCodeRunning={isCodeRunning}
+                        runnerLogs={runnerLogs}
+                        isEsbuildReady={
+                          esBuildInitializationState === "initialized"
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
-
-                <ClientChallengeTable
-                  onRunCodeClick={handleRunCode}
-                  requirements={requirements}
-                  completedRequirementsCount={completedRequirementsCount}
-                  allIncomplete={allIncomplete}
-                  isLoading={isVerificationLoading}
-                  error={verificationHookError}
-                  verificationData={verificationData}
-                  courseSlug={currentCourse.slug}
-                  isCodeRunning={isCodeRunning}
-                  runnerLogs={runnerLogs}
-                  isEsbuildReady={esBuildInitializationState === "initialized"}
-                />
               </div>
             </motion.div>
           )}

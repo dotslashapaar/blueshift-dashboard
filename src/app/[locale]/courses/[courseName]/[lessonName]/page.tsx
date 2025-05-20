@@ -9,6 +9,7 @@ import CoursePagination from "@/app/components/CoursesContent/CoursePagination";
 import { Link } from "@/i18n/navigation";
 import Button from "@/app/components/Button/Button";
 import LessonTitle from "@/app/components/LessonTitle/LessonTitle";
+import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 interface LessonPageProps {
   params: Promise<{
     courseName: string;
@@ -56,7 +57,16 @@ export default async function LessonPage({ params }: LessonPageProps) {
       >
         <div className="px-4 py-14 pb-20 md:px-8 lg:px-14 max-w-app w-full mx-auto flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
           <div className="flex flex-col gap-y-2">
-            <div className="flex items-center gap-x-2">
+            <div className="flex items-center gap-x-2 relative w-max">
+              <CrosshairCorners
+                size={5}
+                spacingTop={2}
+                spacingBottom={2}
+                spacingX={6}
+                style={{
+                  color: `rgb(${courseColors[courseMetadata.language]},1)`,
+                }}
+              />
               <div
                 className="w-[24px] h-[24px] rounded-sm flex items-center justify-center"
                 style={{

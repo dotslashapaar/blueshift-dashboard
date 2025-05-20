@@ -8,6 +8,7 @@ import { courseColors } from "@/app/utils/course";
 import { getCourse } from "@/app/utils/mdx";
 import ProgramChallengesContent from "@/app/components/Challenges/ProgramChallengesContent";
 import ClientChallengesContent from "@/app/components/Challenges/ClientChallengesContent";
+import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 
 interface ChallengePageProps {
   params: Promise<{
@@ -35,7 +36,16 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       >
         <div className="px-4 py-14 pb-20 max-w-app md:px-8 lg:px-14 mx-auto w-full flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
           <div className="flex flex-col gap-y-2">
-            <div className="flex items-center gap-x-2">
+            <div className="flex items-center gap-x-2 relative w-max">
+              <CrosshairCorners
+                size={5}
+                spacingTop={2}
+                spacingBottom={2}
+                spacingX={6}
+                style={{
+                  color: `rgb(${courseColors[courseMetadata.language]},1)`,
+                }}
+              />
               <div
                 className="w-[24px] h-[24px] rounded-sm flex items-center justify-center"
                 style={{

@@ -9,6 +9,10 @@ import { useEsbuildRunner } from "@/hooks/useEsbuildRunner";
 import { TestRequirement } from "@/app/components/TSChallengeEnv/types/test-requirements";
 import { useState } from "react";
 import Icon from "../Icon/Icon";
+import Button from "../Button/Button";
+import LogoGlyph from "../Logo/LogoGlyph";
+import { useTranslations } from "next-intl";
+
 interface IDEProps {
   initialCode: string;
   challengeTitle: string;
@@ -16,6 +20,7 @@ interface IDEProps {
 
 export default function IDE() {
   const [ideView, setIdeView] = useState<"minified" | "expanded">("minified");
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const {
     esBuildInitializationState,
     isRunning: isCodeRunning,
@@ -60,6 +65,7 @@ async function main() {
   // TODO rename this to isVerifying
   const isVerificationLoading = false;
 
+  const t = useTranslations();
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -75,7 +81,7 @@ async function main() {
           "left-1/2 -translate-x-1/2 fixed !max-w-[90dvw] !bottom-0 !min-h-[300px] !py-0 backdrop-blur-xl z-50"
       )}
     >
-      <div className="w-full h-full flex flex-col rounded-t-xl lg:rounded-xl overflow-hidden border border-border">
+      <div className="w-full h-full flex flex-col rounded-xl overflow-hidden border border-border">
         <div className="flex flex-col relative w-full h-full">
           <div className="w-full py-2.5 h-[36px] flex-shrink-0 z-30 relative px-4 bg-background-card rounded-t-xl flex items-center border-b border-border">
             <div className="flex items-center gap-x-2">
@@ -118,12 +124,51 @@ async function main() {
               <span className="flex-shrink-0">{editorTitle}</span>
             </div>
           </div>
+          <div className="w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
+            <LogoGlyph width={16} />
+            <div className="flex items-center gap-x-2.5">
+              {!isPanelOpen ? (
+                <>
+                  <Button
+                    variant="link"
+                    icon={"Play"}
+                    iconSize={12}
+                    size="sm"
+                    label={
+                      isCodeRunning
+                        ? t("challenge_page.running_program_btn")
+                        : t("challenge_page.run_program_btn")
+                    }
+                    className="w-max !text-brand-primary"
+                    disabled={isVerificationLoading}
+                    onClick={() => setIsPanelOpen(true)}
+                  />
+                  <Button
+                    variant="link"
+                    size="sm"
+                    label={t("challenge_page.view_logs_btn")}
+                    className="w-max"
+                    onClick={() => setIsPanelOpen(true)}
+                  />
+                </>
+              ) : (
+                <Button
+                  variant="link"
+                  size="sm"
+                  label={t("challenge_page.back_to_editor_btn")}
+                  className="w-max"
+                  onClick={() => setIsPanelOpen(false)}
+                />
+              )}
+            </div>
+          </div>
           <BlueshiftEditor
             initialCode={initialCode}
             onCodeChange={handleCodeUpdate}
           />
           {/* TODO: Extract execution logs and execution components out of Right Panel */}
           <RightPanel
+            isPanelOpen={isPanelOpen}
             onRunCodeClick={() => console.log("execute pressed")}
             requirements={requirements}
             isLoading={isVerificationLoading}
