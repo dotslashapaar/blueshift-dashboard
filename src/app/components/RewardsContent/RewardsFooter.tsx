@@ -36,6 +36,7 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
           icon="Claim"
           iconSide="right"
           className="!w-full !min-w-[150px]"
+          disabled
         />
       )}
       {status === "Claimed" && (
