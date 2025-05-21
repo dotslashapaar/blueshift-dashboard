@@ -69,8 +69,9 @@ export async function generateMetadata({ params }: RootLayoutProps) {
     keywords: t("keywords"),
     openGraph: {
       title: t("title"),
+      type: "website",
       description: t("description"),
-      url: "/",
+      url: `/${locale}`,
       siteName: t("title"),
       images: [
         {

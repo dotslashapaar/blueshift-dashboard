@@ -12,6 +12,8 @@ import LessonTitle from "@/app/components/LessonTitle/LessonTitle";
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 import { notFound } from "next/navigation";
 import defaultOpenGraphImage from "@/../public/graphics/meta-image.png";
+import { getPathname } from "@/i18n/navigation";
+import { Metadata } from "next";
 
 interface LessonPageProps {
   params: Promise<{
@@ -21,24 +23,31 @@ interface LessonPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: LessonPageProps) {
-  const { courseName, locale } = await params;
+export async function generateMetadata({ params }: LessonPageProps): Metadata {
+  const { courseName, lessonName, locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
+  const pathname = getPathname({
+    locale,
+    href: `/courses/${courseName}/${lessonName}`,
+  });
 
   let ogImage = defaultOpenGraphImage;
   try {
     const imageModule = await import(
-      `@/../public//graphics/courses/og-${courseName}.png`
+      `@/../public/graphics/courses/og-${courseName}.png`
     );
     ogImage = imageModule.default;
   } catch {}
 
   return {
+    title: t("title"),
+    description: t("description"),
     openGraph: {
       title: t("title"),
+      type: "website",
       description: t("description"),
-      url: "/",
       siteName: t("title"),
+      url: pathname,
       images: [
         {
           url: ogImage.src,
