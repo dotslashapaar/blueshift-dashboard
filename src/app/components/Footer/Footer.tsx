@@ -3,6 +3,11 @@ import Icon from "../Icon/Icon";
 
 export default function Footer() {
   const year = new Date().getFullYear();
+
+  const twitterLink = process.env.NEXT_PUBLIC_TWITTER_LINK ?? "";
+  const discordLink = process.env.NEXT_PUBLIC_DISCORD_LINK ?? "";
+  const githubLink = process.env.NEXT_PUBLIC_GITHUB_LINK ?? "";
+
   return (
     <div className="border-t border-t-border bg-background-card py-8">
       <div className="wrapper">
@@ -14,19 +19,19 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-x-8">
             <Link
-              href="/"
+              href={twitterLink}
               className="text-tertiary hover:text-primary transition"
             >
               <Icon name="X"></Icon>
             </Link>
             <Link
-              href="/"
+              href={githubLink}
               className="text-tertiary hover:text-primary transition"
             >
               <Icon name="Github"></Icon>
             </Link>
             <Link
-              href="/"
+              href={discordLink}
               className="text-tertiary hover:text-primary transition"
             >
               <Icon name="Discord"></Icon>
