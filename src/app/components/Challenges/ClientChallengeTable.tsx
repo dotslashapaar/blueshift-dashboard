@@ -31,6 +31,7 @@ interface ChallengeTableProps {
   isCodeRunning: boolean;
   runnerLogs: LogMessage[];
   isEsbuildReady: boolean;
+  onRedoChallenge: () => void;
 }
 
 export default function ChallengeTable({
@@ -42,6 +43,7 @@ export default function ChallengeTable({
   isCodeRunning,
   runnerLogs,
   isEsbuildReady,
+  onRedoChallenge,
 }: ChallengeTableProps) {
   const t = useTranslations();
   const [selectedRequirement, setSelectedRequirement] =
@@ -106,6 +108,22 @@ export default function ChallengeTable({
                 )}
               />
             </Link>
+            <div className="relative w-full">
+              <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">
+                {t(`challenge_page.challenge_completed.divider_label`).toUpperCase()}
+              </div>
+              <div className="w-full h-[1px] bg-border absolute"></div>
+            </div>
+            <Button
+              variant="secondary"
+              size="md"
+              icon="Refresh"
+              label={t("challenge_page.challenge_completed.redo")}
+              onClick={() => {
+                setCourseStatus(courseSlug, "Locked");
+                onRedoChallenge();
+              }}
+            />
           </motion.div>
         )}
 

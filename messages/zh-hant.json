@@ -237,7 +237,9 @@
     "challenge_completed": {
       "title": "挑戰完成",
       "body": "您已完成此挑戰",
-      "view_other_courses": "查看其他課程"
+      "view_other_courses": "查看其他課程",
+      "divider_label": "或",
+      "redo": "重做挑戰"
     }
   }
 }

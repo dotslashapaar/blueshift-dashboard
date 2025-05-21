@@ -238,7 +238,9 @@
     "challenge_completed": {
       "title": "Challenge Complete",
       "body": "You have already completed this challenge.",
-      "view_other_courses": "View Other Courses"
+      "view_other_courses": "View Other Courses",
+      "divider_label": "Or",
+      "redo": "Redo Challenge"
     }
   }
 }

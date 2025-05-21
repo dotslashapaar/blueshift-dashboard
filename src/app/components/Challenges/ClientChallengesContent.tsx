@@ -193,12 +193,13 @@ export default function ChallengesContent({
 
   const {
     esBuildInitializationState,
+    esbuildInitializationError,
     isRunning: isCodeRunning,
     logs: runnerLogs,
     error: runnerError,
     addLog,
     runCode,
-    clearLogs: clearRunnerLogs,
+    clearLogs,
   } = useEsbuildRunner({
     onRpcCallInterceptedForDecision: handleRpcCallForDecision,
     onWsSendInterceptedForDecision: handleWsSendForDecision,
@@ -276,8 +277,11 @@ export default function ChallengesContent({
     uploadTransaction,
     requirements,
     completedRequirementsCount,
-    allIncomplete,
+    allIncomplete: allIncompleteVerification,
     verificationData,
+    setRequirements,
+    initialRequirements,
+    setVerificationData,
   } = useChallengeVerifier({
     verificationEndpoint: verificationEndpoint,
     challenge: challenge!,
@@ -289,10 +293,19 @@ export default function ChallengesContent({
       alert("Code runner is not ready yet. Please wait a moment.");
       return;
     }
-    clearRunnerLogs();
-    setWasSendTransactionIntercepted(false); // Reset flag before new run
-    setVerificationFailureMessageLogged(false); // Reset verification failure flag
+    clearLogs();
+    setWasSendTransactionIntercepted(false);
+    setVerificationFailureMessageLogged(false);
+
+    // The verifier might be called after execution or based on editorCode directly
+    // For now, just run the code. Verification logic will use `verificationData`
     runCode(editorCode).catch(console.error);
+  };
+
+  const handleRedoChallenge = () => {
+    setVerificationData(null);
+    setRequirements(initialRequirements);
+    clearLogs();
   };
 
   return (
@@ -416,7 +429,7 @@ export default function ChallengesContent({
                         onRunCodeClick={handleRunCode}
                         requirements={requirements}
                         completedRequirementsCount={completedRequirementsCount}
-                        allIncomplete={allIncomplete}
+                        allIncomplete={allIncompleteVerification}
                         isLoading={isVerificationLoading}
                         error={verificationHookError}
                         verificationData={verificationData}
@@ -426,6 +439,7 @@ export default function ChallengesContent({
                         isEsbuildReady={
                           esBuildInitializationState === "initialized"
                         }
+                        onRedoChallenge={handleRedoChallenge}
                       />
                     </div>
                   </div>

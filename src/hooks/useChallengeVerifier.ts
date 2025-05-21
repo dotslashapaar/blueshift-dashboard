@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { challengeMetadata } from "@/app/utils/course";
 
 // --- Consolidated Types ---
@@ -41,6 +41,9 @@ interface UseChallengeVerifierReturn {
   uploadProgram: () => void;
   uploadTransaction: (base64EncodedTx: string) => Promise<void>;
   requirements: ChallengeRequirement[];
+  setRequirements: React.Dispatch<React.SetStateAction<ChallengeRequirement[]>>;
+  initialRequirements: ChallengeRequirement[];
+  setVerificationData: React.Dispatch<React.SetStateAction<VerificationApiResponse | null>>;
   completedRequirementsCount: number;
   allIncomplete: boolean;
 }
@@ -53,6 +56,36 @@ export function useChallengeVerifier({
     useState<VerificationApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const initialRequirements = challenge.requirements.map((req) => ({
+    ...req,
+    status: "incomplete" as const,
+  }));
+
+  const [requirements, setRequirements] =
+    useState<ChallengeRequirement[]>(initialRequirements);
+
+  useEffect(() => {
+    if (verificationData) {
+      setRequirements(
+        challenge.requirements.map((req): ChallengeRequirement => {
+          const result = verificationData?.results?.find(
+            (res) => res.instruction === req.instructionKey,
+          );
+          if (result) {
+            return { ...req, status: result.success ? "passed" : "failed" };
+          } else {
+            // If no result for a requirement, but we have verification data,
+            // it implies it wasn't part of this verification run or something else.
+            // Keep its existing status or mark as incomplete if it was reset.
+            // For simplicity now, let's find its current status or default to incomplete.
+            const currentReq = requirements.find(r => r.instructionKey === req.instructionKey);
+            return { ...req, status: currentReq?.status || "incomplete" };
+          }
+        }),
+      );
+    }
+  }, [verificationData, challenge.requirements]); // Removed 'requirements' from dependency array to avoid infinite loop
 
   const handleVerificationRequest = useCallback(
     async (body: FormData | string, headers?: HeadersInit) => {
@@ -145,19 +178,6 @@ export function useChallengeVerifier({
     [verificationEndpoint, handleVerificationRequest],
   );
 
-  const requirements = useMemo(() => {
-    return challenge.requirements.map((req): ChallengeRequirement => {
-      const result = verificationData?.results?.find(
-        (res) => res.instruction === req.instructionKey,
-      );
-      if (result) {
-        return { ...req, status: result.success ? "passed" : "failed" };
-      } else {
-        return { ...req, status: "incomplete" };
-      }
-    });
-  }, [challenge.requirements, verificationData]);
-
   const completedRequirementsCount = useMemo(() => {
     return requirements.filter((requirement) => requirement.status === "passed")
       .length;
@@ -179,6 +199,9 @@ export function useChallengeVerifier({
     uploadProgram,
     uploadTransaction,
     requirements,
+    setRequirements,
+    initialRequirements,
+    setVerificationData,
     completedRequirementsCount,
     allIncomplete,
   };

@@ -50,12 +50,18 @@ export default function ChallengesContent({
     completedRequirementsCount,
     allIncomplete,
     verificationData,
+    setVerificationData,
+    setRequirements,
+    initialRequirements,
   } = useChallengeVerifier({
     verificationEndpoint: verificationEndpoint,
     challenge: challenge!,
   });
 
-  // Remove the handleUploadClick function as it's now inside the hook
+  const handleRedoChallenge = () => {
+    setVerificationData(null);
+    setRequirements(initialRequirements);
+  };
 
   return (
     <div className="relative w-full h-full">
@@ -134,6 +140,7 @@ export default function ChallengesContent({
                 allIncomplete={allIncomplete}
                 verificationData={verificationData}
                 courseSlug={currentCourse.slug}
+                onRedoChallenge={handleRedoChallenge}
               />
             </motion.div>
           )}
