@@ -7,6 +7,9 @@ routes = [
     { pattern = "learn.blueshift.gg", custom_domain = true }
 ]
 
+[observability]
+enabled = true
+
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
