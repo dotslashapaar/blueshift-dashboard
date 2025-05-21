@@ -1,12 +1,12 @@
 # Introduction to Pinocchio - Chapter 1: The Vault
 
-While most Solana developers lean on Anchor, there are plenty of good reasons to write a program without it. Perhaps you need finer-grained control over every account field, or you’re chasing maximum performance free from macro overhead. 
+While most Solana developers lean on Anchor, there are plenty of good reasons to write a program without it. Perhaps you need finer-grained control over every account field, or you’re chasing maximum performance, or you just simply want to avoid macros.
 
 Native development is more demanding, yet in this chapter you’ll learn to craft a Solana program from scratch with Pinocchio; a lightweight library that lets you skip external frameworks and own every byte of your code.
 
 # Pinocchio 101
 
-Pinocchio is a minimalist Rust library that lets you craft Solana programs without pulling in the heavyweight `solana-program` crate. It works by treating the incoming transaction payload—accounts, instruction data, everything; as a single byte slice and reading it in-place via zero-copy techniques. 
+Pinocchio is a minimalist Rust library that lets you craft Solana programs without pulling in the heavyweight `solana-program` crate. It works by treating the incoming transaction payload: accounts, instruction data, everything; as a single byte slice and reads it in-place via zero-copy techniques. 
 
 That one design choice unlocks three big wins:
 - Fewer compute units. No extra deserialization or memory copies.
