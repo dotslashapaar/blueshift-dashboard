@@ -8,14 +8,8 @@ export default function WalletMultiButton() {
   const { setVisible: setWalletModalVisible } = useWalletModal();
   const [isHovering, setIsHovering] = useState<boolean>(false);
 
-  const {
-    connected,
-    connecting,
-    disconnect,
-    disconnecting,
-    publicKey,
-    wallet,
-  } = useWallet();
+  const { connected, connecting, disconnect, disconnecting, publicKey } =
+    useWallet();
 
   const handleClick = useCallback(() => {
     if (connected) {
@@ -26,15 +20,19 @@ export default function WalletMultiButton() {
   }, [connected, disconnect, setWalletModalVisible]);
 
   const getButtonLabel = () => {
-    if (connected && publicKey) {
-      const base58 = publicKey.toBase58();
-      return base58.slice(0, 4) + ".." + base58.slice(-4);
+    if (connecting) {
+      return "Connecting...";
     }
     if (disconnecting) {
-      return "Disconnecting";
+      return "Disconnecting...";
     }
-    if (wallet) {
-      return "Connect";
+    if (connected) {
+      if (publicKey) {
+        const base58 = publicKey.toBase58();
+        return `${base58.slice(0, 4)}..${base58.slice(-4)}`;
+      } else {
+        return "Loading...";
+      }
     }
     return "Connect Wallet";
   };
