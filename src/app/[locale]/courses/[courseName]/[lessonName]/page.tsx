@@ -11,6 +11,7 @@ import Button from "@/app/components/Button/Button";
 import LessonTitle from "@/app/components/LessonTitle/LessonTitle";
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 import { notFound } from "next/navigation";
+import defaultOpenGraphImage from "@/../public/graphics/meta-image.png";
 
 interface LessonPageProps {
   params: Promise<{
@@ -21,25 +22,28 @@ interface LessonPageProps {
 }
 
 export async function generateMetadata({ params }: LessonPageProps) {
-  const { courseName } = await params;
+  const { courseName, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
 
-  let ogImage;
+  let ogImage = defaultOpenGraphImage;
   try {
-    const path = `/graphics/courses/og-${courseName}.png`
-    ogImage = await import(`@/../public${path}`);
-  } catch {
-    const path = "/graphics/meta-image.png"
-    ogImage = await import(`@/../public/${path}`);
-  }
+    const imageModule = await import(
+      `@/../public//graphics/courses/og-${courseName}.png`
+    );
+    ogImage = imageModule.default;
+  } catch {}
 
   return {
-    metadataBase: new URL("https://learn.blueshift.gg"),
     openGraph: {
+      title: t("title"),
+      description: t("description"),
+      url: "/",
+      siteName: t("title"),
       images: [
         {
-          url: ogImage.default.src,
-          width: 1200,
-          height: 678,
+          url: ogImage.src,
+          width: ogImage.width,
+          height: ogImage.height,
         },
       ],
     },

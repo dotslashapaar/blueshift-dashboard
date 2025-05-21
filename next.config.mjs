@@ -8,14 +8,12 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   webpack: (config) => {
-    // Add a rule to handle .d.ts?raw imports
     config.module.rules.push({
       test: /\.d\.ts$/, // Target .d.ts files
       resourceQuery: /raw/, // Only when ?raw is in the import path
       type: "asset/source", // Import as a string
     });
 
-    // Add a rule to handle .ts.template?raw imports
     config.module.rules.push({
       test: /\.ts\.template$/, // Target .ts files
       resourceQuery: /raw/, // Only when ?raw is in the import path
