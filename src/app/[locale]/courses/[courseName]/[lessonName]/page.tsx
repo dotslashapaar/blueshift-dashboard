@@ -20,6 +20,32 @@ interface LessonPageProps {
   }>;
 }
 
+export async function generateMetadata({ params }: LessonPageProps) {
+  const { courseName } = await params;
+
+  let ogImage;
+  try {
+    const path = `/graphics/courses/og-${courseName}.png`
+    ogImage = await import(`@/../public${path}`);
+  } catch {
+    const path = "/graphics/meta-image.png"
+    ogImage = await import(`@/../public/${path}`);
+  }
+
+  return {
+    metadataBase: new URL("https://learn.blueshift.gg"),
+    openGraph: {
+      images: [
+        {
+          url: ogImage.default.src,
+          width: 1200,
+          height: 678,
+        },
+      ],
+    },
+  };
+}
+
 export default async function LessonPage({ params }: LessonPageProps) {
   const t = await getTranslations();
   const { courseName, lessonName, locale } = await params;
@@ -28,7 +54,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
   try {
     const lessonModule = await import(
       `@/app/content/courses/${courseName}/${lessonName}/${locale}.mdx`
-      );
+    );
     Lesson = lessonModule.default;
   } catch {
     notFound();
@@ -41,7 +67,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   // Find current lesson index
   const currentLessonIndex = allLessons.findIndex(
-    (lesson) => lesson.slug === lessonName
+    (lesson) => lesson.slug === lessonName,
   );
 
   // const lessonMetadata = courseMetadata.lessons[currentLessonIndex];
@@ -155,7 +181,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                       </span>
                       <span className="font-medium text-primary">
                         {t(
-                          `courses.${courseMetadata.slug}.lessons.${nextLessonSlug}`
+                          `courses.${courseMetadata.slug}.lessons.${nextLessonSlug}`,
                         )}
                       </span>
                     </div>
