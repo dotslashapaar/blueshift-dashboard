@@ -9,7 +9,6 @@ import Footer from "@/app/components/Footer/Footer";
 import GlobalModals from "@/app/components/Modals/GlobalModals";
 import WalletProvider from "@/app/contexts/WalletProvider";
 import { Geist_Mono, Funnel_Display } from "next/font/google";
-import type { Metadata } from "next";
 
 const GeistMono = Geist_Mono({
   subsets: ["latin"],

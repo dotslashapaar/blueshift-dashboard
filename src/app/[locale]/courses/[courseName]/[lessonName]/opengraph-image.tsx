@@ -19,16 +19,16 @@ export default async function Image({
   // Determine base URL
   let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (!baseUrl) {
-    baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+    console.error("NEXT_PUBLIC_APP_URL is not defined.");
+    throw Error("Base URL is not defined.");
   }
   // Ensure baseUrl doesn't have a trailing slash if image paths start with one
   if (baseUrl.endsWith('/')) {
     baseUrl = baseUrl.slice(0, -1);
   }
 
-  // Define your image paths relative to the public directory
   const primaryImagePublicPath = `/graphics/lessons/og-${courseName}.png`;
-  const fallbackImagePublicPath = `/graphics/lessons/og-fallback.png`; // Ensure this fallback image exists in public/graphics/
+  const fallbackImagePublicPath = `/graphics/meta-image.png`;
 
   const primaryImageUrl = `${baseUrl}${primaryImagePublicPath}`;
   const fallbackImageUrl = `${baseUrl}${fallbackImagePublicPath}`;
@@ -59,7 +59,7 @@ export default async function Image({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "black", // Optional: background if image has transparency
+          backgroundColor: "black",
         }}
       >
         <img
