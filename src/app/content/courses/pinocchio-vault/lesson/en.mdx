@@ -1,40 +1,36 @@
-# Introduction to Native - Chapter 1: The Vault
+# Introduction to Pinocchio - Chapter 1: The Vault
 
-While the majority of Solana developers use the Anchor framework to build
-their programs, there are many reasons why you might want to build a Solana
-program without it.
+While most Solana developers lean on Anchor, there are plenty of good reasons to write a program without it. Perhaps you need finer-grained control over every account field, or you’re chasing maximum performance, or you just simply want to avoid macros.
 
-Whether you're looking for more control over your program's performance, or
-you simply want to learn how to build a Solana program from scratch, this
-lesson will help you get started with building a native Solana program using
-the Pinocchio library.
+Writing Solana programs without a framework like Anchor is known as **native development**. It is more demanding, yet in this chapter you’ll learn to craft a Solana program from scratch with Pinocchio; a lightweight library that lets you skip external frameworks and own every byte of your code.
 
-<ArticleSection name="Pinocchio 101" id="pinocchio-101" />
+# Pinocchio 101
 
-Pinocchio is a lightweight library for creating Solana programs in Rust without any external dependencies. It works by taking a smarter approach to how Solana programs receive and process data.
+Pinocchio is a minimalist Rust library that lets you craft Solana programs without pulling in the heavyweight `solana-program` crate. It works by treating the incoming transaction payload: accounts, instruction data, everything; as a single byte slice and reads it in-place via zero-copy techniques. 
 
-When a Solana program runs, all the information it needs (accounts, instruction data, etc.) gets packed into a simple byte array. Instead of unpacking and copying this data multiple times (which wastes processing power), Pinocchio reads it directly where it sits in memory using a technique called "zero-copy."
+The minimalist design unlocks three big benefits:
+- Fewer compute units. No extra deserialization or memory copies.
+- Smaller binaries. Leaner code paths mean a lighter `.so` on-chain.
+- Zero dependency drag. No external crates to update (or break).
 
-This approach eliminates the need for the standard solana-program library that most developers use. By cutting out this middleman, Pinocchio helps your programs:
+The project was started by [Febo](https://x.com/0x_febo) at [Anza](https://www.anza.xyz) with core contribution from the Solana ecosystem and the Blueshift team, and lives [here](https://github.com/anza-xyz/pinocchio). 
 
-1. Run faster (using fewer compute units)
-2. Take up less space (smaller binary size)
-3. Avoid dependency hell (no external library updates to worry about)
+Alongside the core crate, you’ll find `pinocchio-system` and `pinocchio-token`, which give you zero-copy helpers and CPI utilities for Solana’s native System and SPL-Token programs.
 
-This library has been developed by [Febo](https://github.com/febo) from Anza with other contributors, like the Blueshift Team, and can be found at this [link](https://github.com/anza-xyz/pinocchio). As you can see in the GitHub, Pinocchio doesn't just come with a substitute for the `solana-program` crate, it comes with `pinocchio-system` and `pinocchio-token` as well that makes it super easy to Deserialize, CPI and use these 2 native programs.
+## Native Development
 
-<ArticleSection name="Native 101" id="native-101" />
+That might sound daunting, but it’s exactly why this chapter exists. By the end you’ll understand every byte that crosses the program boundary and how to keep your logic tight, secure, and fast.
 
-As talked about during the "Introduction to Anchor" course, Anchor uses **Declarative Macros** to simplify the boilerplate of dealing with accounts, instruction data, and error handling that are associated with building Solana Programs (or Smart Contracts). 
+Anchor uses **Declarative Macros** to simplify the boilerplate of dealing with accounts, instruction data, and error handling that are the core of building Solana Programs. 
 
-When we switch to Native, we don't have that luxury anymore, meaning that we will need to:
-- Create our own Discriminator for Instructions
-- Create our own Account, Instruction and implementation for all the different instructions
+Going Native, means we don't have that luxury anymore and that we will need to:
+- Create our own Discriminator and Entrypoint for the different Instructions
+- Create our own Account, Instruction and deserialization logic
 - Implement all the security checks that Anchor was doing for us before
 
-<ArticleSection name="Instruction Handling and Discriminator" id="insruction-handling-and-discriminator" level="h3" />
+### Instruction Handling and Discriminator
 
-In anchor, the `#[program]` macro creates 8-byte discriminators based on the name of the functions by hashing the name with a prefix "global:" using a `Sha256` function. Something like this:
+In Anchor, the `#[program]` macro hides a lot of wiring. Under the hood it builds an 8-byte discriminator (size customizable since version 0.31) for every instruction by hashing `"global:"` + function_name with SHA-256:
 
 ```rust
 pub fn get_anchor_discriminator_from_name(name: &str) -> [u8; 8] {
@@ -46,15 +42,20 @@ pub fn get_anchor_discriminator_from_name(name: &str) -> [u8; 8] {
 }
 ```
 
-In native Solana programs, we typically use 1-byte discriminators that we assign arbitrarily (usually in a sequence), which allows us to create up to 255 different instructions. 
+Native programs usually keep things leaner. A single-byte discriminator (values 0x01…0xFF) is enough for up to 255 instructions, plenty for most use cases.
 
-**Note**: If you anticipate needing more than that, you can use a 2-byte discriminator instead.
+Need more? Switch to two bytes, and you jump to 65,535 possible variants.
 
-So how does the program know how to handle the different discriminators?
+**Where the program starts**
 
-The first stop for all Solana programs is the `entrypoint()` function, where the bytecode gets deserialized into program_id, accounts, and instruction_data so it can be used by the program.
+Every Solana program lands first in an `entrypoint!` macro. There you receive three raw slices:
+- **program_id**: the public key of the deployed program
+- **accounts**: every account passed in the instruction
+- **instruction_data**: an opaque byte array containing your discriminator plus any user-supplied data
 
-The standard pattern is to structure instruction_data with the discriminator in the first byte(s), allowing us to route the instruction to the appropriate handler like this:
+**A canonical dispatch pattern**
+
+When sending transactions, we usually place the discriminator in the first byte(s) of `instruction_data` so we can route it to the appropriate handler like this:
 
 ```rust
 entrypoint!(process_instruction);
@@ -72,20 +73,23 @@ fn process_instruction(
 }
 ```
 
-As you can see: 
-1. We use `split_first()` to separate the first byte (the discriminator) from the rest of the instruction data
-2. We match on the discriminator to determine which instruction to process
-3. We pass the remaining data and accounts to the appropriate instruction handler
-4. Each instruction handler implements `try_from` to validate and deserialize its inputs
-5. Finally, we call `process()` on the instruction to execute its logic
+This is what the macro does behind the scene:
+1. `split_first()` peels off the discriminator byte.
+2. `match` decides which instruction struct to instantiate.
+3. Each instruction’s `try_from` implementation validates and deserializes its inputs.
+4. A call to `process()` executes the business logic.
 
-<ArticleSection name="Account and Instruction Struct Implementation" id="account-and-instruction-struct-implementation" level="h4" />
+### Account and Instruction Struct Implementation 
 
-Since we're working with Native, we'll need to manually validate all the accounts and instruction data. Since the possibilities are endless and everybody likes to use their own setup, we're going to teach you what is the best and cleanest approach for us, we like to create an Account struct and use the `TryFrom` trait for them to speed up development, use a similar approach to anchor, and in general create a more clean and "safe" method for deserialization. 
+Since we’re writing native code, every account and every byte of instruction data must be validated by hand. To keep that work tidy, and fast, we like to define an Accounts struct for each instruction and implement Rust’s TryFrom trait on it. 
 
-<ArticleSection name="Understanding the TryFrom Trait" id="understanding-the-tryfrom-trait" level="h4" />
+The pattern gives us Anchor-style ergonomics without the macros and keeps the actual `process()` method almost boilerplate-free.
 
-The `TryFrom` trait in Rust is part of the standard library's conversion traits. Unlike the `From` trait which assumes conversions always succeed, `TryFrom` allows for the possibility of failure by returning a `Result` type. This makes it perfect for validating and converting potentially invalid data.
+**Understanding the `TryFrom` Trait**
+
+`TryFrom` is part of Rust’s standard conversion family.
+
+Unlike `From`, which assumes a conversion can’t fail, `TryFrom` returns a `Result`, allowing you to surface errors early; perfect for on-chain validation.
 
 The trait is defined like this:
 
@@ -96,13 +100,13 @@ pub trait TryFrom<T>: Sized {
 }
 ```
 
-In our Solana program, we use `TryFrom` to safely convert raw account arrays and instruction data into our structured types, performing validation along the way.
+In a Solana program, we implement `TryFrom` to turn raw account slices (and, when needed, instruction bytes) into strongly-typed structs while enforcing every constraint.
 
-<ArticleSection name="Account Validation with TryFrom" id="account-validation-with-tryfrom" level="h4" />
+**Account Validation with TryFrom**
 
 In each `TryFrom` implementation, we usually implement the specific checks for accounts and instructions in order to leave the `process()` function, where all the instruction logic happens, as barebone as possible.
 
-This is an example of the `DepositAccounts` struct:
+Below is a trimmed example for a `Deposit` instruction:
 
 ```rust
 pub struct DepositAccounts<'a> {
@@ -114,11 +118,12 @@ impl<'a> TryFrom<&'a [AccountInfo]> for DepositAccounts<'a> {
     type Error = ProgramError;
 
     fn try_from(accounts: &'a [AccountInfo]) -> Result<Self, Self::Error> {
+        // 1. Destructure the slice
         let [owner, vault, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
 
-        // Accounts Checks
+        // 2. Custom checks
         if !owner.is_signer() {
             return Err(ProgramError::InvalidAccountOwner);
         }
@@ -127,20 +132,20 @@ impl<'a> TryFrom<&'a [AccountInfo]> for DepositAccounts<'a> {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
+        // 3. Return the validated struct
         Ok(Self { owner, vault })
     }
 }
 ```
 
-In this implementation:
-1. We first destructure the accounts array to get references to each account
-2. We perform validation checks (like ensuring the owner is a signer)
-3. If all checks pass, we return an `Ok` result containing our structured account type
-4. If any check fails, we return an `Err` with the appropriate error
+**What’s happening**
+1. Destructure the input slice into named variables. If the caller supplied too few accounts, fail fast by returning a `NotEnoughAccountKeys` error.
+2. Validate each constraint manually (signature, ownership, PDA seeds, data size… whatever the instruction requires).
+3. On success, return a typed struct; on failure, bubble up a precise `ProgramError`.
 
-<ArticleSection name="Instruction Data Parsing with TryFrom" id="instruction-data-parsing-with-tryfrom" level="h4" />
+**Instruction Data Validation with `TryFrom`**
 
-For instruction data, the approach is similar:
+For instruction data, we follow the same pattern; validate first, then convert using `TryFrom`:
 
 ```rust
 pub struct DepositInstructionData {
@@ -151,14 +156,16 @@ impl<'a> TryFrom<&'a [u8]> for DepositInstructionData {
     type Error = ProgramError;
 
     fn try_from(data: &'a [u8]) -> Result<Self, Self::Error> {
-        if data.len() != size_of::<u64>() {
+        // 1. Expect exactly eight bytes (one u64)
+        if data.len() != core::mem::size_of::<u64>() {
             return Err(ProgramError::InvalidInstructionData);
         }
 
+        // 2. Parse the bytes
         let amount = u64::from_le_bytes(data.try_into().unwrap());
 
-        // Instruction Checks
-        if amount.eq(&0) {
+        // 3. Basic sanity check
+        if amount == 0 {
             return Err(ProgramError::InvalidInstructionData);
         }
 
@@ -167,17 +174,17 @@ impl<'a> TryFrom<&'a [u8]> for DepositInstructionData {
 }
 ```
 
-Here we:
-1. Check that the data has the expected length
-2. Convert the raw bytes to our expected type (an u64 in this case)
-3. Validate the value (ensuring amount is not zero)
-4. Return the structured data if valid, or an error if not
+**What’s happening**
+1. Confirm the byte slice matches the expected length.
+2. Convert the slice to a concrete type (`u64`).
+3. Validate the value (non-zero in this case).
+4. Return `Ok(Self)` on success, or an appropriate error.
 
-By using the `TryFrom` trait consistently, we create a clean separation between validation and business logic, making our code more maintainable and secure.
+Using `TryFrom` everywhere cleanly separates validation from business logic, improving maintainability and security.
 
-<ArticleSection name="Instruction Logic Implementation" id="instruction-logic-implementation" level="h4" />
+### Instruction Logic Implementation
 
-We start by using a similar approach to the Account and Instruction struct using the `TryFrom` trait to combine and validate both the accounts and instruction data in a single instruction handler:
+Next, we combine the validated accounts and instruction data into a single handler struct:
 
 ```rust
 pub struct Deposit<'a> {
@@ -200,14 +207,12 @@ impl<'a> TryFrom<(&'a [u8], &'a [AccountInfo])> for Deposit<'a> {
 }
 ```
 
-This implementation allows us to:
-1. Take both the instruction data and accounts as input
-2. Validate them using their respective `TryFrom` implementations
-3. Combine them into a single instruction handler struct
+This wrapper:
+1. Accepts both raw inputs (bytes and accounts).
+2. Delegates validation to the individual `TryFrom` implementations.
+3. Returns a fully-typed, fully-checked Deposit struct.
 
-We then create a specific implementation for Deposit where we define:
-1. A `DISCRIMINATOR` constant that uniquely identifies this instruction
-2. A `process` method that contains the actual business logic
+Now the actual logic is concise:
 
 ```rust
 impl<'a> Deposit<'a> {
@@ -226,11 +231,16 @@ impl<'a> Deposit<'a> {
 }
 ```
 
-The `DISCRIMINATOR` is what we'll match against in our entrypoint function to route to this instruction handler. 
+- `DISCRIMINATOR` is the byte we pattern-match on in entrypoint.
+- `process()` contains only business logic; all checks are already complete.
 
-<ArticleSection name="Cross-Program Invocations (CPIs) and Signer Seeds" id="cross-program-inovcations-and-signer-seeds" level="h4" />
+The result? Anchor-style ergonomics, but with all the benefits of being fully native; explicit, predictable, and fast.
 
-As said before, `pinocchio` has some helper crates as well, like `pinocchio-system` and `pinocchio-token` that make it super easy to perform Cross-Program Invocations (CPIs) to these native programs. These helper structs and methods replace Anchor's CpiContext approach we used previously:
+### Cross-Program Invocations (CPIs) and Signer Seeds
+
+As mentioned, Pinocchio has some helper crates like `pinocchio-system` and `pinocchio-token` that make it super easy to perform Cross-Program Invocations (CPIs) to these native programs. 
+
+These helper structs and methods replace Anchor's `CpiContext` approach we used previously:
 
 ```rust
 Transfer {
@@ -241,9 +251,9 @@ Transfer {
 .invoke()?;
 ```
 
-In this example, we're using the `Transfer` struct from `pinocchio-system` to transfer lamports from the owner account to the vault account. The `invoke()` method handles the CPI call to the System Program, similar to how we would use `CpiContext::new()` in Anchor.
+The `Transfer` struct (from `pinocchio-system`) packages every field the System Program needs, and `.invoke()` fires the CPI. No context builder, no extra boilerplate.
 
-For signed CPIs (when using PDAs), `pinocchio` provides a clean way to handle signer seeds and invoke the signed transaction:
+When the caller must be a Program-Derived Address (PDA), Pinocchio keeps the API equally concise:
 
 ```rust
 let seeds = [
@@ -261,34 +271,43 @@ Transfer {
 .invoke_signed(&signers)?;
 ```
 
-Here we:
-1. Create an array of `Seed` objects representing the PDA's seeds
-2. Create a `Signer` from these seeds
-3. Use the `invoke_signed()` method to perform the CPI with the PDA as a signer
+**Here's what happens:**
+1. `Seeds` builds an array of Seed objects that match the PDA derivation.
+2. `Signer` wraps those seeds in a Signer helper.
+3. `invoke_signed` calls the CPI, passing the signer array so the PDA can authorize the transfer.
 
-<ArticleSection name="The Vault Code" id="the-vault-code" />
+The result? a clean, first-class interface for both regular and signed CPIs; no macros required, and no hidden magic.
 
-Now that we have discussed all the essential information needed to start creating our first Native smart contract, it's time we get into the different instruction logic and realization.
+# The Vault Code
 
-The basic idea behind an escrow is the possibility to deposit something (in this case, lamports) that only the "owner" (the one who deposited) can withdraw later. This is exactly what the `deposit` and `withdraw` functions do.
+Now that you know the moving parts of a native Solana program, let’s build an escrow-style vault you can deposit into and withdraw from.
+
+The flow is simple:
+1. A user deposits lamports into a vault PDA derived from their key.
+2. Later, only that same user can withdraw the funds.
 
 Before starting we need to create a new project, to do so run this command in your terminal:
 
 ```
-...
+# create workspace
+cargo new blueshift_vault --lib
+cd blueshift_vault
 ```
 
-Open the newly generated folder, and add the `pinocchio` crate like this:
+Add Pinocchio to Cargo.toml:
 
 ```
-...
+[dependencies]
+pinocchio         = "x.x.x"
+pinocchio-system  = "x.x.x"
+pinocchio-token   = "x.x.x"
 ```
 
-You're now ready to write your first Native program!
+You’re now ready to write your first native program.
 
-<ArticleSection name="Template" id="template" level="h4" />
+## Template
 
-This is how the `lib.rs` where we handle the entrypoint should look like:  
+`lib.rs` begins with the entrypoint and a dispatcher:
 
 ```rust
 #![no_std]
@@ -322,14 +341,23 @@ fn process_instruction(
 }
 ```
 
-<ArticleSection name="Deposit" id="deposit" level="h4" />
+## Deposit
 
-Here's what happens in the `deposit` logic:
-- It verifies that the vault account has zero lamports, ensuring the vault doesn't already exist.
-- It checks that the amount being deposited is greater than the minimum rent needed to create a `SystemAccount`.
-- Once those conditions are met, it transfers lamports from the signer to the vault using the System Program.
+**Goals**
+- Create an empty vault PDA for the caller if it doesn’t exist.
+- Move lamports from the signer to that vault.
 
-We're going to start with the account struct:
+**Validation steps**
+- Accounts slice must include signer, vault PDA, and System Program.
+- Signer must have signed the transaction.
+- Vault must be:
+    - Owned by the System Program.
+    - Holding zero lamports (ensures “fresh” deposit).
+    - Derived deterministically from [b"vault", signer_pubkey].
+- Instruction data must be exactly 8 bytes (one u64 amount) and non-zero.
+
+**Execution**
+We're going to start with the account struct (we already described this in the last section so we're going to gloss over):
 
 ```rust
 pub struct DepositAccounts<'a> {
@@ -369,15 +397,7 @@ impl<'a> TryFrom<&'a [AccountInfo]> for DepositAccounts<'a> {
 }
 ```
 
-As explained before, the `deposit` account uses the `TryFrom` traits to deserialize the accounts and adding some checks to them. These checks, in this instance, are similar to what we did previously in Anchor. 
-- The `owner` needs to be a `Signer`
-- The `vault` needs to be a `SystemAccount`
-- The `vault` hasn't been already initialized by checking that the lamports are zero
-- The `vault` key is derived from the `owner` key
-
-We do so, by checking the `Signer` flag on the owner and verifying that the `vault` is owned by the System Program and performing other checks with the `.eq()` and `.ne()` functions.
-
-We can now move to the instruction struct:
+And here's the instruction data struct:
 
 ```rust
 pub struct DepositInstructionData {
@@ -404,10 +424,7 @@ impl<'a> TryFrom<&'a [u8]> for DepositInstructionData {
 }
 ```
 
-The `deposit` instruction_data need to check some "requirements" as well before performing any action like:
-- The `amount` is more than the minimum rent exemption
-
-We can finally pass to the business logic where we're just going to perform the transfer of the lamports from the owner to the vault using the `pinocchio_system` transfer macro like this:
+We can finally pass to the business logic where we're just going to perform the transfer of the lamports from the owner to the vault using the `pinocchio_system` transfer helper like this:
 
 ```rust 
 pub struct Deposit<'a> {
@@ -445,10 +462,19 @@ impl<'a> Deposit<'a> {
 }
 ```
 
-<ArticleSection name="Withdraw" id="withdraw" level="h4" />
+## Withdraw
 
-Here's what happens in the `withdraw` logic:
-- Transfers lamports from the vault to the signer using the System Program and the signer capabilities of the PDA.
+**Goals**
+- Let the same signer reclaim all lamports in the vault.
+- Require a PDA signature so only that vault can authorize the transfer.
+
+**Validation steps**
+- Accounts slice: signer, vault PDA, System Program.
+- Signer must sign.
+- Vault must be owned by the System Program.
+- Vault PDA must match [b"vault", signer_pubkey], capturing the bump used in derivation.
+
+**Execution**
 
 We're going to start with the account struct:
 
@@ -490,8 +516,6 @@ impl<'a> TryFrom<&'a [AccountInfo]> for WithdrawAccounts<'a> {
 The checks performed are the same as the one performed in the Deposit, but this time around in the account struct we saved the bump as well since we're going to need it in the CPI in the `process()` function.
 
 For the withdrawal we don't need any instruction data so we can omit the creation of the instruction struct and just skip to the business logic:
-
-We can now move to the instruction struct:
 
 ```rust
 pub struct Withdraw<'a> {
