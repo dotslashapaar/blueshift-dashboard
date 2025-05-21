@@ -23,7 +23,7 @@ interface LessonPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: LessonPageProps): Metadata {
+export async function generateMetadata({ params }: LessonPageProps): Promise<Metadata> {
   const { courseName, lessonName, locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
   const pathname = getPathname({
