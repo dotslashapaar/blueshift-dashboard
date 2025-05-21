@@ -63,17 +63,18 @@ export async function generateMetadata({ params }: RootLayoutProps) {
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
+    metadataBase: new URL("https://learn.blueshift.gg"),
     title: t("title"),
     description: t("description"),
     keywords: t("keywords"),
     openGraph: {
       title: t("title"),
       description: t("description"),
-      url: "https://learn.blueshift.gg",
+      url: "/",
       siteName: t("title"),
       images: [
         {
-          url: "https://learn.blueshift.gg/graphics/meta-image.png",
+          url: "/graphics/meta-image.png",
           width: 1200,
           height: 628,
         },
