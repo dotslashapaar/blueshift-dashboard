@@ -2,18 +2,18 @@
 
 While most Solana developers lean on Anchor, there are plenty of good reasons to write a program without it. Perhaps you need finer-grained control over every account field, or you’re chasing maximum performance, or you just simply want to avoid macros.
 
-Native development is more demanding, yet in this chapter you’ll learn to craft a Solana program from scratch with Pinocchio; a lightweight library that lets you skip external frameworks and own every byte of your code.
+Writing Solana programs without a framework like Anchor is known as **native development**. It is more demanding, yet in this chapter you’ll learn to craft a Solana program from scratch with Pinocchio; a lightweight library that lets you skip external frameworks and own every byte of your code.
 
 # Pinocchio 101
 
 Pinocchio is a minimalist Rust library that lets you craft Solana programs without pulling in the heavyweight `solana-program` crate. It works by treating the incoming transaction payload: accounts, instruction data, everything; as a single byte slice and reads it in-place via zero-copy techniques. 
 
-That one design choice unlocks three big wins:
+The minimalist design unlocks three big benefits:
 - Fewer compute units. No extra deserialization or memory copies.
 - Smaller binaries. Leaner code paths mean a lighter `.so` on-chain.
 - Zero dependency drag. No external crates to update (or break).
 
-The project was started by [Febo](https://x.com/0x_febo) at Anza with core contribution from the Solana ecosystem and the Blueshift team and lives here: https://github.com/anza-xyz/pinocchio. 
+The project was started by [Febo](https://x.com/0x_febo) at [Anza](https://www.anza.xyz) with core contribution from the Solana ecosystem and the Blueshift team, and lives [here](https://github.com/anza-xyz/pinocchio). 
 
 Alongside the core crate, you’ll find `pinocchio-system` and `pinocchio-token`, which give you zero-copy helpers and CPI utilities for Solana’s native System and SPL-Token programs.
 
@@ -23,14 +23,14 @@ That might sound daunting, but it’s exactly why this chapter exists. By the en
 
 Anchor uses **Declarative Macros** to simplify the boilerplate of dealing with accounts, instruction data, and error handling that are the core of building Solana Programs. 
 
-Switching to Native, means we don't have that luxury anymore and that we will need to:
+Going Native, means we don't have that luxury anymore and that we will need to:
 - Create our own Discriminator and Entrypoint for the different Instructions
 - Create our own Account, Instruction and deserialization logic
 - Implement all the security checks that Anchor was doing for us before
 
 ### Instruction Handling and Discriminator
 
-In Anchor, the `#[program]` macro hides a lot of wiring. Under the hood it builds an 8-byte discriminator for every instruction by hashing `"global:"` + function_name with SHA-256:
+In Anchor, the `#[program]` macro hides a lot of wiring. Under the hood it builds an 8-byte discriminator (size customizable since version 0.31) for every instruction by hashing `"global:"` + function_name with SHA-256:
 
 ```rust
 pub fn get_anchor_discriminator_from_name(name: &str) -> [u8; 8] {
@@ -42,9 +42,9 @@ pub fn get_anchor_discriminator_from_name(name: &str) -> [u8; 8] {
 }
 ```
 
-Native programs usually keep things leaner. A single-byte discriminator (values 0x01…0xFF) is enough for up to 255 instructions—plenty for most use-cases.
+Native programs usually keep things leaner. A single-byte discriminator (values 0x01…0xFF) is enough for up to 255 instructions, plenty for most use cases.
 
-Need more? Switch to two bytes and you jump to 65,535 possible variants.
+Need more? Switch to two bytes, and you jump to 65,535 possible variants.
 
 **Where the program starts**
 
@@ -73,10 +73,10 @@ fn process_instruction(
 }
 ```
 
-This is what happens step-by-step: 
+This is what the macro does behind the scene:
 1. `split_first()` peels off the discriminator byte.
 2. `match` decides which instruction struct to instantiate.
-3. Each instruction’s `try_from` impl validates and deserializes its inputs.
+3. Each instruction’s `try_from` implementation validates and deserializes its inputs.
 4. A call to `process()` executes the business logic.
 
 ### Account and Instruction Struct Implementation 
@@ -89,7 +89,7 @@ The pattern gives us Anchor-style ergonomics without the macros and keeps the ac
 
 `TryFrom` is part of Rust’s standard conversion family.
 
-Unlike From, which assumes a conversion can’t fail, TryFrom returns a Result, allowing you to surface errors early—perfect for on-chain validation.
+Unlike `From`, which assumes a conversion can’t fail, `TryFrom` returns a `Result`, allowing you to surface errors early; perfect for on-chain validation.
 
 The trait is defined like this:
 
@@ -100,13 +100,13 @@ pub trait TryFrom<T>: Sized {
 }
 ```
 
-In a Solana program we implement TryFrom to turn raw account slices (and, when needed, instruction bytes) into strongly-typed structs while enforcing every constraint.
+In a Solana program, we implement `TryFrom` to turn raw account slices (and, when needed, instruction bytes) into strongly-typed structs while enforcing every constraint.
 
 **Account Validation with TryFrom**
 
 In each `TryFrom` implementation, we usually implement the specific checks for accounts and instructions in order to leave the `process()` function, where all the instruction logic happens, as barebone as possible.
 
-Below is a trimmed example for a Deposit instruction:
+Below is a trimmed example for a `Deposit` instruction:
 
 ```rust
 pub struct DepositAccounts<'a> {
@@ -139,13 +139,13 @@ impl<'a> TryFrom<&'a [AccountInfo]> for DepositAccounts<'a> {
 ```
 
 **What’s happening**
-1. Destructure the input slice into named variables—fail fast if the caller supplies too few accounts.
+1. Destructure the input slice into named variables. If the caller supplied too few accounts, fail fast by returning a `NotEnoughAccountKeys` error.
 2. Validate each constraint manually (signature, ownership, PDA seeds, data size… whatever the instruction requires).
-3. On success, return a typed struct; on failure, bubble up a precise ProgramError.
+3. On success, return a typed struct; on failure, bubble up a precise `ProgramError`.
 
-**Instruction Data Validation with TryFrom**
+**Instruction Data Validation with `TryFrom`**
 
-For instruction data, we follow the same pattern; validate first, then convert—using `TryFrom`:
+For instruction data, we follow the same pattern; validate first, then convert using `TryFrom`:
 
 ```rust
 pub struct DepositInstructionData {
@@ -176,11 +176,11 @@ impl<'a> TryFrom<&'a [u8]> for DepositInstructionData {
 
 **What’s happening**
 1. Confirm the byte slice matches the expected length.
-2. Convert the slice to a concrete type (u64).
+2. Convert the slice to a concrete type (`u64`).
 3. Validate the value (non-zero in this case).
-4. Return Ok(Self) on success, or an appropriate error.
+4. Return `Ok(Self)` on success, or an appropriate error.
 
-Using TryFrom everywhere cleanly separates validation from business logic, improving maintainability and security.
+Using `TryFrom` everywhere cleanly separates validation from business logic, improving maintainability and security.
 
 ### Instruction Logic Implementation
 
@@ -209,7 +209,7 @@ impl<'a> TryFrom<(&'a [u8], &'a [AccountInfo])> for Deposit<'a> {
 
 This wrapper:
 1. Accepts both raw inputs (bytes and accounts).
-2. Delegates validation to the individual TryFrom impls.
+2. Delegates validation to the individual `TryFrom` implementations.
 3. Returns a fully-typed, fully-checked Deposit struct.
 
 Now the actual logic is concise:
@@ -234,11 +234,11 @@ impl<'a> Deposit<'a> {
 - `DISCRIMINATOR` is the byte we pattern-match on in entrypoint.
 - `process()` contains only business logic; all checks are already complete.
 
-The result? Anchor-style ergonomics, but fully native—explicit, predictable, and fast.
+The result? Anchor-style ergonomics, but with all the benefits of being fully native; explicit, predictable, and fast.
 
 ### Cross-Program Invocations (CPIs) and Signer Seeds
 
-As said before, Pinocchio has some helper crates like `pinocchio-system` and `pinocchio-token` that make it super easy to perform Cross-Program Invocations (CPIs) to these native programs. 
+As mentioned, Pinocchio has some helper crates like `pinocchio-system` and `pinocchio-token` that make it super easy to perform Cross-Program Invocations (CPIs) to these native programs. 
 
 These helper structs and methods replace Anchor's `CpiContext` approach we used previously:
 
@@ -253,7 +253,7 @@ Transfer {
 
 The `Transfer` struct (from `pinocchio-system`) packages every field the System Program needs, and `.invoke()` fires the CPI. No context builder, no extra boilerplate.
 
-When the caller must be a Program-Derived Address, Pinocchio keeps the API equally concise:
+When the caller must be a Program-Derived Address (PDA), Pinocchio keeps the API equally concise:
 
 ```rust
 let seeds = [
@@ -271,12 +271,12 @@ Transfer {
 .invoke_signed(&signers)?;
 ```
 
-**Here's what happens`:
-1. `Seeds` Build an array of Seed objects that match the PDA derivation.
-2. `Signer` Wrap those seeds in a Signer helper.
-3. `invoke_signed` Call the CPI, passing the signer array so the PDA can authorize the transfer.
+**Here's what happens:**
+1. `Seeds` builds an array of Seed objects that match the PDA derivation.
+2. `Signer` wraps those seeds in a Signer helper.
+3. `invoke_signed` calls the CPI, passing the signer array so the PDA can authorize the transfer.
 
-The result? a clean, first-class interface for both regular and signed CPIs—no macros required, and no hidden magic.
+The result? a clean, first-class interface for both regular and signed CPIs; no macros required, and no hidden magic.
 
 # The Vault Code
 
