@@ -6,10 +6,11 @@ import Button from "../Button/Button";
 import { AnimatePresence, anticipate, motion } from "motion/react";
 import { useState, useRef, RefObject } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useOnClickOutside } from "usehooks-ts";
 import { useRouter, usePathname, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
+
 import Logo from "../Logo/Logo";
 
 export default function HeaderContent() {
@@ -20,7 +21,6 @@ export default function HeaderContent() {
   const currentLocale = useLocale();
   const { locales } = routing;
   const router = useRouter();
-  const { setVisible } = useWalletModal();
   const languageDropdownRef = useRef<HTMLDivElement>(null);
 
   const isRootOrCourses =
@@ -170,12 +170,7 @@ export default function HeaderContent() {
           className="hidden md:flex"
           onClick={() => setOpenedModal("shift-goal")}
         /> */}
-          <Button
-            label={t("header.connect_wallet")}
-            icon="Wallet"
-            variant="primary"
-            onClick={() => setVisible(true)}
-          />
+          <WalletMultiButton />
           <Button
             variant="tertiary"
             icon="Table"
