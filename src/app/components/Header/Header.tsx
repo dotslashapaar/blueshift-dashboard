@@ -2,7 +2,6 @@
 
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
-import Button from "../Button/Button";
 import { AnimatePresence, anticipate, motion } from "motion/react";
 import { useState, useRef, RefObject } from "react";
 import { useTranslations, useLocale } from "next-intl";
@@ -12,6 +11,8 @@ import { routing } from "@/i18n/routing";
 import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
 
 import Logo from "../Logo/Logo";
+import { useAuth } from "@/hooks/useAuth";
+import Button from "@/app/components/Button/Button";
 
 export default function HeaderContent() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,20 +24,33 @@ export default function HeaderContent() {
   const router = useRouter();
   const languageDropdownRef = useRef<HTMLDivElement>(null);
 
-  const isRootOrCourses =
-    pathname === "/" ||
-    pathname === `/${currentLocale}` ||
-    pathname.startsWith("/courses") ||
-    pathname.startsWith(`/${currentLocale}/courses`);
+  // Wallet and Auth Hook Logic
+  const auth = useAuth();
 
   useOnClickOutside(languageDropdownRef as RefObject<HTMLDivElement>, () =>
-    setIsLanguageDropdownOpen(false)
+    setIsLanguageDropdownOpen(false),
   );
 
   const handleLanguageChange = (newLocale: string) => {
     router.replace(pathname, { locale: newLocale });
     setIsLanguageDropdownOpen(false);
   };
+
+  const handleSignIn = () => {
+    auth.login();
+  };
+
+  const handleSignOut = () => {
+    auth.logout().then(() => {
+      console.log("Header: User logged out.");
+    });
+  };
+
+  const isRootOrCourses =
+    pathname === "/" ||
+    pathname === `/${currentLocale}` ||
+    pathname.startsWith("/courses") ||
+    pathname.startsWith(`/${currentLocale}/courses`);
 
   return (
     <div className="fixed bg-background/80 backdrop-blur-lg z-40 w-full border-b border-b-border">
@@ -54,6 +68,7 @@ export default function HeaderContent() {
             style={{ originY: "0px" }}
             className="gap-x-6 hidden md:flex"
           >
+            {/* Desktop Nav Links - Courses */}
             <Link
               className={classNames(
                 "py-2.5 px-3 relative rounded-xl transition flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",
@@ -85,6 +100,7 @@ export default function HeaderContent() {
                 {t("header.courses")}
               </span>
             </Link>
+            {/* Desktop Nav Links - Rewards */}
             <Link
               className={classNames(
                 "py-2.5 px-3 relative transition rounded-xl flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",
@@ -144,7 +160,7 @@ export default function HeaderContent() {
                       className={classNames(
                         "flex items-center relative gap-x-4 py-3 px-4 rounded-lg transition hover:bg-background-card-foreground",
                         locale === currentLocale &&
-                          "bg-background-card-foreground"
+                          "bg-background-card-foreground",
                       )}
                     >
                       <span
@@ -152,7 +168,7 @@ export default function HeaderContent() {
                           "text-sm font-medium leading-none",
                           locale === currentLocale
                             ? "text-primary"
-                            : "text-secondary"
+                            : "text-secondary",
                         )}
                       >
                         {t(`locales_native_name.${locale}`)}
@@ -163,21 +179,31 @@ export default function HeaderContent() {
               )}
             </AnimatePresence>
           </div>
-          {/* <Button
-          label={t("header.set_goal")}
-          icon="Target"
-          variant="secondary"
-          className="hidden md:flex"
-          onClick={() => setOpenedModal("shift-goal")}
-        /> */}
-          <WalletMultiButton />
+
+          {/* Wallet Multi Button and Error Display */}
+          <div className="relative">
+            <WalletMultiButton
+              status={auth.status}
+              address={auth.publicKey?.toBase58()}
+              onSignIn={handleSignIn}
+              onSignOut={handleSignOut}
+              // disabled={walletButtonIsDisabled}
+            />
+            {/*{authError && (*/}
+            {/*  <div className="absolute top-full right-0 mt-1 text-xs text-red-500 w-max max-w-xs text-right">*/}
+            {/*    {authError.message || String(authError)}*/}
+            {/*  </div>*/}
+            {/*)}*/}
+          </div>
+
+          {/* Mobile Menu Button */}
           <Button
             variant="tertiary"
             icon="Table"
             className="!px-0 !w-[42px] flex md:hidden"
             onClick={() => setIsOpen(true)}
           />
-          {/* Mobile */}
+          {/* Mobile Menu Panel */}
           <AnimatePresence>
             {isOpen && (
               <motion.div
@@ -188,6 +214,7 @@ export default function HeaderContent() {
                 transition={{ duration: 0.15, easing: anticipate }}
               >
                 <div className="flex gap-x-6 items-center">
+                  {/* Mobile Nav Links - Courses */}
                   <Link
                     className={classNames(
                       "py-2.5 px-3 relative rounded-xl flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",
@@ -218,6 +245,7 @@ export default function HeaderContent() {
                       {t("header.courses")}
                     </span>
                   </Link>
+                  {/* Mobile Nav Links - Rewards */}
                   <Link
                     className={classNames(
                       "py-2.5 relative px-3 rounded-xl flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",

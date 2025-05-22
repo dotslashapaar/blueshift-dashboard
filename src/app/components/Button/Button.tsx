@@ -6,7 +6,7 @@ import Icon from "../Icon/Icon";
 import DecryptedText from "../HeadingReveal/DecryptText";
 import { useState } from "react";
 
-interface ButtonProps {
+export interface ButtonProps {
   label?: string;
   className?: string;
   onClick?: () => void;

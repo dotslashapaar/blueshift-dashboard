@@ -1,61 +1,71 @@
-import { useCallback, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import React, { useCallback, useState } from "react";
 import Button from "../Button/Button";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import DecryptedText from "../HeadingReveal/DecryptText";
+import { AuthState } from "@/hooks/useAuth";
 
-export default function WalletMultiButton() {
-  const { setVisible: setWalletModalVisible } = useWalletModal();
-  const [isHovering, setIsHovering] = useState<boolean>(false);
+interface WalletButtonProps {
+  status: AuthState["status"];
+  address?: string;
+  onSignIn: () => void;
+  onSignOut: () => void;
+  disabled?: boolean;
+  isLoading?: boolean;
+}
 
-  const { connected, connecting, disconnect, disconnecting, publicKey } =
-    useWallet();
+export default function WalletMultiButton({
+  status,
+  address,
+  onSignIn,
+  onSignOut,
+  disabled = false,
+  isLoading = false,
+}: WalletButtonProps) {
+  const [isHoveringLocal, setIsHoveringLocal] = useState<boolean>(false);
 
-  const handleClick = useCallback(() => {
-    if (connected) {
-      return disconnect();
-    } else {
-      setWalletModalVisible(true);
-    }
-  }, [connected, disconnect, setWalletModalVisible]);
+  const showDisconnectOverlay = isHoveringLocal && status === "signed-in";
 
-  const getButtonLabel = () => {
-    if (connecting) {
-      return "Connecting...";
+  const getButtonLabel = useCallback(() => {
+    if (status === "signing-in") return "Signing In...";
+    if (status === "signed-in" && address) {
+      return `${address.slice(0, 4)}...${address.slice(-4)}`;
     }
-    if (disconnecting) {
-      return "Disconnecting...";
-    }
-    if (connected) {
-      if (publicKey) {
-        const base58 = publicKey.toBase58();
-        return `${base58.slice(0, 4)}..${base58.slice(-4)}`;
-      } else {
-        return "Loading...";
-      }
-    }
+
     return "Connect Wallet";
-  };
+  }, [address, status]);
 
   const buttonLabel = getButtonLabel();
 
+  const handleClick = useCallback(() => {
+    if (status === "signed-in") {
+      onSignOut();
+    } else {
+      onSignIn();
+    }
+  }, [status, onSignIn, onSignOut]);
+
+  // const walletButtonIsDisabled = connecting || disconnecting || authLoading;
+  // const walletButtonIsLoading = authLoading;
+
   return (
     <div
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseEnter={() => setIsHoveringLocal(true)}
+      onMouseLeave={() => setIsHoveringLocal(false)}
       className="relative"
     >
       <Button
-        disabled={connecting || disconnecting}
+        disabled={disabled || isLoading}
         label={buttonLabel}
         icon="Wallet"
         variant="primary"
         onClick={handleClick}
       />
-      {connected && isHovering && (
+      {showDisconnectOverlay && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/50 backdrop-blur-sm rounded-xl">
           <span className="font-mono text-[15px] font-medium leading-none text-white">
-            <DecryptedText isHovering={isHovering} text="Disconnect" />
+            <DecryptedText
+              isHovering={isHoveringLocal}
+              text="Disconnect"
+            />
           </span>
         </div>
       )}

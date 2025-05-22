@@ -56,6 +56,11 @@ interface PersistentStore {
   // Wallet Recommended Modal
   connectionRecommendedViewed: boolean;
   setConnectionRecommendedViewed: (viewed: boolean) => void;
+
+  // Authentication
+  authToken: string | null;
+  setAuthToken: (token: string) => void;
+  clearAuthToken: () => void;
 }
 
 export const usePersistentStore = create<PersistentStore>()(
@@ -106,6 +111,11 @@ export const usePersistentStore = create<PersistentStore>()(
       connectionRecommendedViewed: false,
       setConnectionRecommendedViewed: (viewed) =>
         set({ connectionRecommendedViewed: viewed }),
+
+      // Authentication
+      authToken: null,
+      setAuthToken: (token) => set({ authToken: token }),
+      clearAuthToken: () => set({ authToken: null }),
     }),
     {
       name: "blueshift-storage",
