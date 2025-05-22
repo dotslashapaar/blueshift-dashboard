@@ -15,10 +15,11 @@ import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { LogMessage } from "@/hooks/useEsbuildRunner";
 import { TestRequirement } from "@/app/components/TSChallengeEnv/types/test-requirements";
 import { AnimatePresence } from "motion/react";
-
+import { CourseMetadata } from "@/app/utils/course";
 interface ChallengeTableProps {
   onRunCodeClick: () => void;
   requirements: TestRequirement[];
+  course: CourseMetadata;
   isLoading: boolean;
   error: string | null;
   verificationData: VerificationApiResponse | null;
@@ -31,6 +32,7 @@ interface ChallengeTableProps {
 export default function RightPanel({
   onRunCodeClick,
   requirements,
+  course,
   isLoading,
   error,
   verificationData,
@@ -62,6 +64,7 @@ export default function RightPanel({
       <ChallengeCompleted
         isOpen={isCompletedModalOpen}
         onClose={() => setIsCompletedModalOpen(false)}
+        course={course}
       />
       <div>
         <AnimatePresence>

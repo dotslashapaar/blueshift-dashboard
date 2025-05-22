@@ -167,17 +167,18 @@ async function main() {
             onCodeChange={handleCodeUpdate}
           />
           {/* TODO: Extract execution logs and execution components out of Right Panel */}
-          <RightPanel
+          {/* <RightPanel
             isPanelOpen={isPanelOpen}
             onRunCodeClick={() => console.log("execute pressed")}
             requirements={requirements}
+            course={course}
             isLoading={isVerificationLoading}
             error={verificationError}
             verificationData={verificationData}
             isCodeRunning={isCodeRunning}
             runnerLogs={runnerLogs}
             isEsbuildReady={esBuildInitializationState === "initialized"}
-          />
+          /> */}
         </div>
       </div>
     </motion.div>
