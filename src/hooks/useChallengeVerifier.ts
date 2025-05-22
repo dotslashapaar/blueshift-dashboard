@@ -1,25 +1,16 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { challengeMetadata } from "@/app/utils/course";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CourseMetadata } from "@/app/utils/course";
+import { usePersistentStore } from "@/stores/store";
+import { Certificate, TestResult } from "@/lib/challenges/types";
+
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 // --- Consolidated Types ---
 
-interface VerificationResult {
-  success: boolean;
-  instruction: string;
-  compute_units_consumed?: number;
-  execution_time?: number;
-  program_logs?: string[];
-  message?: string;
-}
-
 export interface VerificationApiResponse {
   success: boolean;
-  results: VerificationResult[];
-  certificate?: {
-    pubkey: string;
-    signature: string;
-    message: string;
-  };
+  results: TestResult[];
+  certificate?: Certificate;
 }
 
 export interface ChallengeRequirement {
@@ -30,8 +21,7 @@ export interface ChallengeRequirement {
 // --- Hook Definition ---
 
 interface useChallengeVerifierOptions {
-  verificationEndpoint: string;
-  challenge: challengeMetadata;
+  course: CourseMetadata;
 }
 
 interface UseChallengeVerifierReturn {
@@ -43,21 +33,23 @@ interface UseChallengeVerifierReturn {
   requirements: ChallengeRequirement[];
   setRequirements: React.Dispatch<React.SetStateAction<ChallengeRequirement[]>>;
   initialRequirements: ChallengeRequirement[];
-  setVerificationData: React.Dispatch<React.SetStateAction<VerificationApiResponse | null>>;
+  setVerificationData: React.Dispatch<
+    React.SetStateAction<VerificationApiResponse | null>
+  >;
   completedRequirementsCount: number;
   allIncomplete: boolean;
 }
 
 export function useChallengeVerifier({
-  verificationEndpoint,
-  challenge,
+  course,
 }: useChallengeVerifierOptions): UseChallengeVerifierReturn {
   const [verificationData, setVerificationData] =
     useState<VerificationApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const verificationEndpoint = `${apiBaseUrl}${course.challenge.apiPath}`;
 
-  const initialRequirements = challenge.requirements.map((req) => ({
+  const initialRequirements = course.challenge.requirements.map((req) => ({
     ...req,
     status: "incomplete" as const,
   }));
@@ -65,10 +57,12 @@ export function useChallengeVerifier({
   const [requirements, setRequirements] =
     useState<ChallengeRequirement[]>(initialRequirements);
 
+  const { authToken, setCertificate } = usePersistentStore();
+
   useEffect(() => {
     if (verificationData) {
       setRequirements(
-        challenge.requirements.map((req): ChallengeRequirement => {
+        course.challenge.requirements.map((req): ChallengeRequirement => {
           const result = verificationData?.results?.find(
             (res) => res.instruction === req.instructionKey,
           );
@@ -79,13 +73,15 @@ export function useChallengeVerifier({
             // it implies it wasn't part of this verification run or something else.
             // Keep its existing status or mark as incomplete if it was reset.
             // For simplicity now, let's find its current status or default to incomplete.
-            const currentReq = requirements.find(r => r.instructionKey === req.instructionKey);
+            const currentReq = requirements.find(
+              (r) => r.instructionKey === req.instructionKey,
+            );
             return { ...req, status: currentReq?.status || "incomplete" };
           }
         }),
       );
     }
-  }, [verificationData, challenge.requirements]); // Removed 'requirements' from dependency array to avoid infinite loop
+  }, [verificationData, course.challenge.requirements] /* need to keep requirements out of this for now */);
 
   const handleVerificationRequest = useCallback(
     async (body: FormData | string, headers?: HeadersInit) => {
@@ -98,15 +94,30 @@ export function useChallengeVerifier({
           method: "POST",
           body: body,
           ...(headers && { headers }),
+          ...(authToken && {
+            headers: {
+              ...headers,
+              Authorization: `Bearer ${authToken}`,
+            },
+          }),
         });
 
         if (response.ok) {
           const result: VerificationApiResponse = await response.json();
-          console.log("Verification successful:", result);
           setVerificationData(result);
+
           if (!result.success) {
             console.warn("Verification API reported failure:", result);
+            return;
           }
+
+          if (!result.certificate) {
+            console.error("No certificate received in response.");
+            setError("No certificate received.");
+            return
+          }
+
+          // setCertificate(course.slug, result.certificate);
         } else {
           const errorText = await response.text();
           console.error(
@@ -129,7 +140,7 @@ export function useChallengeVerifier({
         setIsLoading(false);
       }
     },
-    [verificationEndpoint],
+    [verificationEndpoint, authToken, setCertificate, course],
   );
 
   const uploadProgram = useCallback(() => {

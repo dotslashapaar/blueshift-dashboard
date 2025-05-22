@@ -6,6 +6,7 @@ import {
   rewardsStatus,
   RewardsStatus,
 } from "@/app/utils/course";
+import { Certificate } from "@/lib/challenges/types";
 
 interface Store {
   // Global Modal
@@ -61,6 +62,10 @@ interface PersistentStore {
   authToken: string | null;
   setAuthToken: (token: string) => void;
   clearAuthToken: () => void;
+
+  // Certificates
+  certificates: Record<string, Certificate>;
+  setCertificate: (courseSlug: string, certificate: Certificate) => void;
 }
 
 export const usePersistentStore = create<PersistentStore>()(
@@ -116,6 +121,16 @@ export const usePersistentStore = create<PersistentStore>()(
       authToken: null,
       setAuthToken: (token) => set({ authToken: token }),
       clearAuthToken: () => set({ authToken: null }),
+
+      // Certificates
+      certificates: {},
+      setCertificate: (courseSlug, certificate) =>
+        set((state) => ({
+          certificates: {
+            ...state.certificates,
+            [courseSlug]: certificate,
+          },
+        })),
     }),
     {
       name: "blueshift-storage",

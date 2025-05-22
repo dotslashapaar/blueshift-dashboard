@@ -47,7 +47,7 @@ export function useAuth() {
     }
 
     // Ensure status reflects the current operation, even if re-entrant or called from different paths
-    setAuthState(prev => ({ ...prev, loading: true, error: null, status: "signing-in" }));
+    setAuthState({ loading: true, error: null, status: "signing-in" });
 
     try {
       const { pubkey, timestamp, message } = prepareSignInMessage(publicKey.toBase58());
@@ -75,6 +75,12 @@ export function useAuth() {
       }
       const data: AuthResponse = await response.json();
       setAuthToken(data.token);
+      // Explicitly set signed-in state and clear loading on success
+      setAuthState({
+        loading: false,
+        error: null,
+        status: "signed-in",
+      });
     } catch (err) {
       console.error("Error during sign-in sequence:", err);
       setAuthState({
@@ -119,10 +125,20 @@ export function useAuth() {
 
   // Effect to handle automatic sign-in when the wallet is connected and ready.
   useEffect(() => {
-    if (authToken && connected && authState.status !== "signed-in") {
-      setAuthState({ loading: false, error: null, status: "signed-in" });
+    // This effect transitions to "signed-in" state when conditions are met.
+    if (authToken && connected) {
+      // Only transition to "signed-in" if not already signed-in and not in the process of signing out.
+      if (authState.status !== "signed-in" && authState.status !== "signing-out") {
+        setAuthState({ loading: false, error: null, status: "signed-in" });
+      }
+    } else if (!authToken && authState.status === "signed-in") {
+      // If token is lost (e.g. cleared, expired) while status is "signed-in", revert to "signed-out".
+      setAuthState({ loading: false, error: null, status: "signed-out" });
     }
-  }, [authToken, connected, authState]);
+    // Note: If !connected and status is "signed-in", we generally let explicit logout handle it,
+    // as transient disconnections shouldn't always force a sign-out.
+    // The `logout` function explicitly handles disconnection.
+  }, [authToken, connected, authState.status, setAuthState]);
 
   // useEffect to handle signing after modal connection or if connection was pending.
   useEffect(() => {
@@ -153,7 +169,7 @@ export function useAuth() {
   const logout = useCallback(async () => {
     setAuthState({
       loading: true,
-      error: null,
+      error: null, // Clear previous errors
       status: "signing-out",
     });
     try {
@@ -161,7 +177,7 @@ export function useAuth() {
       // Wallet disconnect should be attempted regardless of its current state,
       // and errors during disconnect are caught.
       if (connected) {
-         await disconnect();
+        await disconnect(); // Ensure disconnect is awaited
       }
       setAuthState({
         loading: false,
@@ -169,7 +185,7 @@ export function useAuth() {
         status: "signed-out",
       });
     } catch (err) {
-      console.error("Error disconnecting wallet:", err);
+      console.error("Error during logout:", err);
       // Even if disconnect fails, app state is signed-out.
       setAuthState({
         loading: false,

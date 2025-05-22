@@ -25,7 +25,8 @@ import { Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
 import BlueshiftEditor from "@/app/components/TSChallengeEnv/BlueshiftEditor";
 import LogoGlyph from "../Logo/LogoGlyph";
-import RightPanel from "../TSChallengeEnv/RightPanel";
+import { useAuth } from "@/hooks/useAuth";
+import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const rpcEndpoint = process.env.NEXT_PUBLIC_CHALLENGE_RPC_ENDPOINT;
@@ -36,10 +37,10 @@ interface ChallengesContentProps {
 }
 
 export default function ChallengesContent({
-  content,
   currentCourse,
 }: ChallengesContentProps) {
-  const [isUserConnected] = useState(true);
+  const auth = useAuth();
+  const isUserConnected = auth.status === "signed-in";
   const { courseProgress } = usePersistentStore();
   const t = useTranslations();
   const isCourseCompleted =
@@ -193,7 +194,6 @@ export default function ChallengesContent({
 
   const {
     esBuildInitializationState,
-    esbuildInitializationError,
     isRunning: isCodeRunning,
     logs: runnerLogs,
     error: runnerError,
@@ -267,10 +267,6 @@ export default function ChallengesContent({
     addLog,
   ]);
 
-  const verificationEndpoint = challenge?.apiPath
-    ? `${apiBaseUrl}${challenge.apiPath}`
-    : "";
-
   const {
     isLoading: isVerificationLoading,
     error: verificationHookError,
@@ -282,10 +278,7 @@ export default function ChallengesContent({
     setRequirements,
     initialRequirements,
     setVerificationData,
-  } = useChallengeVerifier({
-    verificationEndpoint: verificationEndpoint,
-    challenge: challenge!,
-  });
+  } = useChallengeVerifier({ course: currentCourse });
 
   const handleRunCode = () => {
     if (esBuildInitializationState !== "initialized") {
@@ -324,12 +317,11 @@ export default function ChallengesContent({
               {t("challenges.connect_wallet_description")}
             </div>
           </div>
-          <Button
-            label="Connect wallet"
-            variant="primary"
-            size="lg"
-            className="!w-[2/3]"
-            icon="Wallet"
+          <WalletMultiButton
+            status={auth.status}
+            address={auth.publicKey?.toBase58()}
+            onSignIn={auth.login}
+            onSignOut={auth.logout}
           />
         </div>
       ) : (

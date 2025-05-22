@@ -47,6 +47,7 @@ export type CourseMetadata = {
   color: string;
   difficulty: CourseDifficulty;
   isFeatured: boolean;
+  unitName: string;
   lessons: LessonMetadata[];
   challenge: challengeMetadata;
 };

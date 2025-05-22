@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { usePersistentStore } from "@/stores/store";
 import Button from "../Button/Button";
 import Icon from "../Icon/Icon";
@@ -13,6 +13,8 @@ import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 import { useChallengeVerifier } from "@/hooks/useChallengeVerifier";
 import { AnimatePresence, motion } from "motion/react";
 import { anticipate } from "motion";
+import { useAuth } from "@/hooks/useAuth";
+import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -25,8 +27,8 @@ export default function ChallengesContent({
   currentCourse,
   content
 }: ChallengeContentProps) {
-  // Replace with real connection later
-  const [isUserConnected] = useState(true);
+  const auth = useAuth();
+  const isUserConnected = auth.status === "signed-in";
   const { courseProgress } = usePersistentStore();
   const t = useTranslations();
   const isCourseCompleted =
@@ -37,10 +39,6 @@ export default function ChallengesContent({
   if (!apiBaseUrl) {
     console.error("API Base URL is not defined in the environment variables.");
   }
-
-  const verificationEndpoint = challenge?.apiPath
-    ? `${apiBaseUrl}${challenge.apiPath}`
-    : "";
 
   const {
     isLoading,
@@ -53,10 +51,7 @@ export default function ChallengesContent({
     setVerificationData,
     setRequirements,
     initialRequirements,
-  } = useChallengeVerifier({
-    verificationEndpoint: verificationEndpoint,
-    challenge: challenge!,
-  });
+  } = useChallengeVerifier({course: currentCourse});
 
   const handleRedoChallenge = () => {
     setVerificationData(null);
@@ -79,12 +74,11 @@ export default function ChallengesContent({
               {t("challenges.connect_wallet_description")}
             </div>
           </div>
-          <Button
-            label="Connect wallet"
-            variant="primary"
-            size="lg"
-            className="!w-[2/3]"
-            icon="Wallet"
+          <WalletMultiButton
+            status={auth.status}
+            address={auth.publicKey?.toBase58()}
+            onSignIn={auth.login}
+            onSignOut={auth.logout}
           />
         </div>
       ) : (

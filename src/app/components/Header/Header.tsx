@@ -36,16 +36,6 @@ export default function HeaderContent() {
     setIsLanguageDropdownOpen(false);
   };
 
-  const handleSignIn = () => {
-    auth.login();
-  };
-
-  const handleSignOut = () => {
-    auth.logout().then(() => {
-      console.log("Header: User logged out.");
-    });
-  };
-
   const isRootOrCourses =
     pathname === "/" ||
     pathname === `/${currentLocale}` ||
@@ -185,8 +175,8 @@ export default function HeaderContent() {
             <WalletMultiButton
               status={auth.status}
               address={auth.publicKey?.toBase58()}
-              onSignIn={handleSignIn}
-              onSignOut={handleSignOut}
+              onSignIn={auth.login}
+              onSignOut={auth.logout}
               // disabled={walletButtonIsDisabled}
             />
             {/*{authError && (*/}

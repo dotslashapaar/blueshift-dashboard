@@ -7,6 +7,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
+    unitName: "Anchor Vault",
     lessons: [{ slug: "lesson" }],
     challenge: {
       apiPath: "/v1/verify/anchor/vault",
@@ -22,6 +23,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
+    unitName: "Anchor Escrow",
     lessons: [{ slug: "lesson" }],
     challenge: {
       apiPath: "/v1/verify/anchor/escrow",
@@ -38,6 +40,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
+    unitName: "Anchor Memo",
     lessons: [{ slug: "lesson" }],
     challenge: {
       apiPath: "/v1/verify/anchor/memo",
@@ -50,6 +53,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "255,173,102",
     difficulty: 2,
     isFeatured: true,
+    unitName: "Pinocchio Vault",
     lessons: [{ slug: "lesson" }],
     challenge: {
       apiPath: "/v1/verify/pinocchio/vault",
@@ -65,6 +69,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "255,173,102",
     difficulty: 2,
     isFeatured: true,
+    unitName: "Pinocchio Memo",
     lessons: [{ slug: "lesson" }],
     challenge: {
       apiPath: "/v1/verify/pinocchio/memo",
@@ -77,6 +82,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "140,255,102",
     difficulty: 2,
     isFeatured: true,
+    unitName: "Assembly Memo",
     lessons: [{ slug: "lesson" }],
     challenge: {
       apiPath: "/v1/verify/assembly/memo",
@@ -89,6 +95,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "255,173,102",
     difficulty: 4,
     isFeatured: true,
+    unitName: "Quantum Vault",
     lessons: [{ slug: "introduction-to-quantum-vault" }],
     challenge: {
       apiPath: "/v1/verify/quantum/vault",
@@ -101,6 +108,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "105,162,241",
     difficulty: 2,
     isFeatured: true,
+    unitName: "SPL Token Mint",
     lessons: [{ slug: "understanding-spl-tokens" }],
     challenge: {
       apiPath: "/v1/verify/spf-token/create-mint",
