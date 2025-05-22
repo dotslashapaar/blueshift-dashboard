@@ -28,7 +28,7 @@ function prepareSignInMessage(pubkey: string) {
 export function useAuth() {
   const { publicKey, signMessage, disconnect, connected, connecting } = useWallet();
   const { setVisible: setModalVisible, visible: isModalVisible } = useWalletModal();
-  const { setAuthToken, clearAuthToken } = usePersistentStore();
+  const { authToken, setAuthToken, clearAuthToken } = usePersistentStore();
 
   const [authState, setAuthState] = useState<AuthState>({
     loading: false,
@@ -75,7 +75,6 @@ export function useAuth() {
       }
       const data: AuthResponse = await response.json();
       setAuthToken(data.token);
-      setAuthState({ loading: false, status: "signed-in", error: null });
     } catch (err) {
       console.error("Error during sign-in sequence:", err);
       setAuthState({
@@ -117,6 +116,13 @@ export function useAuth() {
     _performSignInSequence,
     setAuthState,
   ]);
+
+  // Effect to handle automatic sign-in when the wallet is connected and ready.
+  useEffect(() => {
+    if (authToken && connected && authState.status !== "signed-in") {
+      setAuthState({ loading: false, error: null, status: "signed-in" });
+    }
+  }, [authToken, connected, authState]);
 
   // useEffect to handle signing after modal connection or if connection was pending.
   useEffect(() => {
