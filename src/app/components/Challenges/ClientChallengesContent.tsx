@@ -29,7 +29,7 @@ import { useAuth } from "@/hooks/useAuth";
 import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-const rpcEndpoint = process.env.NEXT_PUBLIC_CHALLENGE_RPC_ENDPOINT;
+const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
 
 interface ChallengesContentProps {
   currentCourse: CourseMetadata;
