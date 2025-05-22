@@ -223,6 +223,9 @@
     "challenge_completed_skip_description": "You can see your unlocks on the rewards page.",
     "challenge_completed_tweet": "Share on X"
   },
+  "notifications": {
+    "session_expired_logout": "Your session has expired. Please log in again."
+  },
   "challenge_page": {
     "requirements_title": "Challenge",
     "upload_program_btn": "Upload Program",

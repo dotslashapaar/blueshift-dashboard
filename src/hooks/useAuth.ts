@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import bs58 from "bs58";
 import { usePersistentStore } from "@/stores/store";
+import { decodeJwt } from "jose";
 
 export interface AuthState {
   loading: boolean;
@@ -25,16 +26,75 @@ function prepareSignInMessage(pubkey: string) {
   return { pubkey, timestamp, message };
 }
 
+/**
+ * Checks if a JWT token is expired.
+ * @param token The JWT token string.
+ * @returns True if the token is expired or invalid, false otherwise.
+ */
+export function isTokenExpired(token: string | null): boolean {
+  if (!token) {
+    return true; // No token, considered expired/invalid
+  }
+
+  try {
+    const decodedJwt = decodeJwt(token);
+    const expirationTime = decodedJwt.exp;
+
+    if (typeof expirationTime === "undefined") {
+      // No expiration claim, treat as invalid or handle as per your app's policy
+      console.warn("JWT token does not have an expiration (exp) claim.");
+      return true;
+    }
+
+    const nowInSeconds = Date.now() / 1000;
+    return expirationTime <= nowInSeconds;
+  } catch (error) {
+    console.error("Error decoding JWT token:", error);
+    return true; // Error decoding, treat as expired/invalid
+  }
+}
+
 export function useAuth() {
   const { publicKey, signMessage, disconnect, connected, connecting } = useWallet();
   const { setVisible: setModalVisible, visible: isModalVisible } = useWalletModal();
   const { authToken, setAuthToken, clearAuthToken } = usePersistentStore();
+
+  const authExpiry = useMemo(() => {
+    if (!authToken) return null;
+    const decodedJwt = decodeJwt(authToken);
+    return decodedJwt.exp;
+  }, [authToken]);
 
   const [authState, setAuthState] = useState<AuthState>({
     loading: false,
     error: null,
     status: "signed-out",
   });
+
+  /**
+   * Checks if the current authentication token has an 'exp' claim and if that time is in the past.
+   * @returns True if the token has an 'exp' claim and is expired. 
+   *          False if the token is not expired, or if the 'exp' claim is missing (treated as non-expiring by this check).
+   */
+  const checkTokenExpired = useCallback((): boolean => {
+    if (!authToken) {
+      return true; // No token, considered expired/invalid for practical purposes
+    }
+    try {
+      const decodedJwt = decodeJwt(authToken);
+      const expirationTime = decodedJwt.exp;
+      if (typeof expirationTime === "undefined") {
+        // No expiration claim, treat as non-expiring for the purpose of this specific check.
+        console.warn("JWT token does not have an expiration (exp) claim. Treating as non-expiring.");
+        return false;
+      }
+      const nowInSeconds = Date.now() / 1000;
+      return expirationTime <= nowInSeconds;
+    } catch (error) {
+      console.error("Error decoding JWT token during expiry check:", error);
+      return true; // Error decoding, treat as expired/invalid
+    }
+  }, [authToken]);
 
   const _performSignInSequence = useCallback(async () => {
     if (!publicKey || !signMessage) {
@@ -74,6 +134,9 @@ export function useAuth() {
         );
       }
       const data: AuthResponse = await response.json();
+
+      const decodedJwt = decodeJwt(data.token)
+
       setAuthToken(data.token);
       // Explicitly set signed-in state and clear loading on success
       setAuthState({
@@ -195,5 +258,5 @@ export function useAuth() {
     }
   }, [clearAuthToken, disconnect, connected, setAuthState]);
 
-  return { ...authState, login, logout, publicKey };
+  return { ...authState, login, logout, publicKey, authToken, authExpiry, checkTokenExpired };
 }

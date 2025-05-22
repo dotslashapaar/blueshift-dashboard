@@ -18,6 +18,7 @@ import { usePersistentStore } from "@/stores/store";
 import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { Link } from "@/i18n/navigation";
 import { CourseMetadata } from "@/app/utils/course";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ChallengeTableProps {
   onUploadClick: () => void;
@@ -48,7 +49,8 @@ export default function ChallengeTable({
 
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
   const [allowRedo, setAllowRedo] = useState(false);
-  const { setCourseStatus, courseStatus } = usePersistentStore();
+  const { setCourseStatus, courseStatus, authToken } = usePersistentStore();
+  const auth = useAuth();
 
   const courseSlug = course.slug;
 
@@ -190,7 +192,14 @@ export default function ChallengeTable({
             size="lg"
             label={t("challenge_page.upload_program_btn")}
             className="w-full sm:w-auto"
-            onClick={onUploadClick}
+            onClick={() => {
+              if (auth.checkTokenExpired()) {
+                alert(t("notifications.session_expired_logout"));
+                auth.logout();
+              } else {
+                onUploadClick();
+              }
+            }}
           />
         </div>
 
