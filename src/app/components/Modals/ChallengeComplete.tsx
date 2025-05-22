@@ -130,7 +130,6 @@ export default function ChallengeCompleted({
                     closeModal();
                   }
                 }}
-                disabled={isLoading}
               />
               <div
                 onClick={closeModal}
