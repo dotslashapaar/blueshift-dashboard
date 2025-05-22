@@ -121,7 +121,7 @@ export default function ChallengeCompleted({
                   const left = window.screenX + (window.outerWidth - popupWidth) / 2;
                   const top = window.screenY + (window.outerHeight - popupHeight) / 2;
                   const tweetWindow = window.open(
-                    `https://x.com/intent/tweet?text="${encodeURIComponent(`I just completed the Anchor Vault challenge from @blueshift_gg.\n\nTry it out here: https://learn.blueshift.gg/en/courses/${course.slug}/lesson\n\nMake the shift. Build on @solana.`)}`,
+                    `https://x.com/intent/tweet?text=${encodeURIComponent(`I just completed the Anchor Vault challenge from @blueshift_gg.\n\nTry it out here: https://learn.blueshift.gg/en/courses/${course.slug}/lesson\n\nMake the shift. Build on @solana.`)}`,
                     "_blank",
                     `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`
                   );
