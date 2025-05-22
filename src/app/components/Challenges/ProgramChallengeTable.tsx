@@ -17,6 +17,7 @@ import HeadingReveal from "../HeadingReveal/HeadingReveal";
 import { usePersistentStore } from "@/stores/store";
 import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { Link } from "@/i18n/navigation";
+import { CourseMetadata } from "@/app/utils/course";
 
 interface ChallengeTableProps {
   onUploadClick: () => void;
@@ -26,7 +27,7 @@ interface ChallengeTableProps {
   isLoading: boolean;
   error: string | null;
   verificationData: VerificationApiResponse | null;
-  courseSlug: string;
+  course: CourseMetadata;
   onRedoChallenge: () => void;
 }
 
@@ -38,7 +39,7 @@ export default function ChallengeTable({
   isLoading,
   error,
   verificationData,
-  courseSlug,
+  course,
   onRedoChallenge,
 }: ChallengeTableProps) {
   const t = useTranslations();
@@ -46,7 +47,10 @@ export default function ChallengeTable({
     useState<ChallengeRequirement | null>(null);
 
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
+  const [allowRedo, setAllowRedo] = useState(false);
   const { setCourseStatus, courseStatus } = usePersistentStore();
+
+  const courseSlug = course.slug;
 
   useEffect(() => {
     if (verificationData) {
@@ -63,8 +67,12 @@ export default function ChallengeTable({
       );
       if (allRequirementsPassed) {
         setTimeout(() => {
-          setCourseStatus(courseSlug, "Unlocked");
+          if (courseStatus[courseSlug] === "Locked") {
+            console.log("triggered")
+            setCourseStatus(courseSlug, "Unlocked");
+          }
           setIsCompletedModalOpen(true);
+          setAllowRedo(false);
         }, 1000);
       }
     }
@@ -73,12 +81,13 @@ export default function ChallengeTable({
   return (
     <div>
       <ChallengeCompleted
-        isOpen={isCompletedModalOpen}
+        isOpen={isCompletedModalOpen && !allowRedo}
         onClose={() => setIsCompletedModalOpen(false)}
+        course={course}
       />
       <div className="relative flex flex-col gap-y-4 w-full overflow-hidden px-1.5 pt-1.5 pb-12 border rounded-2xl border-border bg-background-card">
         {(courseStatus[courseSlug] === "Unlocked" ||
-          courseStatus[courseSlug] === "Claimed") && (
+          courseStatus[courseSlug] === "Claimed") && !allowRedo && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -115,8 +124,9 @@ export default function ChallengeTable({
               icon="Refresh"
               label={t("challenge_page.challenge_completed.redo")}
               onClick={() => {
-                setCourseStatus(courseSlug, "Locked");
                 onRedoChallenge();
+                setAllowRedo(true);
+                setIsCompletedModalOpen(false);
               }}
             />
           </motion.div>

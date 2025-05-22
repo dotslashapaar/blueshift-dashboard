@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import { anticipate } from "motion";
 import { useWindowSize } from "usehooks-ts";
 import { useEffect } from "react";
+import useMintNFT from "@/hooks/useMintNFT";
 
 type RewardsListProps = {
   initialCourses: CourseMetadata[];
@@ -91,7 +92,7 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
                         courseStatus[course.slug] === "Locked" && "opacity-50"
                       )}
                       footer={
-                        <RewardsFooter status={courseStatus[course.slug]} />
+                        <RewardsFooter course={course} />
                       }
                     />
                   ))}

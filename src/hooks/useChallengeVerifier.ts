@@ -117,7 +117,7 @@ export function useChallengeVerifier({
             return
           }
 
-          // setCertificate(course.slug, result.certificate);
+          setCertificate(course.slug, result.certificate);
         } else {
           const errorText = await response.text();
           console.error(
@@ -140,7 +140,7 @@ export function useChallengeVerifier({
         setIsLoading(false);
       }
     },
-    [verificationEndpoint, authToken, setCertificate, course],
+    [verificationEndpoint, authToken],
   );
 
   const uploadProgram = useCallback(() => {

@@ -1,22 +1,33 @@
 "use client";
+
 import Modal from "./Modal";
-import { useStore, usePersistentStore } from "@/stores/store";
 import { useTranslations } from "next-intl";
 import Button from "../Button/Button";
 import DecryptedText from "../HeadingReveal/DecryptText";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { anticipate } from "motion";
+import { CourseMetadata } from "@/app/utils/course";
+import useMintNFT from "@/hooks/useMintNFT";
+import { usePersistentStore } from "@/stores/store";
+import { Link } from "@/i18n/navigation";
+
+interface ChallengeCompletedProps {
+  isOpen: boolean;
+  onClose: () => void;
+  course: CourseMetadata;
+}
 
 export default function ChallengeCompleted({
   isOpen,
   onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+  course,
+}: ChallengeCompletedProps) {
   const t = useTranslations();
   const [isAnimating, setIsAnimating] = useState(false);
+  const { mint, isLoading } = useMintNFT();
+  const { courseStatus } = usePersistentStore();
+  const currentCourseStatus = courseStatus[course.slug];
 
   useEffect(() => {
     setTimeout(() => {
@@ -27,6 +38,13 @@ export default function ChallengeCompleted({
   const [isHovering, setIsHovering] = useState(false);
   const closeModal = () => {
     onClose();
+  };
+
+  const handleMint = async () => {
+    mint(course)
+      .catch((error) => {
+        console.error("Error minting NFT:", error);
+      });
   };
 
   return (
@@ -64,27 +82,69 @@ export default function ChallengeCompleted({
             {t("challenges.challenge_completed_description")}
           </span>
         </div>
+
         <div className="flex flex-col gap-y-4">
-          <Button
-            label={t("challenges.challenge_completed_button")}
-            variant="primary"
-            size="lg"
-            icon="Claimed"
-            className="!w-full !flex-shrink"
-            onClick={closeModal}
-            disabled
-          />
-          <div
-            onClick={closeModal}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-            className="hover:text-primary text-mute transition w-2/3 text-center text-sm font-medium mx-auto cursor-pointer"
-          >
-            <DecryptedText
-              text={t("challenges.challenge_completed_skip")}
-              isHovering={isHovering}
-            />
-          </div>
+          {currentCourseStatus === "Unlocked" ? (
+            <>
+              <Button
+                label={t("challenges.challenge_completed_button")}
+                variant="primary"
+                size="lg"
+                icon="Claimed"
+                className="!w-full !flex-shrink"
+                onClick={handleMint}
+                disabled={isLoading}
+              />
+              <div
+                onClick={closeModal}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                className="hover:text-primary text-mute transition w-2/3 text-center text-sm font-medium mx-auto cursor-pointer"
+              >
+                <DecryptedText
+                  text={t("challenges.challenge_completed_skip")}
+                  isHovering={isHovering}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <Button
+                label={t("challenges.challenge_completed_tweet")}
+                variant="primary"
+                size="lg"
+                icon="X"
+                className="!w-full !flex-shrink"
+                onClick={() => {
+                  const popupWidth = 600;
+                  const popupHeight = 720;
+                  const left = window.screenX + (window.outerWidth - popupWidth) / 2;
+                  const top = window.screenY + (window.outerHeight - popupHeight) / 2;
+                  const tweetWindow = window.open(
+                    `https://x.com/intent/tweet?text="${encodeURIComponent(`I just completed the Anchor Vault challenge from @blueshift_gg.\n\nTry it out here: https://learn.blueshift.gg/en/courses/${course.slug}/lesson\n\nMake the shift. Build on @solana.`)}`,
+                    "_blank",
+                    `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`
+                  );
+                  if (tweetWindow) {
+                    tweetWindow.focus();
+                    closeModal();
+                  }
+                }}
+                disabled={isLoading}
+              />
+              <div
+                onClick={closeModal}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                className="hover:text-primary text-mute transition w-2/3 text-center text-sm font-medium mx-auto cursor-pointer"
+              >
+                <DecryptedText
+                  text={t("challenges.challenge_completed_skip")}
+                  isHovering={isHovering}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </Modal>

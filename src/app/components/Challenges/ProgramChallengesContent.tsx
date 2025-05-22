@@ -133,7 +133,7 @@ export default function ChallengesContent({
                 completedRequirementsCount={completedRequirementsCount}
                 allIncomplete={allIncomplete}
                 verificationData={verificationData}
-                courseSlug={currentCourse.slug}
+                course={currentCourse}
                 onRedoChallenge={handleRedoChallenge}
               />
             </motion.div>

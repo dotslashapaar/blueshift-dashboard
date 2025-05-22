@@ -3,15 +3,27 @@ import { useTranslations } from "next-intl";
 import classNames from "classnames";
 import { usePersistentStore } from "@/stores/store";
 import Icon from "../Icon/Icon";
+import { CourseMetadata } from "@/app/utils/course";
+import useMintNFT from "@/hooks/useMintNFT";
 
 type RewardsFooterProps = {
-  status?: "Locked" | "Claimed" | "Unlocked";
+  course: CourseMetadata;
 };
 
-export default function RewardsFooter({ status }: RewardsFooterProps) {
+export default function RewardsFooter({ course }: RewardsFooterProps) {
   const t = useTranslations();
-
+  const { courseStatus } = usePersistentStore();
+  const status = courseStatus[course.slug];
   const { view } = usePersistentStore();
+  const { mint } = useMintNFT();
+
+  const handleMint = async () => {
+    console.log("minting")
+    mint(course)
+      .catch((error) => {
+        console.error("Error minting NFT:", error);
+      });
+  };
 
   return (
     <div
@@ -36,7 +48,7 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
           icon="Claim"
           iconSide="right"
           className="!w-full !min-w-[150px]"
-          disabled
+          onClick={handleMint}
         />
       )}
       {status === "Claimed" && (
@@ -47,6 +59,7 @@ export default function RewardsFooter({ status }: RewardsFooterProps) {
           icon="Claim"
           iconSide="right"
           className="!w-full !min-w-[150px]"
+          disabled
         />
       )}
     </div>

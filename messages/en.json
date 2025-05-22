@@ -177,13 +177,13 @@
     "subtitle": "Rewards",
     "Unclaimed": "Unclaimed",
     "claimed": "Minted",
-    "claim": "Mint (Coming Soon)",
+    "claim": "Mint",
     "locked": "Locked",
     "empty_title": "No rewards found",
     "empty_description": "Try changing your filters to see rewards here.",
     "locked_description": "Complete Challenge to Unlock",
     "claimed_description": "NFT Is Available in your Wallet",
-    "view_nft": "View NFT",
+    "view_nft": "View NFT (coming soon)",
     "filter__label": "All Statuses",
     "filter__all_statuses": "All",
     "filter__selected_statuses": "Statuses"
@@ -218,9 +218,10 @@
     "connect_wallet_description": "A Solana wallet is required to complete the challenge and unlock NFTs",
     "challenge_completed": "Congratulations!",
     "challenge_completed_description": "You've completed the challenge and unlocked an NFT reward!",
-    "challenge_completed_button": "Mint NFT (Coming Soon)",
+    "challenge_completed_button": "Mint NFT",
     "challenge_completed_skip": "Skip for now",
-    "challenge_completed_skip_description": "You can see your unlocks on the rewards page."
+    "challenge_completed_skip_description": "You can see your unlocks on the rewards page.",
+    "challenge_completed_tweet": "Share on X"
   },
   "challenge_page": {
     "requirements_title": "Challenge",

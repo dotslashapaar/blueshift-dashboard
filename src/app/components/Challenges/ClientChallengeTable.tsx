@@ -18,6 +18,7 @@ import { usePersistentStore } from "@/stores/store";
 import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { Link } from "@/i18n/navigation";
 import { LogMessage } from "@/hooks/useEsbuildRunner";
+import { CourseMetadata } from "@/app/utils/course";
 
 interface ChallengeTableProps {
   onRunCodeClick: () => void;
@@ -27,7 +28,7 @@ interface ChallengeTableProps {
   isLoading: boolean;
   error: string | null;
   verificationData: VerificationApiResponse | null;
-  courseSlug: string;
+  course: CourseMetadata;
   isCodeRunning: boolean;
   runnerLogs: LogMessage[];
   isEsbuildReady: boolean;
@@ -39,7 +40,7 @@ export default function ChallengeTable({
   isLoading,
   error,
   verificationData,
-  courseSlug,
+  course,
   isCodeRunning,
   runnerLogs,
   isEsbuildReady,
@@ -51,6 +52,7 @@ export default function ChallengeTable({
 
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
   const { setCourseStatus, courseStatus } = usePersistentStore();
+  const courseSlug = course.slug;
 
   useEffect(() => {
     if (verificationData) {
@@ -66,7 +68,9 @@ export default function ChallengeTable({
       );
       if (allRequirementsPassed) {
         setTimeout(() => {
-          setCourseStatus(courseSlug, "Unlocked");
+          if (courseStatus[courseSlug] === "Locked") {
+            setCourseStatus(courseSlug, "Unlocked");
+          }
           setIsCompletedModalOpen(true);
         }, 1000);
       }
@@ -74,12 +78,14 @@ export default function ChallengeTable({
   }, [verificationData, requirements, setCourseStatus, courseSlug]);
 
   const overallIsLoading = isCodeRunning || !isEsbuildReady;
+  
 
   return (
     <div className="w-full flex">
       <ChallengeCompleted
         isOpen={isCompletedModalOpen}
         onClose={() => setIsCompletedModalOpen(false)}
+        course={course}
       />
       <div className="bg-background-card/50 rounded-b-xl lg:rounded-none w-full min-w-full lg:min-w-[400px] px-4 lg:px-6 lg:right-4 lg:border-l border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden pb-6">
         {(courseStatus[courseSlug] === "Unlocked" ||
@@ -120,8 +126,8 @@ export default function ChallengeTable({
               icon="Refresh"
               label={t("challenge_page.challenge_completed.redo")}
               onClick={() => {
-                setCourseStatus(courseSlug, "Locked");
                 onRedoChallenge();
+                setIsCompletedModalOpen(false);
               }}
             />
           </motion.div>

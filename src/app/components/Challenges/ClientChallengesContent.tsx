@@ -425,7 +425,7 @@ export default function ChallengesContent({
                         isLoading={isVerificationLoading}
                         error={verificationHookError}
                         verificationData={verificationData}
-                        courseSlug={currentCourse.slug}
+                        course={currentCourse}
                         isCodeRunning={isCodeRunning}
                         runnerLogs={runnerLogs}
                         isEsbuildReady={
