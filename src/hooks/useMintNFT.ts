@@ -40,7 +40,10 @@ export default function useMintNFT() {
       const tx = await minter.methods
       .mintCredential(signature)
       .accounts({ unit })
-      .rpc();
+      .rpc({
+        commitment: "processed",
+        skipPreflight: true
+      });
 
       setIsLoading(false);
       setCourseStatus(course.slug, "Claimed");

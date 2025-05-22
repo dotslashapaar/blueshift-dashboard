@@ -16,6 +16,7 @@ export default function useMinter() {
     }
     try {
       const provider = new AnchorProvider(connection, wallet, {
+        commitment: "processed",
         skipPreflight: true,
       });
       return new Program(idl as BlueshiftCredentials, provider);
