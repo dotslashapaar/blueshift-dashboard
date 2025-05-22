@@ -222,7 +222,7 @@ export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
               process.env.NEXT_PUBLIC_CHALLENGE_SECRET,
             ),
             "process.env.RPC_ENDPOINT": JSON.stringify(
-              process.env.NEXT_PUBLIC_CHALLENGE_RPC_ENDPOINT,
+              process.env.NEXT_PUBLIC_RPC_ENDPOINT,
             ),
             window: "self",
           },
