@@ -6,7 +6,7 @@ While most Solana developers lean on Anchor, there are plenty of good reasons to
 
 Writing Solana programs without a framework like Anchor is known as **native development**. It is more demanding, yet in this chapter you’ll learn to craft a Solana program from scratch with Pinocchio; a lightweight library that lets you skip external frameworks and own every byte of your code.
 
-# Pinocchio 101
+<ArticleSection name="Pinocchio 101" id="pinocchio-101" level="h2" />
 
 Pinocchio is a minimalist Rust library that lets you craft Solana programs without pulling in the heavyweight `solana-program` crate. It works by treating the incoming transaction payload: accounts, instruction data, everything; as a single byte slice and reads it in-place via zero-copy techniques. 
 
@@ -19,7 +19,7 @@ The project was started by [Febo](https://x.com/0x_febo) at [Anza](https://www.a
 
 Alongside the core crate, you’ll find `pinocchio-system` and `pinocchio-token`, which give you zero-copy helpers and CPI utilities for Solana’s native System and SPL-Token programs.
 
-## Native Development
+<ArticleSection name="Native Development" id="native-development" level="h2" />
 
 That might sound daunting, but it’s exactly why this chapter exists. By the end you’ll understand every byte that crosses the program boundary and how to keep your logic tight, secure, and fast.
 
@@ -307,7 +307,7 @@ pinocchio-token   = "x.x.x"
 
 You’re now ready to write your first native program.
 
-## Template
+<ArticleSection name="The Vault Code" id="the-vault-code" level="h2" />
 
 `lib.rs` begins with the entrypoint and a dispatcher:
 
@@ -345,7 +345,7 @@ fn process_instruction(
 ```
 </Codeblock>
 
-## Deposit
+<ArticleSection name="Deposit" id="deposit" level="h3" />
 
 **Goals**
 - Create an empty vault PDA for the caller if it doesn’t exist.
@@ -466,7 +466,7 @@ impl<'a> Deposit<'a> {
 }
 ```
 
-## Withdraw
+<ArticleSection name="Withdraw" id="withdraw" level="h3" />
 
 **Goals**
 - Let the same signer reclaim all lamports in the vault.
