@@ -311,6 +311,7 @@ You’re now ready to write your first native program.
 
 `lib.rs` begins with the entrypoint and a dispatcher:
 
+<Codeblock lang="rust">
 ```rust
 #![no_std]
 
@@ -342,8 +343,9 @@ fn process_instruction(
     }
 }
 ```
+</Codeblock>
 
-## Deposit
+## Deposit
 
 **Goals**
 - Create an empty vault PDA for the caller if it doesn’t exist.
