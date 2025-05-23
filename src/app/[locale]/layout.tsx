@@ -75,7 +75,7 @@ export async function generateMetadata({ params }: RootLayoutProps) {
       siteName: t("title"),
       images: [
         {
-          url: "/graphics/meta-image.png",
+          url: "https://learn.blueshift.gg/graphics/meta-image.png",
           width: 1200,
           height: 628,
         },
