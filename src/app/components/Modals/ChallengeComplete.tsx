@@ -63,7 +63,7 @@ export default function ChallengeCompleted({
         transition={{ duration: 0.75, delay: 0.5 }}
         className="w-[175px] relative z-10 mt-6"
       >
-        <img src="/graphics/nft-test.png" className="w-full animate-nft"></img>
+        <img src={`/graphics/nft-${course.slug}.png`} className="w-full animate-nft"></img>
       </motion.div>
       <motion.div
         initial={{ opacity: 0 }}
