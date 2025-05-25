@@ -30,7 +30,7 @@ Going Native, means we don't have that luxury anymore and that we will need to:
 - Create our own Account, Instruction and deserialization logic
 - Implement all the security checks that Anchor was doing for us before
 
-### Instruction Handling and Discriminator
+### The Discriminator
 
 In Anchor, the `#[program]` macro hides a lot of wiring. Under the hood it builds an 8-byte discriminator (size customizable since version 0.31) for every instruction by hashing `"global:"` + function_name with SHA-256:
 
@@ -81,7 +81,7 @@ This is what the macro does behind the scene:
 3. Each instruction’s `try_from` implementation validates and deserializes its inputs.
 4. A call to `process()` executes the business logic.
 
-### Account and Instruction Struct Implementation 
+### Accounts and Instructions
 
 Since we’re writing native code, every account and every byte of instruction data must be validated by hand. To keep that work tidy, and fast, we like to define an Accounts struct for each instruction and implement Rust’s TryFrom trait on it. 
 
@@ -184,7 +184,7 @@ impl<'a> TryFrom<&'a [u8]> for DepositInstructionData {
 
 Using `TryFrom` everywhere cleanly separates validation from business logic, improving maintainability and security.
 
-### Instruction Logic Implementation
+### Logic
 
 Next, we combine the validated accounts and instruction data into a single handler struct:
 
@@ -238,7 +238,7 @@ impl<'a> Deposit<'a> {
 
 The result? Anchor-style ergonomics, but with all the benefits of being fully native; explicit, predictable, and fast.
 
-### Cross-Program Invocations (CPIs) and Signer Seeds
+### Cross-Program Invocations (CPIs)
 
 As mentioned, Pinocchio has some helper crates like `pinocchio-system` and `pinocchio-token` that make it super easy to perform Cross-Program Invocations (CPIs) to these native programs. 
 
