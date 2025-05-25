@@ -50,6 +50,7 @@ export type CourseMetadata = {
   unitName: string;
   lessons: LessonMetadata[];
   challenge: challengeMetadata;
+  collectionMintAddress?: string;
 };
 
 export type LessonMetadata = {

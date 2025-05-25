@@ -14,6 +14,9 @@ import { notFound } from "next/navigation";
 import defaultOpenGraphImage from "@/../public/graphics/meta-image.png";
 import { getPathname } from "@/i18n/navigation";
 import { Metadata } from "next";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { publicKey } from "@metaplex-foundation/umi";
+import { fetchCollectionV1 } from "@metaplex-foundation/mpl-core";
 
 interface LessonPageProps {
   params: Promise<{
@@ -74,27 +77,39 @@ export default async function LessonPage({ params }: LessonPageProps) {
   }
 
   const courseMetadata = await getCourse(courseName);
+  const coursePageTitle = t(`courses.${courseMetadata.slug}.title`);
 
-  // Get all lessons for the course
+  const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
+
+  if (!rpcEndpoint) {
+    throw new Error("NEXT_PUBLIC_RPC_ENDPOINT is not set");
+  }
+
+  const umi = createUmi(rpcEndpoint);
+
+  let collectionSize: number | null = null;
+
+  const collectionMintAddress = courseMetadata.collectionMintAddress;
+
+  if (collectionMintAddress) {
+    try {
+      const collectionPda = publicKey(collectionMintAddress);
+      const collection = await fetchCollectionV1(umi, collectionPda);
+      collectionSize = collection.numMinted;
+    } catch (error) {
+      console.error(
+        `Failed to fetch collection details for ${collectionMintAddress}:`,
+        error,
+      );
+    }
+  }
+
   const allLessons = courseMetadata.lessons;
-
-  // Find current lesson index
   const currentLessonIndex = allLessons.findIndex(
     (lesson) => lesson.slug === lessonName,
   );
-
-  // const lessonMetadata = courseMetadata.lessons[currentLessonIndex];
-
-  // Get next lesson slug (if exists)
   const nextLesson = allLessons[currentLessonIndex + 1];
   const nextLessonSlug = nextLesson ? nextLesson.slug : "";
-
-  // Get previous lesson slug (if exists)
-  // const previousLesson = allLessons[currentLessonIndex - 1];
-  // const previousLessonSlug = previousLesson ? previousLesson.slug : "";
-
-  // Check if this is the last lesson
-  // const isLastLesson = currentLessonIndex === allLessons.length - 1;
 
   return (
     <div className="flex flex-col w-full border-b border-b-border">
@@ -136,7 +151,16 @@ export default async function LessonPage({ params }: LessonPageProps) {
             <span className="sr-only">
               {t(`courses.${courseMetadata.slug}.title`)}
             </span>
-            <LessonTitle title={t(`courses.${courseMetadata.slug}.title`)} />
+            <LessonTitle title={coursePageTitle} />
+            {collectionMintAddress && collectionSize !== null && (
+              <Link href={`https://solana.fm/address/${collectionMintAddress}`} target="_blank">
+                <p className="text-base text-secondary mt-1 text-sm" style={{
+                  color: `rgb(${courseColors[courseMetadata.language]},1)`,
+                }}>
+                  {collectionSize.toString()} Graduates
+                </p>
+              </Link>
+            )}
           </div>
         </div>{" "}
       </div>

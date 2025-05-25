@@ -16,6 +16,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
         { instructionKey: "withdraw" },
       ],
     },
+    collectionMintAddress: "53tiK9zY67DuyA1tgQ6rfNgixMB1LiCP9D67RgfbCrpz",
   },
   {
     slug: "anchor-escrow",
@@ -62,6 +63,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
         { instructionKey: "withdraw" },
       ],
     },
+    collectionMintAddress: "AL38QM96SDu4Jpx7UGcTcaLtwvWPVgRUzg9PqC787djK",
   },
   {
     slug: "pinocchio-memo",
