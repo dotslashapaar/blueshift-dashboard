@@ -18,7 +18,7 @@ export default function Footer() {
             <span className="text-tertiary/75 font-mono text-sm">
               Blueshift &copy; {year}
             </span>
-            <span className="text-tertiary/30 font-mono text-xs mt-1">
+            <span className="text-tertiary/25 font-mono text-xs text-center sm:text-left mt-1">
               Commit: {build}
             </span>
           </div>
