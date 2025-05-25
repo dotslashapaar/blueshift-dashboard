@@ -604,12 +604,9 @@ pub fn handler(ctx: Context<Take>) -> Result<()> {
 
 #### Refund
 
-Here's what happens in the `refund` instruction:
-
-- The `Escrow` account gets closed, since we don't need it anymore, and lamports are returned to the maker.
-- Transfer Token A from the `vault` back to the `maker` and close the `vault` since now it's empty.
-
-These are all the accounts needed for the `Refund` context:
+The `refund` instruction lets the maker cancel an open offer:
+- Close the escrow PDA and send its rent lamports back to the maker.
+- Move the full Token A balance out of the vault and back to the maker, then close the vault account.
 
 ```rust
 #[derive(Accounts)]
@@ -704,3 +701,5 @@ pub fn handler(ctx: Context<Refund>) -> Result<()> {
     Ok(())
 }
 ```
+
+Once this executes, the offer is void, the vault is gone, and the maker has their Token A and rent back in their wallet.
