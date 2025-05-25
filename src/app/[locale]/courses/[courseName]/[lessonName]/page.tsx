@@ -14,9 +14,8 @@ import { notFound } from "next/navigation";
 import defaultOpenGraphImage from "@/../public/graphics/meta-image.png";
 import { getPathname } from "@/i18n/navigation";
 import { Metadata } from "next";
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { publicKey } from "@metaplex-foundation/umi";
-import { fetchCollectionV1 } from "@metaplex-foundation/mpl-core";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { decodeCoreCollectionNumMinted } from "@/lib/nft/decodeCoreCollectionNumMinted";
 
 interface LessonPageProps {
   params: Promise<{
@@ -85,17 +84,28 @@ export default async function LessonPage({ params }: LessonPageProps) {
     throw new Error("NEXT_PUBLIC_RPC_ENDPOINT is not set");
   }
 
-  const umi = createUmi(rpcEndpoint);
-
   let collectionSize: number | null = null;
-
   const collectionMintAddress = courseMetadata.collectionMintAddress;
 
   if (collectionMintAddress) {
     try {
-      const collectionPda = publicKey(collectionMintAddress);
-      const collection = await fetchCollectionV1(umi, collectionPda);
-      collectionSize = collection.numMinted;
+      const connection = new Connection(rpcEndpoint);
+      const collectionPublicKey = new PublicKey(collectionMintAddress);
+      const accountInfo = await connection.getAccountInfo(collectionPublicKey);
+
+      if (accountInfo) {
+        collectionSize = decodeCoreCollectionNumMinted(accountInfo.data);
+
+        if (collectionSize === null) {
+          console.error(
+            `Failed to decode num_minted for collection ${collectionMintAddress}`,
+          );
+        }
+      } else {
+        console.error(
+          `Failed to fetch account info for ${collectionMintAddress}`,
+        );
+      }
     } catch (error) {
       console.error(
         `Failed to fetch collection details for ${collectionMintAddress}:`,
@@ -152,12 +162,12 @@ export default async function LessonPage({ params }: LessonPageProps) {
               {t(`courses.${courseMetadata.slug}.title`)}
             </span>
             <LessonTitle title={coursePageTitle} />
-            {collectionMintAddress && collectionSize !== null && (
+            {collectionMintAddress && typeof collectionSize === 'number' && (
               <Link href={`https://solana.fm/address/${collectionMintAddress}`} target="_blank">
                 <p className="text-base text-secondary mt-1 text-sm" style={{
                   color: `rgb(${courseColors[courseMetadata.language]},1)`,
                 }}>
-                  {collectionSize.toString()} Graduates
+                  {(collectionSize as any).toString()} Graduates
                 </p>
               </Link>
             )}
