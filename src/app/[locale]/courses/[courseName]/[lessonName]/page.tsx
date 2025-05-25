@@ -89,7 +89,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   if (collectionMintAddress) {
     try {
-      const connection = new Connection(rpcEndpoint);
+      const connection = new Connection(rpcEndpoint, { httpAgent: false });
       const collectionPublicKey = new PublicKey(collectionMintAddress);
       const accountInfo = await connection.getAccountInfo(collectionPublicKey);
 
