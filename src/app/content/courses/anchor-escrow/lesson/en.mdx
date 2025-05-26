@@ -17,7 +17,7 @@ For the first time, this program will mix several account types, so it's worth t
 
 <ArticleSection name="Account on Solana" id="account-on-solana" level="h2" />
 
-On Solana every piece of state lives in an account; picture the ledger as one giant table where each row shares the same base schema:
+On Solana every piece of state lives in an account; picture the [ledger](https://solana.com/docs/references/terminology#ledger) as one giant table where each row shares the same base schema:
 
 ```rust
 pub struct Account {
@@ -26,38 +26,38 @@ pub struct Account {
     /// data held in this account
     #[cfg_attr(feature = "serde", serde(with = "serde_bytes"))]
     pub data: Vec<u8>,
-    /// the program that owns this account and that is allowed to mutate this account's lamports or data
+    /// the program that owns this account and can mutate its lamports or data.
     pub owner: Pubkey,
     /// `true` if the account is a program; `false` if it merely belongs to one
     pub executable: bool,
-    /// the epoch at which this account will next owe rent (currently deprecated so set to `0`)
+    /// the epoch at which this account will next owe rent (currently deprecated and is set to `0`)
     pub rent_epoch: Epoch,
 }
 ```
 
-All accounts on Solana share the same base layout. What sets them apart is simply which program owns them since it has exclusive rights to add, delete, or modify the data stored inside.
+All accounts on Solana share the same base layout. What sets them apart is the program that owns them, as the program has exclusive rights to add, delete, or modify the data stored inside.
 
 So when we talk about a Token Account, we mean an account owned by the Token Program. Unlike a plain System Account (whose data field is empty), a token-program account can be either a **Mint** or a **Token** account. We'll look at both in a moment.
 
-Another important category of accounts are the Program Accounts: accounts owned by on-chain programs that are used store critical protocol or user state. The `Escrow` record we are going to create in this chapter is exactly this kind of account.
+Another important category of accounts are the Program Accounts: accounts owned by on-chain programs that are used to store critical protocol or user state. The `Escrow` record we are going to create in this chapter is exactly this kind of account.
 
 <ArticleSection name="Token Program" id="token-program" level="h2" />
 
-The Token Program, sart of the Solana Program Library (SPL), is the built-in toolkit for minting and moving any asset that isn't native SOL. It has instructions to create tokens, mint new supply, transfer balances, burn, freeze, and more.
+The Token Program, part of the Solana Program Library (SPL), is the built-in toolkit for minting and moving any asset that isn't native SOL. It has instructions to create tokens, mint new supply, transfer balances, burn, freeze, and more.
 
 This program owns two key account types:
 - **Mint Account**: stores the metadata for one specific token: supply, decimals, mint authority, freeze authority, and so on.
-- **Token Account**: holds a balance of that mint for a particular owner. Only the owner can reduce the balance (transfer, burn, etc.), but anyone can send tokens in, increasing it.
+- **Token Account**: holds a balance of that mint for a particular owner. Only the owner can reduce the balance (transfer, burn, etc.), but anyone can send tokens to the account, increasing its balance
 
 In our Escrow program we'll create both kinds of accounts and show how the vault PDA safely moves balances between them.
 
 <ArticleSection name="Program Accounts" id="program-accounts" level="h2" />
 
-We've already covered Anchor's core macros in the previous unit; now we'll put one of its most powerful to work. In this section we'll use `#[account]` to define a custom data structure and store it inside an account that our program owns.
+We've already covered Anchor's core macros in the previous unit; now we'll put one of its most powerful macros to work. In this section we'll use `#[account]` to define a custom data structure and store it inside an account that our program owns.
 
 ### `#[account]`
 
-In the vault example, our PDA was just an empty System account with a deterministic address. When PDA are owned by our program they unlock its second super-power: we can write arbitrary data into it. Anchor makes that painless.
+In the vault example, our PDA is an empty System Program account with a deterministic address. When a PDA is owned by our program, it unlocks its second superpower: the ability to write arbitrary data to it. Anchor makes this process seamless.
 
 First, declare the data you want to live inside the account:
 
@@ -79,9 +79,9 @@ impl Space for Escrow {
 }
 ```
 
-Creating a struct is very easy, The only constraint that we have with anchor is that the account's data is capped at 10,240 bytes (10 KiB). If we need more, we're going to need to use `zero_copy` and chunked writes; an advanced topic for another day.
+Creating a struct is very easy, The only constraint that we have with Anchor is that the account's data is capped at 10,240 bytes (10 KiB). If we need more, we're going to need to use `zero_copy` and chunked writes; an advanced topic for another day.
 
-The `Space` trait tells Anchor the exact byte size of the struct so during creation we can reference it to deposit enough lamports for rent exemption. (Type sizes are in Anchor's space reference; the discriminator is usually 8 bytes, referenced here with Self::DISCRIMINATOR.len().)
+The `Space` trait tells Anchor the exact byte size of the struct so during creation we can reference it to deposit enough lamports for rent exemption. (Type sizes are in Anchor's space reference; the discriminator is usually 8 bytes, referenced here with `Self::DISCRIMINATOR.len()`.)
 
 Here's how we're going to initiate the account in our `Account` struct:
 
@@ -96,12 +96,12 @@ Here's how we're going to initiate the account in our `Account` struct:
 pub escrow: Account<'info, Escrow>,
 ```
 
-Here are some of the field used in the `#[account]` macro, beyond the `seeds` and `bump` fields that we have already covered, and what they do:
+Here are some of the fields used in the `#[account]` macro, beyond the `seeds` and `bump` fields that we have already covered, and what they do:
 - **init**: tells Anchor to create the account.
 - **payer**: which signer funds the rent (here, the maker).
 - **space**: how many bytes to allocate. This is where the rent calculation magic happens as well.
 
-Then, once we created it, we can access the data of the account like this:
+Once we create the account, we can access its data like this:
 
 ```rust
 #[account(
@@ -160,7 +160,7 @@ pub maker_ata_a: Account<'info, TokenAccount>,
 - deserialize its data so you can read fields directly;
 - enforce any extra constraints you specify (`authority`, `decimals`, `mint`, `token_program`, etc.).
 
-These token-related accounts follow the same `init` pattern we used earlier. Because Anchor already knows their fixed byte size, we don't need to supply a space value but just tell Anchor who pays the rent.
+These token-related accounts follow the same `init` pattern used earlier. Since Anchor knows their fixed byte size, we don’t need to specify a `space` value, only the payer funding the account.
 
 Anchor also offers `init_if_needed` macro: it checks whether the token account already exists and, if not, creates it. That shortcut isn't safe for every account type, but it's perfectly suited to token accounts, so we'll rely on it here.
 
@@ -216,7 +216,7 @@ The `has_one` constraint tells Anchor: “this field on the account struct must 
 pub escrow: Account<'info, Escrow>,
 ```
 
-When `has_one` isn’t a fit, because maybe the field name differs, you can write any boolean expression with constraint. If the expression is false, Anchor raises the error you specify.
+When the `has_one` constraint doesn't fit, such as when the field name differs, you can write a custom constraint with any boolean expression. If the expression evaluates to false, Anchor raises the specified error.
 
 These inline constraints keep validation next to the account definition and save you from scattering `require!()` calls throughout your instruction logic.
 
@@ -224,7 +224,7 @@ These inline constraints keep validation next to the account definition and save
 
 Now that we’ve covered every moving part we’ll need, let’s dive into the escrow logic itself.
 
-An escrow lets one user lock up Token A in exchange for Token B from a second user. Our contract therefore boils down to three instructions:
+An escrow lets one user lock up Token A in exchange for Token B from a second user. Our program therefore boils down to three instructions:
 - **Make**: the maker defines the trade terms and deposits the agreed amount of Token A.
 - **Take**: the taker accepts, transfers the promised Token B to the maker, and receives the locked Token A.
 - **Refund**: the maker cancels the offer and pulls back the Token A they deposited.
@@ -236,7 +236,7 @@ anchor init blueshift_anchor_escrow
 cd blueshift_anchor_escrow
 ```
 
-Add the crates we’ll need, enabling Anchor’s init-if-needed helper so we can lazily create token accounts:
+Add the crates we’ll need, enabling Anchor’s `init-if-needed` helper to create token accounts if they don't already exist:
 
 ```
 cargo add anchor-lang --features init-if-needed
@@ -295,7 +295,7 @@ Now let's start with the additional file like `state.rs` and `errors.rs` before 
 
 #### State
 
-`state.rs` is straightforward; we already know how `#[account]` works, and we already seen this structure in the past section:
+`state.rs` is straightforward; we already know how `#[account]` works, and we have already seen this structure in the past section:
 
 ```rust 
 use anchor_lang::prelude::*;
@@ -322,7 +322,7 @@ What each field does:
 - **receive**: how much of token B the maker wants. (The vault’s balance itself shows how much token A was deposited, so we don’t store that.)
 - **bump**: cached bump byte; deriving it on the fly costs compute, so we save it once.
 
-We could pack in more info, but extra bytes mean extra rent. Storing only the essentials keeps deposits cheap while still letting the contract enforce every rule it needs.
+We could pack in more info, but extra bytes mean extra rent. Storing only the essentials keeps deposits cheap while still letting the program enforce every rule it needs.
 
 #### Errors
 

@@ -24,7 +24,7 @@ pub struct MyState { … }
 pub unsafe extern "C" fn entrypoint(ptr: *mut u8) -> u64 { … }
 ```
 
-- `extern "C"` tells the Rust compiler to expose (or expect) a symbol that follows the C ABI—the calling convention that defines which eBPF registers carry arguments, how the stack is laid out, and which register returns a value.
+- `extern "C"` tells the Rust compiler to expose (or expect) a symbol that follows the C ABI; the calling convention that defines which eBPF registers carry arguments, how the stack is laid out, and which register returns a value.
 - `#[repr(C)]` forces Rust to arrange a struct exactly as the C compiler would, locking field order and padding so the byte layout never changes
 
 Why is the C ABI chosen? Because it is the lowest common denominator across every language that LLVM's eBPF backend supports: Rust, C, Zig, or even hand-written assembly. No matter which toolchain produces the bytecode, the Solana runtime needs to call your program's entry function by raw name and shove three pointers into the correct registers; sticking to the C ABI guarantees that will work for code produced by any LLVM-based language.
@@ -41,7 +41,7 @@ Before the jump, the loader packs everything an instruction needs into one flat,
 The macro will:
 - Converting those raw pointers into safe Rust slices.
 - Catching panics so they become clean `ProgramError::Custom` codes instead of crashing the VM.
-- Forwarding everything to a user-defined function (often called `process_instruction`) that returns a ProgramResult.
+- Forwarding everything to a user-defined function (often called `process_instruction`) that returns a `ProgramResult`.
 
 Here's a description of the single, flat record that the Solana loader places in the BPF VM's input page before jumping to your entrypoint.
 
@@ -55,7 +55,7 @@ pub struct Entrypoint {
 }
 ```
 - `account_len`: number of accounts sent in.
-- `account_info`: that many raw account records, one after another.
+- `account_info`: the raw account records in the instruction, one after another.
 - `instruction_len`: how many bytes of instruction data follow.
 - `instruction_data`: the instruction itself
 - `program_id`: the 32-byte `Pubkey` of the program being run.
@@ -113,7 +113,7 @@ fn sol_invoke_signed_c(
 
 Now that we've unpacked every building block of a "crate-less" Solana program, we can outline the vault itself. Remember, a vault does exactly two things:
 - **Deposit** lamports into a PDA derived from the owner's public key.
-- **Withdraw** those same lamports later—only by the owner.
+- **Withdraw** those same lamports later; only by the owner.
 
 Each instruction will therefore carry three accounts:
 - **Owner** (signer, writable): The user depositing or withdrawing funds.
@@ -254,7 +254,7 @@ pub unsafe extern "C" fn entrypoint(input: *mut u8) -> u64 {
 
 Before we can run `deposit` or `withdraw`, the entrypoint has to be sure the transaction gave us exactly the right accounts and that each one has the expected flags.
 
-Because we're working at the raw-pointer level, every check is done with simple pointer math and direct loads.
+Because we're working at the raw pointer level, every check is done with simple pointer math and direct loads.
 
 The first eight bytes of the input record hold account_len. For this vault we expect three accounts: owner, vault PDA, and the System Program:
 
