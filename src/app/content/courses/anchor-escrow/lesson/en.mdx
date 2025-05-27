@@ -63,24 +63,33 @@ An important feature of the `#[account]` macro, and also relevant for instructio
 
 #### Discriminators
 
-When you have multiple account types or instruction types within a single program, Anchor uses a unique identifier called a "discriminator" to distinguish between them.
+Anchor needs a quick way to tell one account from another. It does that with an 8-byte discriminator; a tiny prefix stored at the start of every serialized struct that is generated using this snippet: `sha256("account:<StructName>")[0..8]`
 
-By default, Anchor automatically generates an 8-byte discriminator for each account and instruction struct. This discriminator is derived from the SHA256 hash of the struct's name (e.g., `sha256("account:<STRUCT_NAME>")[..8]`). This ensures that each type has a unique prefix, allowing Anchor to correctly serialize and deserialize account data and dispatch to the correct instruction handler.
+When Anchor reads raw bytes, it peeks at the first 8 bytes, matches them to a table of known discriminators, and then deserializes into the right Rust struct or routes to the right handler. And the hash-based approach guarantees each type in your program has a unique marker 
 
 ##### Custom Discriminators
 
-While automatic discriminators work well for most cases, Anchor v0.31.0 introduced the ability to define **custom discriminators**. This feature provides more flexibility, especially when:
-- You need to interact with programs not written in Anchor.
-- You want to optimize account space by using shorter discriminators (e.g., 1-byte instead of 8-bytes).
-- You are migrating from a legacy system or need to maintain compatibility with existing data structures that use a specific discriminator format.
+Starting with Anchor `v0.31` you can override the auto-generated hash and give an account or instruction its own discriminator directly in the `#[account]` or `#[instruction]` macro. 
 
-You can specify a custom discriminator directly in the `#[account]` or `#[instruction]` macro. For example, `#[account(discriminator = 0)]` or `#[account(discriminator = [1, 2, 3, 4])]`.
+```rust
+#[account(discriminator = 0)]              // single-byte
+pub struct Escrow { … }
 
-It's crucial to ensure that custom discriminators are unique across all account and instruction types within your program. If discriminators are not unique, Anchor won't be able to reliably distinguish between types, leading to potential errors and undefined behavior. The IDL generation step in Anchor includes checks for ambiguous discriminators. However, you should also consider future possibilities when choosing discriminators, especially with variable-length ones. For instance, an account with `[1]` as its discriminator means you cannot have another type with a discriminator starting with `1`, like `[1, 2, 3]`.
+#[instruction(discriminator = [1, 2, 3, 4])] // four-byte array
+pub fn make(…) { … }
+```
 
-In our `Escrow` program, we will use a simple custom discriminator for our `Escrow` account struct and for our instructions. This will be a single byte that increments for each type. For example, the `Escrow` account might use `0`, the `make` instruction `0`, `take` instruction `1`, and `refund` instruction `2`. This demonstrates how custom discriminators can be used, although for a program with few types like ours, the default 8-byte discriminator would also work perfectly fine. Using a custom, shorter discriminator can save a small amount of space on-chain.
+**Note**: Every discriminator in your program must be unique. If two types share the same prefix the runtime can’t tell them apart and the Anchor’s IDL generator will throw an error if it spots a collision. Additionally, know that using `[1]` as discriminator blocks you from ever adding `[1, 2, …]` later because it also starts with `1`.
 
-Now that we understand discriminators, let's declare the data you want to live inside the account:
+For this `Escrow` program we’ll tag everything with a single-byte discriminator:
+- `Escrow` account: 0x00
+- `make` instruction: 0x00
+- `take` instruction: 0x01
+- `refund` instruction:` 0x02
+
+The default 8-byte hashes would work fine; but it shows how a custom, shorter discriminator trims a few bytes of on-chain storage.
+
+With the discriminators sorted, let's declare the data that we want to live inside the account:
 
 ```rust 
 use anchor_lang::prelude::*;
