@@ -79,9 +79,9 @@ pub struct Escrow { … }
 pub fn make(…) { … }
 ```
 
-**Note**: Every discriminator in your program must be unique. If two types share the same prefix the runtime can’t tell them apart and the Anchor’s IDL generator will throw an error if it spots a collision. Additionally, know that using `[1]` as discriminator blocks you from ever adding `[1, 2, …]` later because it also starts with `1`.
+**Note**: Every discriminator in your program must be unique. If two types share the same prefix the runtime can't tell them apart and Anchor's IDL generator will throw an error if it spots a collision. Additionally, know that using `[1]` as discriminator blocks you from ever adding `[1, 2, …]` later because it also starts with `1`.
 
-For this `Escrow` program we’ll tag everything with a single-byte discriminator:
+For this `Escrow` program we'll tag everything with a single-byte discriminator:
 - `Escrow` account: 0x00
 - `make` instruction: 0x00
 - `take` instruction: 0x01
@@ -108,7 +108,11 @@ pub struct Escrow {
 
 Creating a struct is very easy, The only constraint that we have with Anchor is that the account's data is capped at 10,240 bytes (10 KiB). If we need more, we're going to need to use `zero_copy` and chunked writes; an advanced topic for another day.
 
-The `Space` trait tells Anchor the exact byte size of the struct so during creation we can reference it to deposit enough lamports for rent exemption. (Type sizes are in Anchor's space reference; the discriminator is usually 8 bytes, referenced here with `Self::DISCRIMINATOR.len()`.)
+Anchor also needs to know the byte size of the struct to allocate the correct amount of space on-chain. The `InitSpace` derive macro takes care of this. When you derive `InitSpace`, it implements the `Space` trait for your struct, calculating and storing its size in an `INIT_SPACE` constant.
+
+The total space in bytes needed for the account is the sum of `INIT_SPACE` (size of all the fields combined) and the discriminator size (`DISCRIMINATOR.len()`).
+
+Solana accounts require a rent deposit in lamports, which depends on the size of the account. Knowing the size helps us calculate how many lamports we need to deposit to make the account open.
 
 Here's how we're going to initiate the account in our `Account` struct:
 
@@ -348,7 +352,7 @@ What each field does:
 - **seed**: Random number used during seed derivation so one maker can open multiple escrows with the same token pair; stored on-chain so we can always re-derive the PDA.
 - **maker**: The wallet that created the escrow; needed for refunds and to receive payment.
 - **mint_a** & **mint_b**: The SPL mints addresses for the "give" and "get" sides of the swap.
-- **receive**: How much of token B the maker wants. (The vault’s balance itself shows how much token A was deposited, so we don’t store that.)
+- **receive**: How much of token B the maker wants. (The vault's balance itself shows how much token A was deposited, so we don't store that.)
 - **bump**: Cached bump byte; deriving it on the fly costs compute, so we save it once.
 
 We could pack in more info, but extra bytes mean extra rent. Storing only the essentials keeps deposits cheap while still letting the program enforce every rule it needs.
