@@ -72,7 +72,7 @@ When Anchor reads raw bytes, it peeks at the first 8 bytes, matches them to a ta
 Starting with Anchor `v0.31` you can override the auto-generated hash and give an account or instruction its own discriminator directly in the `#[account]` or `#[instruction]` macro. 
 
 ```rust
-#[account(discriminator = 0)]              // single-byte
+#[account(discriminator = 1)]              // single-byte
 pub struct Escrow { … }
 
 #[instruction(discriminator = [1, 2, 3, 4])] // four-byte array
@@ -95,7 +95,7 @@ With the discriminators sorted, let's declare the data that we want to live insi
 use anchor_lang::prelude::*;
 
 #[derive(InitSpace)]
-#[account(discriminator = 0)]
+#[account(discriminator = 1)]
 pub struct Escrow {
     pub seed: u64,
     pub maker: Pubkey,
@@ -337,7 +337,7 @@ Now let's start with the additional file like `state.rs` and `errors.rs` before 
 use anchor_lang::prelude::*;
 
 #[derive(InitSpace)]
-#[account(discriminator = 0)]
+#[account(discriminator = 1)]
 pub struct Escrow {
     pub seed: u64,
     pub maker: Pubkey,
