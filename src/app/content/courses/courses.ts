@@ -34,6 +34,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
         { instructionKey: "refund" },
       ],
     },
+    collectionMintAddress: "2E5K7FxDWGXkbRpFEAkhR8yQwiUBGggVyng2vaAhah5L",
   },
   {
     slug: "anchor-memo",
