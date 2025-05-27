@@ -59,12 +59,34 @@ We've already covered Anchor's core macros in the previous unit; now we'll put o
 
 In the vault example, our PDA is an empty System Program account with a deterministic address. When a PDA is owned by our program, it unlocks its second superpower: the ability to write arbitrary data to it. Anchor makes this process seamless.
 
-First, declare the data you want to live inside the account:
+An important feature of the `#[account]` macro, and also relevant for instructions, is the use of discriminators. These are unique identifiers that help Anchor distinguish between different account (or instruction) types within your program. Let's explore this concept before looking at the `Escrow` struct.
+
+#### Discriminators
+
+When you have multiple account types or instruction types within a single program, Anchor uses a unique identifier called a "discriminator" to distinguish between them.
+
+By default, Anchor automatically generates an 8-byte discriminator for each account and instruction struct. This discriminator is derived from the SHA256 hash of the struct's name (e.g., `sha256("account:<STRUCT_NAME>")[..8]`). This ensures that each type has a unique prefix, allowing Anchor to correctly serialize and deserialize account data and dispatch to the correct instruction handler.
+
+##### Custom Discriminators
+
+While automatic discriminators work well for most cases, Anchor v0.31.0 introduced the ability to define **custom discriminators**. This feature provides more flexibility, especially when:
+- You need to interact with programs not written in Anchor.
+- You want to optimize account space by using shorter discriminators (e.g., 1-byte instead of 8-bytes).
+- You are migrating from a legacy system or need to maintain compatibility with existing data structures that use a specific discriminator format.
+
+You can specify a custom discriminator directly in the `#[account]` or `#[instruction]` macro. For example, `#[account(discriminator = 0)]` or `#[account(discriminator = [1, 2, 3, 4])]`.
+
+It's crucial to ensure that custom discriminators are unique across all account and instruction types within your program. If discriminators are not unique, Anchor won't be able to reliably distinguish between types, leading to potential errors and undefined behavior. The IDL generation step in Anchor includes checks for ambiguous discriminators. However, you should also consider future possibilities when choosing discriminators, especially with variable-length ones. For instance, an account with `[1]` as its discriminator means you cannot have another type with a discriminator starting with `1`, like `[1, 2, 3]`.
+
+In our `Escrow` program, we will use a simple custom discriminator for our `Escrow` account struct and for our instructions. This will be a single byte that increments for each type. For example, the `Escrow` account might use `0`, the `make` instruction `0`, `take` instruction `1`, and `refund` instruction `2`. This demonstrates how custom discriminators can be used, although for a program with few types like ours, the default 8-byte discriminator would also work perfectly fine. Using a custom, shorter discriminator can save a small amount of space on-chain.
+
+Now that we understand discriminators, let's declare the data you want to live inside the account:
 
 ```rust 
 use anchor_lang::prelude::*;
 
-#[account]
+#[derive(InitSpace)]
+#[account(discriminator = 0)]
 pub struct Escrow {
     pub seed: u64,
     pub maker: Pubkey,
@@ -72,10 +94,6 @@ pub struct Escrow {
     pub mint_b: Pubkey,
     pub receive: u64,
     pub bump: u8,
-}
-
-impl Space for Escrow {
-    const INIT_SPACE: usize = Self::DISCRIMINATOR.len() + 8 + 32 + 32 + 32 + 8 + 1;
 }
 ```
 
@@ -89,7 +107,7 @@ Here's how we're going to initiate the account in our `Account` struct:
 #[account(
     init,
     payer = maker,
-    space = Escrow::INIT_SPACE,
+    space = Escrow::INIT_SPACE + Escrow::DISCRIMINATOR.len(),
     seeds = ["escrow".as_bytes(), maker.key().as_ref(), seed.to_le_bytes().as_ref()],
     bump,
 )]
@@ -160,7 +178,7 @@ pub maker_ata_a: Account<'info, TokenAccount>,
 - deserialize its data so you can read fields directly;
 - enforce any extra constraints you specify (`authority`, `decimals`, `mint`, `token_program`, etc.).
 
-These token-related accounts follow the same `init` pattern used earlier. Since Anchor knows their fixed byte size, we don’t need to specify a `space` value, only the payer funding the account.
+These token-related accounts follow the same `init` pattern used earlier. Since Anchor knows their fixed byte size, we don't need to specify a `space` value, only the payer funding the account.
 
 Anchor also offers `init_if_needed` macro: it checks whether the token account already exists and, if not, creates it. That shortcut isn't safe for every account type, but it's perfectly suited to token accounts, so we'll rely on it here.
 
@@ -192,7 +210,7 @@ This approach is particularly useful when you want your program to be compatible
 
 #### Account constraints
 
-So far we’ve leaned on built-in arguments and custom error enums to catch mistakes, but Anchor lets you bolt on extra checks right in the account macro.
+So far we've leaned on built-in arguments and custom error enums to catch mistakes, but Anchor lets you bolt on extra checks right in the account macro.
 
 Here are some examples:
 
@@ -205,7 +223,7 @@ Here are some examples:
 pub escrow: Account<'info, Escrow>,
 ```
 
-The `has_one` constraint tells Anchor: “this field on the account struct must equal this account’s key.” If the keys differ, Anchor throws `EscrowError::InvalidMaker` before your handler runs.
+The `has_one` constraint tells Anchor: "this field on the account struct must equal this account's key." If the keys differ, Anchor throws `EscrowError::InvalidMaker` before your handler runs.
 
 ```rust
 #[account(
@@ -222,7 +240,7 @@ These inline constraints keep validation next to the account definition and save
 
 <ArticleSection name="The Escrow Code" id="the-escrow-code" level="h1" />
 
-Now that we’ve covered every moving part we’ll need, let’s dive into the escrow logic itself.
+Now that we've covered every moving part we'll need, let's dive into the escrow logic itself.
 
 An escrow lets one user lock up Token A in exchange for Token B from a second user. Our program therefore boils down to three instructions:
 - **Make**: The maker defines the trade terms and deposits the agreed amount of Token A.
@@ -236,7 +254,7 @@ anchor init blueshift_anchor_escrow
 cd blueshift_anchor_escrow
 ```
 
-Add the crates we’ll need, enabling Anchor’s `init-if-needed` helper to create token accounts if they don't already exist:
+Add the crates we'll need, enabling Anchor's `init-if-needed` helper to create token accounts if they don't already exist:
 
 ```
 cargo add anchor-lang --features init-if-needed
@@ -247,7 +265,7 @@ Next, let's look at how to structure the code in `programs/blueshift_anchor_escr
 
 #### Template
 
-This time we’ll split the program into small, focused modules instead of cramming everything into the `lib.rs`. The folder tree will look roughly like this:
+This time we'll split the program into small, focused modules instead of cramming everything into the `lib.rs`. The folder tree will look roughly like this:
 
 ```
 src
@@ -278,14 +296,17 @@ And this is how the `lib.rs` will look like:
     pub mod blueshift_anchor_escrow {
         use super::*;
 
+        #[instruction(discriminator = 0)]
         pub fn make(ctx: Context<Make>, seed: u64, recieve: u64, amount: u64) -> Result<()> {
             //...
         }
 
+        #[instruction(discriminator = 1)]
         pub fn take(ctx: Context<Take>) -> Result<()> {
             //...
         }
 
+        #[instruction(discriminator = 2)]
         pub fn refund(ctx: Context<Refund>) -> Result<()> {
             //...
         }
@@ -302,7 +323,8 @@ Now let's start with the additional file like `state.rs` and `errors.rs` before 
 ```rust 
 use anchor_lang::prelude::*;
 
-#[account]
+#[derive(InitSpace)]
+#[account(discriminator = 0)]
 pub struct Escrow {
     pub seed: u64,
     pub maker: Pubkey,
@@ -311,16 +333,12 @@ pub struct Escrow {
     pub receive: u64,
     pub bump: u8,
 }
-
-impl Space for Escrow {
-    const INIT_SPACE: usize = Self::DISCRIMINATOR.len() + 8 + 32 + 32 + 32 + 8 + 1;
-}
 ```
 
 What each field does:
 - **seed**: Random number used during seed derivation so one maker can open multiple escrows with the same token pair; stored on-chain so we can always re-derive the PDA.
 - **maker**: The wallet that created the escrow; needed for refunds and to receive payment.
-- **mint_a** & **mint_b**: The SPL mints addresses for the “give” and “get” sides of the swap.
+- **mint_a** & **mint_b**: The SPL mints addresses for the "give" and "get" sides of the swap.
 - **receive**: How much of token B the maker wants. (The vault’s balance itself shows how much token A was deposited, so we don’t store that.)
 - **bump**: Cached bump byte; deriving it on the fly costs compute, so we save it once.
 
@@ -353,9 +371,9 @@ Each enum maps to a clear, human-readable message that Anchor will surface whene
 The `make` instruction does three jobs:
 - Initialises the Escrow record and stores all deal terms.
 - Creates the Vault (an ATA for `mint_a` owned by the `escrow`).
-- Moves the maker’s Token A into that vault with a CPI to the SPL-Token program.
+- Moves the maker's Token A into that vault with a CPI to the SPL-Token program.
 
-Below are the accounts the context needs. Most of these macro arguments and types were introduced earlier, so we’ll skim:
+Below are the accounts the context needs. Most of these macro arguments and types were introduced earlier, so we'll skim:
 
 ```rust
 #[instruction(seed: u64)]
@@ -365,7 +383,7 @@ pub struct Make<'info> {
     #[account(
         init,
         payer = maker,
-        space = Escrow::INIT_SPACE,
+        space = Escrow::INIT_SPACE + Escrow::DISCRIMINATOR.len(),
         seeds = ["escrow".as_bytes(), maker.key().as_ref(), seed.to_le_bytes().as_ref()],
         bump,
     )]
@@ -602,7 +620,7 @@ pub fn handler(ctx: Context<Take>) -> Result<()> {
 }
 ```
 
-**Note**: Once a token account’s balance is zero you can close it to reclaim the rent, which we do for the vault above.
+**Note**: Once a token account's balance is zero you can close it to reclaim the rent, which we do for the vault above.
 
 #### Refund
 
