@@ -1,15 +1,23 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+import { Codeblock } from "../../../../components/Codeblock/Codeblock";
 
 # Chapter 2: The Escrow
 
-Now that you've got your first Anchor program under your belt, let's explore another common program type — **escrow**.
+![Image Test](/graphics/anchor-101.png)
 
-In simple terms, an escrow program acts as a trusted third party that holds assets on behalf of two other parties until certain conditions are met, facilitating a secure exchange.
+Congrats! You just shipped your first Anchor program; from here on, things only get smoother as we rinse and repeat the patterns you've just learned, layering in new tricks along the way.
 
-Before diving into additional Anchor features and escrow, let's understand accounts and how they work on Solana, as we'll be using different account types in this program.
+Our next stop is the Escrow; arguably the most common building block on Solana. 
 
-<ArticleSection name="Account on Solana" id="account-on-solana" />
+Look closely at an AMM, an orderbook, or an NFT marketplace: under the hood, each relies on an escrow-style pattern. The program acts as a neutral third party, holding assets from two participants until a set of conditions is met, then releasing those assets to complete the swap.
 
-On Solana, all data is contained in what we call "accounts". You can think of data on Solana as a public database with a single "Accounts" table, where each entry in this table is an individual account with the same base Account type. Here's how the data inside these accounts is structured:
+Before we dive into the code and introduce a few new Anchor features, that we haven't seen during the Vault lesson, we need a rock-solid mental model of accounts. 
+
+For the first time, this program will mix several account types, so it's worth taking a moment to see how they fit together.
+
+<ArticleSection name="Account on Solana" id="account-on-solana" level="h2" />
+
+On Solana every piece of state lives in an account; picture the [ledger](https://solana.com/docs/references/terminology#ledger) as one giant table where each row shares the same base schema:
 
 ```rust
 pub struct Account {
@@ -18,40 +26,40 @@ pub struct Account {
     /// data held in this account
     #[cfg_attr(feature = "serde", serde(with = "serde_bytes"))]
     pub data: Vec<u8>,
-    /// the program that owns this account. If executable, the program that loads this account.
+    /// the program that owns this account and can mutate its lamports or data.
     pub owner: Pubkey,
-    /// this account's data contains a loaded program (and is now read-only)
+    /// `true` if the account is a program; `false` if it merely belongs to one
     pub executable: bool,
-    /// the epoch at which this account will next owe rent
+    /// the epoch at which this account will next owe rent (currently deprecated and is set to `0`)
     pub rent_epoch: Epoch,
 }
 ```
 
-All accounts on Solana, whether system accounts or otherwise, share this same underlying structure. The key distinction between different account types lies in the program that owns the account, which controls the ability to add, delete, and modify the associated data within the account itself.
+All accounts on Solana share the same base layout. What sets them apart is the program that owns them, as the program has exclusive rights to add, delete, or modify the data stored inside.
 
-For example when we refer to a Token Account, we're talking about accounts owned by the token program. Instead of being empty like System Accounts, Token Accounts can represent **Mints** or **Token Accounts**, which we'll explore in more detail in the following section.
+So when we talk about a Token Account, we mean an account owned by the Token Program. Unlike a plain System Account (whose data field is empty), a token-program account can be either a **Mint** or a **Token** account. We'll look at both in a moment.
 
-Another important category is Program Accounts - accounts owned by smart contracts that typically store and reference critical protocol or user data. The **Escrow** account we're going to create in this program, is an example of this account type.
+Another important category of accounts are the Program Accounts: accounts owned by on-chain programs that are used to store critical protocol or user state. The `Escrow` record we are going to create in this chapter is exactly this kind of account.
 
-<ArticleSection name="Token Program" id="token-program" />
+<ArticleSection name="Token Program" id="token-program" level="h2" />
 
-The Token Program is one of many programs provided by the Solana Program Library (SPL). It includes instructions for creating and interacting with SPL Tokens, which represent all non-native tokens (i.e., not SOL) on the Solana network.
+The Token Program, part of the Solana Program Library (SPL), is the built-in toolkit for minting and moving any asset that isn't native SOL. It has instructions to create tokens, mint new supply, transfer balances, burn, freeze, and more.
 
-The two main account types owned by this program that interact with its logic are:
-- **Mint Account**: A Token Mint is an account that holds data about a specific token.
-- **Token Account**: A Token Account holds tokens of a specific "mint" and has a designated "owner." Only the owner is authorized to decrease the Token Account balance (through transfers, burns, etc.), while anyone can send tokens to the Token Account to increase its balance.
+This program owns two key account types:
+- **Mint Account**: stores the metadata for one specific token: supply, decimals, mint authority, freeze authority, and so on.
+- **Token Account**: holds a balance of that mint for a particular owner. Only the owner can reduce the balance (transfer, burn, etc.), but anyone can send tokens to the account, increasing its balance
 
-We'll examine how these accounts are created and utilized in the Escrow Program.
+In our Escrow program we'll create both kinds of accounts and show how the vault PDA safely moves balances between them.
 
-<ArticleSection name="Anchor 101" id="anchor-101" />
+<ArticleSection name="Program Accounts" id="program-accounts" level="h2" />
 
-We've looked at how the basics of Anchor work in the last lesson, covering account structs, macros, and creating a very basic smart contract. This time, we're going a little bit more in depth into some of the new concepts that we'll use in this escrow program.
+We've already covered Anchor's core macros in the previous unit; now we'll put one of its most powerful macros to work. In this section we'll use `#[account]` to define a custom data structure and store it inside an account that our program owns.
 
-#### `#[account]`
+### `#[account]`
 
-We briefly touched on the concept of PDAs and used them as system program, just to generate a deterministic address for our vault in the previous program. Now we're going to explore the second property of these account types, that is only possible when we transfer ownership of that account to our program: the ability to save custom data inside the account itself. As said before, any account "owned" by our program can be modified internally, making it easy to save any type of data after depositing enough lamports for rent exemption. Luckily, Anchor helps us tremendously with this process.
+In the vault example, our PDA is an empty System Program account with a deterministic address. When a PDA is owned by our program, it unlocks its second superpower: the ability to write arbitrary data to it. Anchor makes this process seamless.
 
-First, let's declare the custom data that we want to insert into the account using the #[account] macro::
+First, declare the data you want to live inside the account:
 
 ```rust 
 use anchor_lang::prelude::*;
@@ -71,11 +79,11 @@ impl Space for Escrow {
 }
 ```
 
-As you can see, creating a struct that we want to replicate in the program is very easy. The only constraint is that we can store up to 10,240 bytes (10KiB) in this account. If we need more space, we'll need to use `zero_copy` and store the data with multiple transactions, since the transaction limit is 1232 bytes; but we'll explore this more advanced concept in a future course.
+Creating a struct is very easy, The only constraint that we have with Anchor is that the account's data is capped at 10,240 bytes (10 KiB). If we need more, we're going to need to use `zero_copy` and chunked writes; an advanced topic for another day.
 
-We also implement the `Space` trait with an `INIT_SPACE` constant to define the exact byte size needed to make the account rent-exempt. The space accounts for the Anchor Discriminator (which helps distinguish between different account types) plus the space required by each field in the struct. Refer to [this table](https://www.anchor-lang.com/docs/references/space) for the number of bytes needed by each data type. Note that by default, the discriminator uses 8 bytes, but this can change if a custom discriminator is used. The preferred way to specify the discriminator size inside the Account struct is with `Self::DISCRIMINATOR.len()`.
+The `Space` trait tells Anchor the exact byte size of the struct so during creation we can reference it to deposit enough lamports for rent exemption. (Type sizes are in Anchor's space reference; the discriminator is usually 8 bytes, referenced here with `Self::DISCRIMINATOR.len()`.)
 
-Here's how this account looks in the Account struct for the "Make" instruction, when we create the account:
+Here's how we're going to initiate the account in our `Account` struct:
 
 ```rust 
 #[account(
@@ -88,13 +96,12 @@ Here's how this account looks in the Account struct for the "Make" instruction, 
 pub escrow: Account<'info, Escrow>,
 ```
 
-As you can see, beyond the `seeds` and `bump` fields that we have already covered, we have additional macros we can leverage to make account creation as simple as possible. The `init` argument comes with `payer` and `space` parameters:
-- `payer`: Specifies which account will pay to make this account rent-exempt
-- `space`: Defines how much storage space is required for the account
+Here are some of the fields used in the `#[account]` macro, beyond the `seeds` and `bump` fields that we have already covered, and what they do:
+- **init**: tells Anchor to create the account.
+- **payer**: which signer funds the rent (here, the maker).
+- **space**: how many bytes to allocate. This is where the rent calculation magic happens as well.
 
-Because this instruction modifies the payer's balance, the payer (in this case, the maker) must also be a signer of the transaction. This is a security requirement from the System Program to ensure funds cannot be withdrawn without authorization.
-
-If we're not creating the account but accessing an existing one, it will look something like this:
+Once we create the account, we can access its data like this:
 
 ```rust
 #[account(
@@ -104,7 +111,7 @@ If we're not creating the account but accessing an existing one, it will look so
 pub escrow: Account<'info, Escrow>
 ```
 
-This structure is very similar to the PDAs we saw in previous lessons, with the main difference being that we're telling Anchor that the account should match the `Escrow` type and should be deserialized for use accordingly.
+This structure is very similar to the PDAs we saw in previous lessons, with the main difference being that we're telling Anchor that the account should match the `Escrow` struct and should be deserialized for use accordingly.
 
 Lastly, since we deposited lamports as rent in the account, we should close the account and retrieve the lamports once this account is not needed anymore.
 
@@ -117,37 +124,49 @@ Lastly, since we deposited lamports as rent in the account, we should close the 
 )]
 pub escrow: Account<'info, Escrow>,
 ```
-This is done through the `close` field and by specifying the destination to receive the lamports owned by the account.
 
-#### Anchor SPL Crate
+`close` transfers whatever lamports remain in the account back to maker, then zeros out the data.
 
-Natively in the Anchor crate, it's not possible to have helpers other than the ones we've already examined. This is where another crate, called `anchor_spl`, comes into play.
+#### Anchor-spl
 
-This crate introduces helpers for all the instructions in both the **SPL Token Program** and the **SPL Token2022 Program**, as well as utilities that help us check data and deserialize both **Mint** and **Token** Accounts.
+Natively, the core Anchor crate only bundles CPI helpers for the System Program. If you want the same hand-holding for SPL tokens you pull in the `anchor_spl` crate.
+
+`anchor_spl` adds:
+- Helper builders for every instruction in both the SPL Token and Token-2022 programs.
+- Type wrappers that make it painless to verify and deserialize Mint and Token accounts.
 
 Let's look at how the `Mint` and `Token` accounts are structured:
 
 ```rust
 #[account(
-    mint::authority = <target_account>,
-    mint::decimals = <expr>
+    mint::authority    = <target_account>,
+    mint::decimals     = <expr>,
     mint::token_program = <target_account>
 )]
 pub mint: Account<'info, Mint>,
+
 #[account(
     mut,
-    associated_token::mint = <target_account>,
-    associated_token::authority = <target_account>,
+    associated_token::mint       = <target_account>,
+    associated_token::authority  = <target_account>,
     associated_token::token_program = <target_account>
 )]
 pub maker_ata_a: Account<'info, TokenAccount>,
+
 ```
 
-The `Account<'info, Mint/TokenAccount>` syntax makes it extremely easy to verify that an account matches one of these types and to deserialize them to access their internal data. Additionally, we have specific arguments that can be used to ensure the account respects the boundaries we require. For example, with **Mint** accounts we can specify the mint `authority`, the `decimals`, and the `token_program`. For **Token Accounts**, we can specify the associated `mint`, the associated `authority`, and the `token_program`.
+`Account<'info, Mint>` and `Account<'info, TokenAccount>` tell Anchor to:
+- confirm the account really is a Mint or Token account;
+- deserialize its data so you can read fields directly;
+- enforce any extra constraints you specify (`authority`, `decimals`, `mint`, `token_program`, etc.).
 
-These accounts can also use the `init` argument that we saw in the previous section. We don't need to specify the required space since it's fixed and known by Anchor, we only need to indicate who will pay for it. Something worth noting is the existence of an `init_if_needed` argument that checks if the account exists and creates one if it doesn't. While this isn't inherently safe for all account types, it's definitely appropriate for token accounts, which is why we use it here.
+These token-related accounts follow the same `init` pattern used earlier. Since Anchor knows their fixed byte size, we don’t need to specify a `space` value, only the payer funding the account.
 
-As mentioned, `anchor_spl` creates helpers for both the **Token** and **Token2022** programs, with the latter introducing Token Extensions. The main challenge is that even though these accounts achieve similar goals and have comparable structures, they can't be deserialized and checked the same way since they're owned by two different programs. We could create more "advanced" logic to handle these different account types, but fortunately Anchor supports this scenario through **InterfaceAccounts**:
+Anchor also offers `init_if_needed` macro: it checks whether the token account already exists and, if not, creates it. That shortcut isn't safe for every account type, but it's perfectly suited to token accounts, so we'll rely on it here.
+
+As mentioned, `anchor_spl` creates helpers for both the **Token** and **Token2022** programs, with the latter introducing Token Extensions. The main challenge is that even though these accounts achieve similar goals and have comparable structures, they can't be deserialized and checked the same way since they're owned by two different programs. 
+
+We could create more "advanced" logic to handle these different account types, but fortunately Anchor supports this scenario through **InterfaceAccounts**:
 
 ```rust
 use anchor_spl::token_interface::{Mint, TokenAccount};
@@ -167,9 +186,13 @@ pub mint: InterfaceAccounts<'info, Mint>,
 pub maker_ata_a: InterfaceAccounts<'info, TokenAccount>,
 ```
 
+The key difference here is that we're using `InterfaceAccounts` instead of `Account`. This allows our program to work with both Token and Token2022 accounts without needing to handle the differences in their deserialization logic. The interface provides a common way to interact with both types of accounts while maintaining type safety and proper validation.
+
+This approach is particularly useful when you want your program to be compatible with both token standards, as it eliminates the need to write separate logic for each program. The interface handles all the complexity of dealing with different account structures behind the scenes.
+
 #### Account constraints
 
-We've seen how to use args and custom errors to make debugging easier, but there's an even better way to add custom constraints beyond the standard arguments we've already discussed.
+So far we’ve leaned on built-in arguments and custom error enums to catch mistakes, but Anchor lets you bolt on extra checks right in the account macro.
 
 Here are some examples:
 
@@ -182,7 +205,7 @@ Here are some examples:
 pub escrow: Account<'info, Escrow>,
 ```
 
-The `has_one` constraint checks that the target field on the account matches the key of the target field in the Accounts struct.
+The `has_one` constraint tells Anchor: “this field on the account struct must equal this account’s key.” If the keys differ, Anchor throws `EscrowError::InvalidMaker` before your handler runs.
 
 ```rust
 #[account(
@@ -193,39 +216,30 @@ The `has_one` constraint checks that the target field on the account matches the
 pub escrow: Account<'info, Escrow>,
 ```
 
-If the `has_one` constraint isn't usable (perhaps because the field has a different name), we can create a custom constraint that verifies whether a given expression evaluates to true.
+When the `has_one` constraint doesn't fit, such as when the field name differs, you can write a custom constraint with any boolean expression. If the expression evaluates to false, Anchor raises the specified error.
 
-<ArticleSection name="The Escrow Code" id="the-escrow-code" />
+These inline constraints keep validation next to the account definition and save you from scattering `require!()` calls throughout your instruction logic.
 
-Now that we have discussed all the essential information needed to start creating our escrow, it's dive into the logic.
+<ArticleSection name="The Escrow Code" id="the-escrow-code" level="h1" />
 
-The basic idea behind an escrow is the ability to deposit a certain amount of Token A in exchange for a certain amount of Token B that a second user can claim whenever they want. For this reason, our contract has just 3 instructions: "Make", "Take", and "Refund".
+Now that we’ve covered every moving part we’ll need, let’s dive into the escrow logic itself.
 
-- **Make**: The "maker" sets up the details of the deal and deposits the specified amount of Token A.
-- **Take**: The "taker" accepts the deal, sends the agreed Token B amount to the maker, and withdraws the Token A amount that the maker deposited during "make".
-- **Refund**: The "maker" decides to cancel the deal and retrieves the Token A amount they previously deposited.
+An escrow lets one user lock up Token A in exchange for Token B from a second user. Our program therefore boils down to three instructions:
+- **Make**: the maker defines the trade terms and deposits the agreed amount of Token A.
+- **Take**: the taker accepts, transfers the promised Token B to the maker, and receives the locked Token A.
+- **Refund**: the maker cancels the offer and pulls back the Token A they deposited.
 
-Let's start by running creating a new Anchor project:
+Let's start by creating a fresh Anchor workspace:
 
 ```
 anchor init blueshift_anchor_escrow
-```
-
-Go into the newly created directory:
-
-```
 cd blueshift_anchor_escrow
 ```
 
-And run the following commands to install `anchor_spl` and enable the `init_if_needed` flag:
+Add the crates we’ll need, enabling Anchor’s `init-if-needed` helper to create token accounts if they don't already exist:
 
 ```
 cargo add anchor-lang --features init-if-needed
-```
-
-and 
-
-``` 
 cargo add anchor-spl
 ```
 
@@ -233,7 +247,7 @@ Next, let's look at how to structure the code in `programs/blueshift_anchor_escr
 
 #### Template
 
-This time we're going to use a more structured approach instead of a monolithic approach in the lib.rs file. Our project structure will look like this:
+This time we’ll split the program into small, focused modules instead of cramming everything into the `lib.rs`. The folder tree will look roughly like this:
 
 ```
 src
@@ -247,42 +261,41 @@ src
 └── state.rs
 ```
 
-And this is how the lib.rs will look like:
+And this is how the `lib.rs` will look like:
 
+<Codeblock lang="rust">
+    use anchor_lang::prelude::*;
 
-```rust
-use anchor_lang::prelude::*;
+    mod state;
+    mod errors;
+    mod instructions;
+    use instructions::*;
 
-mod state;
-mod errors;
-mod instructions;
-use instructions::*;
+    declare_id!("22222222222222222222222222222222222222222222");
 
-declare_id!("22222222222222222222222222222222222222222222");
+    #[program]
+    pub mod blueshift_anchor_escrow {
+        use super::*;
 
-#[program]
-pub mod blueshift_anchor_escrow {
-    use super::*;
+        pub fn make(ctx: Context<Make>, seed: u64, recieve: u64, amount: u64) -> Result<()> {
+            //...
+        }
 
-    pub fn make(ctx: Context<Make>, seed: u64, recieve: u64, amount: u64) -> Result<()> {
-        //...
+        pub fn take(ctx: Context<Take>) -> Result<()> {
+            //...    
+        }
+
+        pub fn refund(ctx: Context<Refund>) -> Result<()> {
+            //...
+        }
     }
+</Codeblock>
 
-    pub fn take(ctx: Context<Take>) -> Result<()> {
-        //...    
-    }
+Now let's start with the additional file like `state.rs` and `errors.rs` before diving into the logic:
 
-    pub fn refund(ctx: Context<Refund>) -> Result<()> {
-        //...
-    }
-}
-```
+#### State
 
-Now let's start with the additional file like `state.rs` and `erorrs.rs` before diving into the logic:
-
-#### State & Errors
-
-For the `state.rs` there isn't much to add beyond discussing the structure and arguments, since we already covered the #[account] macro previously.
+`state.rs` is straightforward; we already know how `#[account]` works, and we have already seen this structure in the past section:
 
 ```rust 
 use anchor_lang::prelude::*;
@@ -302,17 +315,18 @@ impl Space for Escrow {
 }
 ```
 
-We keep the following fields in the `Escrow` struct to store the necessary state data:
-- **Seed**: A random value for the PDA derivation since we could have multiple escrows from the same person with the same Token A and Token B. Saving it on-chain allows us to reference it when recreating the address.
-- **Maker**: Identifies the creator to ensure they can cancel/refund the deal and receive payment.
-- **Mint A**: Specifies the mint address of Token A the maker offers in the deal.
-- **Mint B**: Specifies the mint address of Token B the maker wants to receive for the deal.
-- **Receive**: Defines the amount of Token B the maker wants in exchange for the deal.
-- **Bump**: Optional but helpful for keeping compute costs lower, as deriving the bump in the contract requires compute power. Saving it allows for deterministic derivation
+What each field does:
+- **seed**: random number used during seed derivation so one maker can open multiple escrows with the same token pair; stored on-chain so we can always re-derive the PDA.
+- **maker**: the wallet that created the escrow; needed for refunds and to receive payment.
+- **mint_a** & **mint_b**: the SPL mints addresses for the “give” and “get” sides of the swap.
+- **receive**: how much of token B the maker wants. (The vault’s balance itself shows how much token A was deposited, so we don’t store that.)
+- **bump**: cached bump byte; deriving it on the fly costs compute, so we save it once.
 
-**Note**: We could store more data, but rent is an expense for users, so we should limit it as much as possible. Game theory allows us to make certain assumptions - for example, we don't need to specify how much the maker deposits in Token A because it will be the "vault" amount, and if someone randomly sends additional tokens to the vault, that simply creates a better deal for the taker.
+We could pack in more info, but extra bytes mean extra rent. Storing only the essentials keeps deposits cheap while still letting the program enforce every rule it needs.
 
-For the `errors.rs file`, there's nothing special, but it's good practice to keep it separate for easy reference and updating. Here's how it looks:
+#### Errors
+
+`errors.rs` lives on its own so you can tweak or extend codes without wading through business logic:
 
 ```rust
 use anchor_lang::prelude::*;
@@ -330,15 +344,16 @@ pub enum EscrowError {
 }
 ```
 
+Each enum maps to a clear, human-readable message that Anchor will surface whenever a constraint or `require!()` fails.
+
 #### Make
 
-Here's what happens in the `make` instruction:
+The `make` instruction does three jobs:
+- Initialises the Escrow record and stores all deal terms.
+- Creates the Vault (an ATA for `mint_a` owned by the `escrow`).
+- Moves the maker’s Token A into that vault with a CPI to the SPL-Token program.
 
-- The `Escrow` account gets initialized and filled with all necessary data.
-- The `Vault` account gets initialized as an associated token account from the mint_a and escrow public key.
-- The `maker` deposits the desired amount in the `vault` through a CPI to the `spl_token_program`.
-
-These are all the accounts needed for the `Make` context, most of the macro arguments and account types were already introduced in the introduction, so we'll move quickly through this part:
+Below are the accounts the context needs. Most of these macro arguments and types were introduced earlier, so we’ll skim:
 
 ```rust
 #[instruction(seed: u64)]
@@ -385,8 +400,7 @@ pub struct Make<'info> {
     pub system_program: Program<'info, System>,
 }
 ```
-
-For the logic code itself, there are different schools of thought. My personal preference is creating very specific functions as implementations of the Context and a general handler function where we have both the checks and references to these helpers. For this case, it will look something like this:
+For the logic, I like to keep the handler slim and push more advanced steps into small helpers function:
 
 ```rust
 impl<'info> Make<'info> {
@@ -437,17 +451,18 @@ pub fn handler(ctx: Context<Make>, seed: u64, receive: u64, amount: u64) -> Resu
 }
 ```
 
-We can see that Anchor helps us in multiple ways. It provides the `set_inner()` method on an account struct that ensures we don't forget to set any value of the struct when filling out the account. It also offers a helper for the `transfer_checked` instruction that functions similarly to the system program helpers we saw in the previous lesson.
+We can see that Anchor helps us in multiple ways:
+- `set_inner()`: guarantees every field is populated.
+- `transfer_checked`: wraps the Token CPI just like the System helpers we used earlier.
 
-We add two validation checks, one on the `amount` and one on the `receive` arguments to ensure we're not passing a zero value for either.
+Additionally, we add two validation checks; one on the `amount` and one on the `receive` arguments to ensure we're not passing a zero value for either.
 
 #### Take
 
-Here's what happens in the `take` instruction:
-
-- The `Escrow` account gets closed, since we don't need it anymore, and lamports are returned to the maker.
-- Transfer Token A from the `vault` to the `taker` and close the `vault` since it's now empty.
-- Transfer Token B from the `taker` to the `maker`. 
+The `take` instruction finalizes the swap:
+- Close the escrow record, sending its rent lamports back to the maker.
+- Move Token A from the vault to the taker, then close the vault.
+- Move the agreed amount of Token B from the taker to the maker.
 
 These are all the accounts needed for the `Take` context:
 
@@ -585,16 +600,13 @@ pub fn handler(ctx: Context<Take>) -> Result<()> {
 }
 ```
 
-**Note**: Token Accounts can be closed to retrieve rent after the balance is emptied out.
+**Note**: once a token account’s balance is zero you can close it to reclaim the rent, which we do for the vault above.
 
 #### Refund
 
-Here's what happens in the `refund` instruction:
-
-- The `Escrow` account gets closed, since we don't need it anymore, and lamports are returned to the maker.
-- Transfer Token A from the `vault` back to the `maker` and close the `vault` since now it's empty.
-
-These are all the accounts needed for the `Refund` context:
+The `refund` instruction lets the maker cancel an open offer:
+- Close the escrow PDA and send its rent lamports back to the maker.
+- Move the full Token A balance out of the vault and back to the maker, then close the vault account.
 
 ```rust
 #[derive(Accounts)]
@@ -689,3 +701,5 @@ pub fn handler(ctx: Context<Refund>) -> Result<()> {
     Ok(())
 }
 ```
+
+Once this executes, the offer is void, the vault is gone, and the maker has their Token A and rent back in their wallet.
