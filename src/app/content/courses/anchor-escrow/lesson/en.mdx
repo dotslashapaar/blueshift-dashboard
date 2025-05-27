@@ -1,4 +1,5 @@
 import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+import { AnchorDiscriminatorCalculator } from "../../../../components/AnchorDiscriminatorCalculator/AnchorDiscriminatorCalculator";
 import { Codeblock } from "../../../../components/Codeblock/Codeblock";
 
 # Chapter 2: The Escrow
@@ -9,15 +10,15 @@ Congrats! You just shipped your first Anchor program; from here on, things only 
 
 Our next stop is the Escrow; arguably the most common building block on Solana. 
 
-Look closely at an AMM, an orderbook, or an NFT marketplace: under the hood, each relies on an escrow-style pattern. The program acts as a neutral third party, holding assets from two participants until a set of conditions is met, then releasing those assets to complete the swap.
+Look closely at an AMM, an orderbook, or an NFT marketplace: under the hood, each relies on an escrow pattern. The program acts as a neutral third party, holding assets from two participants until a set of conditions is met, releasing those assets to complete an exchange of value.
 
-Before we dive into the code and introduce a few new Anchor features, that we haven't seen during the Vault lesson, we need a rock-solid mental model of accounts. 
+Before we dive into the code and introduce a few new Anchor features that we haven't seen during the Vault lesson, we need a rock-solid mental model of accounts. 
 
-For the first time, this program will mix several account types, so it's worth taking a moment to see how they fit together.
+For the first time, this program will mix several account types, so it's worth taking a moment to see how they work together.
 
 <ArticleSection name="Account on Solana" id="account-on-solana" level="h2" />
 
-On Solana every piece of state lives in an account; picture the [ledger](https://solana.com/docs/references/terminology#ledger) as one giant table where each row shares the same base schema:
+On Solana, every piece of state lives in an account; picture the [ledger](https://solana.com/docs/references/terminology#ledger) as one giant table where each row shares the same base schema:
 
 ```rust
 pub struct Account {
@@ -35,11 +36,14 @@ pub struct Account {
 }
 ```
 
-All accounts on Solana share the same base layout. What sets them apart is the program that owns them, as the program has exclusive rights to add, delete, or modify the data stored inside.
+All accounts on Solana share the same base layout. What sets them apart is:
 
-So when we talk about a Token Account, we mean an account owned by the Token Program. Unlike a plain System Account (whose data field is empty), a token-program account can be either a **Mint** or a **Token** account. We'll look at both in a moment.
+1. The owner - The program that has exclusive rights to modify the data and lamports of the account.
+2. The data - Used by the owner program to distinguish between different account types.
 
-Another important category of accounts are the Program Accounts: accounts owned by on-chain programs that are used to store critical protocol or user state. The `Escrow` record we are going to create in this chapter is exactly this kind of account.
+When we talk about Token Program Accounts, what we mean is an account where the `owner` is the Token Program. Unlike a System Account whose data field is empt, a Token Program Account can be either a **Mint** or a **Token** account. We use discriminators to distringuish between them.
+
+Just as the Token Program can own accounts, so can any other program. The `Escrow` record we are going to create in this chapter is another example of a Program Account. In this case, it will belong to our own program.
 
 <ArticleSection name="Token Program" id="token-program" level="h2" />
 
@@ -59,17 +63,22 @@ We've already covered Anchor's core macros in the previous unit; now we'll put o
 
 In the vault example, our PDA is an empty System Program account with a deterministic address. When a PDA is owned by our program, it unlocks its second superpower: the ability to write arbitrary data to it. Anchor makes this process seamless.
 
-An important feature of the `#[account]` macro, and also relevant for instructions, is the use of discriminators. These are unique identifiers that help Anchor distinguish between different account (or instruction) types within your program. Let's explore this concept before looking at the `Escrow` struct.
+An important feature of the `#[account]` macro (which is also relevant to intructions) is the use of discriminators. These are unique identifiers that help Anchor distinguish between different accounts or instructions within your program. Let's explore this concept before looking at the `Escrow` struct.
 
-#### Discriminators
+## Discriminators
 
-Anchor needs a quick way to tell one account from another. It does that with an 8-byte discriminator; a tiny prefix stored at the start of every serialized struct that is generated using this snippet: `sha256("account:<StructName>")[0..8]`
+Anchor needs a quick way to tell one account from another. We do this with either a Default Discriminaotr, or a Custom Discriminator.
 
-When Anchor reads raw bytes, it peeks at the first 8 bytes, matches them to a table of known discriminators, and then deserializes into the right Rust struct or routes to the right handler. And the hash-based approach guarantees each type in your program has a unique marker 
+### Default Discriminators
+By default, Anchor creates an 8-byte discriminator; a tiny prefix stored at the start of every serialized struct that is generated using `sha256("account:<StructName>")[0..8]` for accounts, or `sha256("global:<instruction_name>")[0..8]` for instructions. The seeds of each are in PascalCase and snake_case accordingly. You can see how Anchor calculates default discriminators for both `Accounts` and `Instructions` below:
 
-##### Custom Discriminators
+<AnchorDiscriminatorCalculator value={"Escrow"} />
 
-Starting with Anchor `v0.31` you can override the auto-generated hash and give an account or instruction its own discriminator directly in the `#[account]` or `#[instruction]` macro. 
+When Anchor reads the data of an account or insturction with a default discriminator, it peeks at the first 8 bytes, matches them to a table of known discriminators, and then deserializes into the correct Rust struct, or routes to the correct instruction handler. The hash-based approach gives a high certainty that each type in your program has a unique identifier to tell them apart. 
+
+### Custom Discriminators
+
+Starting with Anchor `v0.31.0` you can now override the auto-generated hash and give an account or instruction its own discriminator directly in the `#[account]` or `#[instruction]` macro. 
 
 ```rust
 #[account(discriminator = 1)]              // single-byte
@@ -79,15 +88,17 @@ pub struct Escrow { … }
 pub fn make(…) { … }
 ```
 
-**Note**: Every discriminator in your program must be unique. If two types share the same prefix the runtime can't tell them apart and Anchor's IDL generator will throw an error if it spots a collision. Additionally, know that using `[1]` as discriminator blocks you from ever adding `[1, 2, …]` later because it also starts with `1`.
+**Note**: Discriminators must be unique. If two instructions or accounts share the same prefix, the runtime won't be able to tell them apart and Anchor's IDL generator will throw an error if it spots a collision. Additionally, using `[1]` as discriminator prevents you from using `[1, 2, …]` as these discriminators also start with `1`. Accounts also cannot use `[0]` as a discriminator, as there is no way to differentiate between a newly initialized account with null data and a zero byte discriminator.
 
-For this `Escrow` program we'll tag everything with a single-byte discriminator:
-- `Escrow` account: 0x00
+Now that we've understood accounts and discriminators, let's apply this knowledge to create an Escrow program. For our `Escrow` program we'll tag both our `Accounts` and `Instructions` with a custom single-byte discriminator. 
+
+Our accounts will include:
+- `Escrow` account: 0x01
+
+Our instructions will include:
 - `make` instruction: 0x00
 - `take` instruction: 0x01
 - `refund` instruction:` 0x02
-
-The default 8-byte hashes would work fine; but it shows how a custom, shorter discriminator trims a few bytes of on-chain storage.
 
 With the discriminators sorted, let's declare the data that we want to live inside the account:
 
@@ -158,7 +169,7 @@ pub escrow: Account<'info, Escrow>,
 
 `close` transfers whatever lamports remain in the account back to maker, then zeros out the data.
 
-#### Anchor-spl
+## Anchor SPL
 
 Natively, the core Anchor crate only bundles CPI helpers for the System Program. If you want the same hand-holding for SPL tokens you pull in the `anchor_spl` crate.
 
@@ -221,7 +232,7 @@ The key difference here is that we're using `InterfaceAccounts` instead of `Acco
 
 This approach is particularly useful when you want your program to be compatible with both token standards, as it eliminates the need to write separate logic for each program. The interface handles all the complexity of dealing with different account structures behind the scenes.
 
-#### Account constraints
+### Account constraints
 
 So far we've leaned on built-in arguments and custom error enums to catch mistakes, but Anchor lets you bolt on extra checks right in the account macro.
 
@@ -251,7 +262,7 @@ When the `has_one` constraint doesn't fit, such as when the field name differs, 
 
 These inline constraints keep validation next to the account definition and save you from scattering `require!()` calls throughout your instruction logic.
 
-<ArticleSection name="The Escrow Code" id="the-escrow-code" level="h1" />
+<ArticleSection name="Escrow" id="escrow" level="h2" />
 
 Now that we've covered every moving part we'll need, let's dive into the escrow logic itself.
 
@@ -276,7 +287,7 @@ cargo add anchor-spl
 
 Next, let's look at how to structure the code in `programs/blueshift_anchor_escrow/src`.
 
-#### Template
+### Template
 
 This time we'll split the program into small, focused modules instead of cramming everything into the `lib.rs`. The folder tree will look roughly like this:
 
@@ -329,7 +340,7 @@ And this is how the `lib.rs` will look like:
 
 Now let's start with the additional file like `state.rs` and `errors.rs` before diving into the logic:
 
-#### State
+### State
 
 `state.rs` is straightforward; we already know how `#[account]` works, and we have already seen this structure in the past section:
 
@@ -357,7 +368,7 @@ What each field does:
 
 We could pack in more info, but extra bytes mean extra rent. Storing only the essentials keeps deposits cheap while still letting the program enforce every rule it needs.
 
-#### Errors
+### Errors
 
 `errors.rs` lives on its own so you can tweak or extend codes without wading through business logic:
 
@@ -379,7 +390,7 @@ pub enum EscrowError {
 
 Each enum maps to a clear, human-readable message that Anchor will surface whenever a constraint or `require!()` fails.
 
-#### Make
+### Make
 
 The `make` instruction does three jobs:
 - Initialises the Escrow record and stores all deal terms.
@@ -490,7 +501,7 @@ We can see that Anchor helps us in multiple ways:
 
 Additionally, we add two validation checks; one on the `amount` and one on the `receive` arguments to ensure we're not passing a zero value for either.
 
-#### Take
+### Take
 
 The `take` instruction finalizes the swap:
 - Close the escrow record, sending its rent lamports back to the maker.
@@ -635,7 +646,7 @@ pub fn handler(ctx: Context<Take>) -> Result<()> {
 
 **Note**: Once a token account's balance is zero you can close it to reclaim the rent, which we do for the vault above.
 
-#### Refund
+### Refund
 
 The `refund` instruction lets the maker cancel an open offer:
 - Close the escrow PDA and send its rent lamports back to the maker.
