@@ -35,7 +35,8 @@
     "anchor-escrow": {
       "title": "Escrow",
       "lessons": {
-        "lesson": "Escrow"
+        "introduction": "Chapter 2: The Escrow",
+        "code": "The Escrow Program"
       },
       "challenge": {
         "requirements": {
