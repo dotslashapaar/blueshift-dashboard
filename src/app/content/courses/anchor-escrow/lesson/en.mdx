@@ -225,9 +225,9 @@ These inline constraints keep validation next to the account definition and save
 Now that we’ve covered every moving part we’ll need, let’s dive into the escrow logic itself.
 
 An escrow lets one user lock up Token A in exchange for Token B from a second user. Our program therefore boils down to three instructions:
-- **Make**: the maker defines the trade terms and deposits the agreed amount of Token A.
-- **Take**: the taker accepts, transfers the promised Token B to the maker, and receives the locked Token A.
-- **Refund**: the maker cancels the offer and pulls back the Token A they deposited.
+- **Make**: The maker defines the trade terms and deposits the agreed amount of Token A.
+- **Take**: The taker accepts, transfers the promised Token B to the maker, and receives the locked Token A.
+- **Refund**: The maker cancels the offer and pulls back the Token A they deposited.
 
 Let's start by creating a fresh Anchor workspace:
 
@@ -316,11 +316,11 @@ impl Space for Escrow {
 ```
 
 What each field does:
-- **seed**: random number used during seed derivation so one maker can open multiple escrows with the same token pair; stored on-chain so we can always re-derive the PDA.
-- **maker**: the wallet that created the escrow; needed for refunds and to receive payment.
-- **mint_a** & **mint_b**: the SPL mints addresses for the “give” and “get” sides of the swap.
-- **receive**: how much of token B the maker wants. (The vault’s balance itself shows how much token A was deposited, so we don’t store that.)
-- **bump**: cached bump byte; deriving it on the fly costs compute, so we save it once.
+- **seed**: Random number used during seed derivation so one maker can open multiple escrows with the same token pair; stored on-chain so we can always re-derive the PDA.
+- **maker**: The wallet that created the escrow; needed for refunds and to receive payment.
+- **mint_a** & **mint_b**: The SPL mints addresses for the “give” and “get” sides of the swap.
+- **receive**: How much of token B the maker wants. (The vault’s balance itself shows how much token A was deposited, so we don’t store that.)
+- **bump**: Cached bump byte; deriving it on the fly costs compute, so we save it once.
 
 We could pack in more info, but extra bytes mean extra rent. Storing only the essentials keeps deposits cheap while still letting the program enforce every rule it needs.
 
@@ -600,7 +600,7 @@ pub fn handler(ctx: Context<Take>) -> Result<()> {
 }
 ```
 
-**Note**: once a token account’s balance is zero you can close it to reclaim the rent, which we do for the vault above.
+**Note**: Once a token account’s balance is zero you can close it to reclaim the rent, which we do for the vault above.
 
 #### Refund
 
