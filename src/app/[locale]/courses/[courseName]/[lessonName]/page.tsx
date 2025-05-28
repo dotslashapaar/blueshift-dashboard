@@ -25,7 +25,9 @@ interface LessonPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: LessonPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: LessonPageProps): Promise<Metadata> {
   const { courseName, lessonName, locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
   const pathname = getPathname({
@@ -162,11 +164,17 @@ export default async function LessonPage({ params }: LessonPageProps) {
               {t(`courses.${courseMetadata.slug}.title`)}
             </span>
             <LessonTitle title={coursePageTitle} />
-            {collectionMintAddress && typeof collectionSize === 'number' && (
-              <Link href={`https://solana.fm/address/${collectionMintAddress}`} target="_blank">
-                <p className="text-base text-secondary mt-1 text-sm" style={{
-                  color: `rgb(${courseColors[courseMetadata.language]},1)`,
-                }}>
+            {collectionMintAddress && typeof collectionSize === "number" && (
+              <Link
+                href={`https://solana.fm/address/${collectionMintAddress}`}
+                target="_blank"
+              >
+                <p
+                  className="text-base text-secondary mt-1 text-sm"
+                  style={{
+                    color: `rgb(${courseColors[courseMetadata.language]},1)`,
+                  }}
+                >
                   {(collectionSize as any).toString()} Graduates
                 </p>
               </Link>
@@ -193,31 +201,15 @@ export default async function LessonPage({ params }: LessonPageProps) {
             </MdxLayout>
 
             <div className=" w-full flex items-center flex-col gap-y-10">
-              <div className="w-[calc(100%+32px)] md:w-[calc(100%+64px)] lg:w-[calc(100%+48px)] gap-y-6 md:gap-y-0 flex flex-col md:flex-row justify-between items-center gap-x-12 group -mt-12 pt-24 pb-16 px-8 [background:linear-gradient(180deg,rgba(0,255,255,0)_0%,rgba(0,255,255,0.08)_50%,rgba(0,255,255,0)_100%)]">
-                <span className="text-primary w-auto flex-shrink-0 font-mono">
-                  {t("lessons.take_challenge_cta")}
-                </span>
-                <Link
-                  href={`/courses/${courseMetadata.slug}/challenge`}
-                  className="w-max"
-                >
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    label={t("lessons.take_challenge")}
-                    icon="Challenge"
-                    className="disabled:opacity-40 w-full disabled:cursor-default"
-                  ></Button>
-                </Link>
-              </div>
-              {nextLesson && (
+              {nextLesson ? (
                 <>
-                  <div className="relative w-full -mt-6">
-                    <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">
-                      {t(`lessons.skip_lesson_divider_title`).toUpperCase()}
-                    </div>
-                    <div className="w-full h-[1px] bg-border absolute"></div>
-                  </div>
+                  {/* Skip lesson divider. Disabled for now */}
+                  {/*<div className="relative w-full -mt-6">*/}
+                  {/*  <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">*/}
+                  {/*    {t(`lessons.skip_lesson_divider_title`).toUpperCase()}*/}
+                  {/*  </div>*/}
+                  {/*  <div className="w-full h-[1px] bg-border absolute"></div>*/}
+                  {/*</div>*/}
                   <Link
                     href={`/courses/${courseMetadata.slug}/${nextLessonSlug}`}
                     className="flex justify-between items-center w-full bg-background-card border border-border group py-5 px-5 rounded-xl"
@@ -238,6 +230,24 @@ export default async function LessonPage({ params }: LessonPageProps) {
                     />
                   </Link>
                 </>
+              ) : (
+                <div className="w-[calc(100%+32px)] md:w-[calc(100%+64px)] lg:w-[calc(100%+48px)] gap-y-6 md:gap-y-0 flex flex-col md:flex-row justify-between items-center gap-x-12 group -mt-12 pt-24 pb-16 px-8 [background:linear-gradient(180deg,rgba(0,255,255,0)_0%,rgba(0,255,255,0.08)_50%,rgba(0,255,255,0)_100%)]">
+                  <span className="text-primary w-auto flex-shrink-0 font-mono">
+                    {t("lessons.take_challenge_cta")}
+                  </span>
+                  <Link
+                    href={`/courses/${courseMetadata.slug}/challenge`}
+                    className="w-max"
+                  >
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      label={t("lessons.take_challenge")}
+                      icon="Challenge"
+                      className="disabled:opacity-40 w-full disabled:cursor-default"
+                    ></Button>
+                  </Link>
+                </div>
               )}
             </div>
           </div>

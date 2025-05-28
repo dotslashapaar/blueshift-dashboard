@@ -25,7 +25,10 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     difficulty: 1,
     isFeatured: true,
     unitName: "Anchor Escrow",
-    lessons: [{ slug: "lesson" }],
+    lessons: [
+      { slug: "introduction" },
+      { slug: "code" },
+    ],
     challenge: {
       apiPath: "/v1/verify/anchor/escrow",
       requirements: [
