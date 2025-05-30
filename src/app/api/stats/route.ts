@@ -3,9 +3,9 @@ import { Connection, PublicKey } from '@solana/web3.js';
 
 // Separate types for addresses (input) and data (output)
 interface AccountAddresses {
-  'anchor-vault': "53tiK9zY67DuyA1tgQ6rfNgixMB1LiCP9D67RgfbCrpz";
-  'anchor-escrow': "2E5K7FxDWGXkbRpFEAkhR8yQwiUBGggVyng2vaAhah5L";
-  'pinocchio-vault': "AL38QM96SDu4Jpx7UGcTcaLtwvWPVgRUzg9PqC787djK";
+  'anchor-vault': string;
+  'anchor-escrow': string;
+  'pinocchio-vault': string;
 }
 
 interface AccountData {
@@ -15,13 +15,16 @@ interface AccountData {
   'total': number;
 }
 
+// Type for just the account keys (without total)
+type AccountKey = keyof AccountAddresses;
+
 const ACCOUNTS: AccountAddresses = {
   'anchor-vault': "53tiK9zY67DuyA1tgQ6rfNgixMB1LiCP9D67RgfbCrpz",
   'anchor-escrow': "2E5K7FxDWGXkbRpFEAkhR8yQwiUBGggVyng2vaAhah5L",
   'pinocchio-vault': "AL38QM96SDu4Jpx7UGcTcaLtwvWPVgRUzg9PqC787djK",  
 }
 
-export async function getMultipleAccountData(
+async function getMultipleAccountData(
   accountAddresses: AccountAddresses
 ): Promise<AccountData> {
   const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
@@ -32,9 +35,9 @@ export async function getMultipleAccountData(
 
   const connection = new Connection(rpcEndpoint, { httpAgent: false });
   
-  // Convert addresses to PublicKey objects
+  // Convert addresses to PublicKey objects - use AccountKey instead of keyof AccountData
   const publicKeys = Object.entries(accountAddresses).map(([key, address]) => ({
-    key: key as keyof AccountData,
+    key: key as AccountKey,
     publicKey: new PublicKey(address)
   }));
 
@@ -58,8 +61,9 @@ export async function getMultipleAccountData(
       if (accountInfo) {
         try {
           const collectionSize = decodeCoreCollectionNumMinted(accountInfo.data);
-          result[key] = collectionSize ?? 0;
-          result["total"] += result[key];
+          const size = collectionSize ?? 0;
+          result[key] = size;
+          result.total += size;
           
           if (collectionSize === null) {
             console.error(`Failed to decode num_minted for ${key}: ${accountAddresses[key]}`);
@@ -82,7 +86,7 @@ export async function getMultipleAccountData(
   return result;
 }
 
-export async function GET(request: Request) { // eslint-disable-line @typescript-eslint/no-unused-vars
+export async function GET(_request: Request) { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     const data = await getMultipleAccountData(ACCOUNTS);
     
@@ -92,8 +96,10 @@ export async function GET(request: Request) { // eslint-disable-line @typescript
         'Content-Type': 'application/json',
       },
     });
-  } catch (e) {
-    console.log(`${(e as Error).message}`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.log(`Error fetching account data: ${errorMessage}`);
+    
     return new Response(
       JSON.stringify({ error: 'Failed to fetch account data' }), 
       {
