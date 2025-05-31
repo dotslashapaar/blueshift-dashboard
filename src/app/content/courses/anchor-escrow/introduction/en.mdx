@@ -131,7 +131,7 @@ Here's how we're going to initiate the account in our `Account` struct:
     init,
     payer = maker,
     space = Escrow::INIT_SPACE + Escrow::DISCRIMINATOR.len(),
-    seeds = ["escrow".as_bytes(), maker.key().as_ref(), seed.to_le_bytes().as_ref()],
+    seeds = [b"escrow", maker.key().as_ref(), seed.to_le_bytes().as_ref()],
     bump,
 )]
 pub escrow: Account<'info, Escrow>,
@@ -146,7 +146,7 @@ Once we create the account, we can access its data like this:
 
 ```rust
 #[account(
-    seeds = ["escrow".as_bytes(), maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
+    seeds = [b"escrow", maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
     bump = escrow.bump,
 )]
 pub escrow: Account<'info, Escrow>
@@ -160,7 +160,7 @@ Lastly, since we deposited lamports as rent in the account, we should close the 
 #[account(
     mut,
     close = maker,
-    seeds = ["escrow".as_bytes(), maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
+    seeds = [b"escrow", maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
     bump = escrow.bump,
 )]
 pub escrow: Account<'info, Escrow>,
@@ -239,7 +239,7 @@ Here are some examples:
 
 ```rust
 #[account(
-    seeds = ["escrow".as_bytes(), maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
+    seeds = [b"escrow", maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
     bump = escrow.bump,
     has_one = maker @ EscrowError::InvalidMaker,
 )]
@@ -250,7 +250,7 @@ The `has_one` constraint tells Anchor: "this field on the account struct must eq
 
 ```rust
 #[account(
-    seeds = ["escrow".as_bytes(), maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
+    seeds = [b"escrow", maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
     bump = escrow.bump,
     constraint = maker.key() == escrow.maker @ EscrowError::InvalidMaker,
 )]
