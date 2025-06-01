@@ -36,7 +36,7 @@ export async function generateMetadata({
   });
 
   const ogImage = {
-    src: `/api/banners/${courseName}`,
+    src: `/graphics/banners/${courseName}.png`,
     width: 1200,
     height: 630,
   }

@@ -1,21 +1,45 @@
 import { ImageResponse } from "next/og";
+import { createTranslator } from 'use-intl/core';
 
-import { CourseMetadata } from "@/app/utils/course";
 import { getCourse } from "@/app/utils/mdx";
-import { getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
 
-export const generateBannerResponse = async (courseSlug: string, lessonSlug?: string) => {
+export interface GeneratedBannerData {
+  data: ArrayBuffer;
+  contentType: string;
+  width: number;
+  height: number;
+}
+
+interface GenerateBannerDataParams {
+  courseSlug: string;
+  lessonSlug?: string;
+  locale?: string;
+}
+
+export const generateBannerData = async ({
+  courseSlug,
+  lessonSlug,
+  locale = "en",
+}: GenerateBannerDataParams): Promise<GeneratedBannerData | null> => {
   try {
-    let course: CourseMetadata
-    
-    course = await getCourse(courseSlug);
+    const course = await getCourse(courseSlug);
 
-    if (lessonSlug && !course.lessons.find(lesson => lesson.slug === lessonSlug)) {
-      return notFound();
+    if (!course) {
+      console.warn(`[BannerGenerator] Course '${courseSlug}' not found by getCourse. Skipping banner generation.`);
+      return null;
     }
 
-    const t = await getTranslations();
+    let lessonMetaData;
+    if (lessonSlug) {
+      lessonMetaData = Array.isArray(course.lessons) ? course.lessons.find(l => l.slug === lessonSlug) : undefined;
+      if (!lessonMetaData) {
+        console.warn(`[BannerGenerator] Lesson slug '${lessonSlug}' not found in course '${courseSlug}' lessons metadata. Skipping banner for this lesson.`);
+        return null;
+      }
+    }
+
+    const messages = await import(`@/../messages/${locale}.json`);
+    const t = createTranslator({locale, messages});
 
     const courseTitle = t(`courses.${courseSlug}.title`);
     const lessonTitle = lessonSlug ? t(`courses.${courseSlug}.lessons.${lessonSlug}`) : null;
@@ -40,7 +64,33 @@ export const generateBannerResponse = async (courseSlug: string, lessonSlug?: st
       }
     };
 
-    return new ImageResponse(
+    // Define the Weight type based on the expected values for fonts
+    type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+    type FontStyle = "normal" | "italic";
+
+    const imageResponseOptions: {
+      width: number;
+      height: number;
+      fonts: {
+        name: string;
+        data: ArrayBuffer;
+        style: FontStyle;
+        weight: FontWeight;
+      }[];
+    } = {
+      width: 1200,
+      height: 630,
+      fonts: [
+        {
+          name: "Funnel Display",
+          data: await loadGoogleFont("Funnel Display", title),
+          style: "normal",
+          weight: 500,
+        },
+      ],
+    };
+
+    const imageResponse = new ImageResponse(
       (
         <div
           style={{
@@ -697,24 +747,22 @@ export const generateBannerResponse = async (courseSlug: string, lessonSlug?: st
           </svg>
         </div>
       ),
-      {
-        width: 1200,
-        height: 630,
-        fonts: [
-          {
-            name: "Funnel Display",
-            data: await loadGoogleFont("Funnel Display", title),
-            style: "normal",
-            weight: 500,
-          },
-        ],
-      }
+      imageResponseOptions
     );
+
+    const contentType = imageResponse.headers.get("content-type") || "image/png";
+    const buffer = await imageResponse.arrayBuffer();
+
+    return {
+      data: buffer,
+      contentType,
+      width: imageResponseOptions.width,
+      height: imageResponseOptions.height,
+    };
+
   } catch (e: any) {
-    console.log(`${e.message}`);
-    return new Response(`Failed to generate the image`, {
-      status: 500,
-    });
+    console.error(`[BannerGenerator] Failed to generate banner for ${courseSlug}${lessonSlug ? '/' + lessonSlug : ''}: ${e.message}`);
+    return null;
   }
 };
 

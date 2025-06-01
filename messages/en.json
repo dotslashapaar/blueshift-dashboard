@@ -189,7 +189,8 @@
     "anchor": "Anchor",
     "rust": "Rust",
     "typescript": "Typescript",
-    "assembly": "Assembly"
+    "assembly": "Assembly",
+    "research": "Research"
   },
   "rewards": {
     "title": "Claim and View your NFTs",
