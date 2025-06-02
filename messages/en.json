@@ -177,7 +177,9 @@
     "challenge_incomplete": "Challenge Incomplete",
     "take_challenge_cta": "Ready to take the challenge?",
     "skip_lesson_divider_title": "Or skip to next lesson",
-    "skip_lesson": "Skip Lesson"
+    "skip_lesson": "Skip Lesson",
+    "lesson_completed": "Lesson Completed. Well done!",
+    "view_other_courses": "View Other Courses"
   },
   "ui": {
     "search_placeholder": "Search by name, category, or level...",
