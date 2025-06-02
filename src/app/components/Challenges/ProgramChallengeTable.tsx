@@ -98,10 +98,10 @@ export default function ChallengeTable({
           >
             <div className="flex flex-col items-center justify-center gap-y-1">
               <span className="text-lg font-medium text-primary">
-                {t("challenge_page.challenge_completed.title")}
+                {t("ChallengePage.challenge_completed.title")}
               </span>
               <span className="text-tertiary">
-                {t("challenge_page.challenge_completed.body")}
+                {t("ChallengePage.challenge_completed.body")}
               </span>
             </div>
             <Link href="/">
@@ -110,13 +110,13 @@ export default function ChallengeTable({
                 size="md"
                 icon="Lessons"
                 label={t(
-                  "challenge_page.challenge_completed.view_other_courses"
+                  "ChallengePage.challenge_completed.view_other_courses"
                 )}
               />
             </Link>
             <div className="relative w-full">
               <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">
-                {t(`challenge_page.challenge_completed.divider_label`).toUpperCase()}
+                {t(`ChallengePage.challenge_completed.divider_label`).toUpperCase()}
               </div>
               <div className="w-full h-[1px] bg-border absolute"></div>
             </div>
@@ -124,7 +124,7 @@ export default function ChallengeTable({
               variant="secondary"
               size="md"
               icon="Refresh"
-              label={t("challenge_page.challenge_completed.redo")}
+              label={t("ChallengePage.challenge_completed.redo")}
               onClick={() => {
                 onRedoChallenge();
                 setAllowRedo(true);
@@ -141,7 +141,7 @@ export default function ChallengeTable({
           <div className="flex flex-col gap-y-4 w-full sm:w-1/2">
             <span className="font-medium">
               {completedRequirementsCount}/{requirements.length}{" "}
-              {t("challenge_page.num_tests_passed")}
+              {t("ChallengePage.num_tests_passed")}
             </span>
             <div
               className={classNames(
@@ -190,7 +190,7 @@ export default function ChallengeTable({
             variant="primary"
             icon="Upload"
             size="lg"
-            label={t("challenge_page.upload_program_btn")}
+            label={t("ChallengePage.upload_program_btn")}
             className="w-full sm:w-auto"
             onClick={() => {
               if (auth.checkTokenExpired()) {
@@ -238,7 +238,7 @@ export default function ChallengeTable({
                   <div className="flex items-center gap-x-4">
                     <ChallengeBadge
                       label={t(
-                        `challenge_page.test_results.${requirement.status}`
+                        `ChallengePage.test_results.${requirement.status}`
                       )}
                       variant={requirement.status}
                     />

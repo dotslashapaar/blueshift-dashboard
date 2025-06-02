@@ -6,7 +6,7 @@ import classNames from "classnames";
 import Icon from "../Icon/Icon";
 import { AnimatePresence, anticipate, motion } from "motion/react";
 import { useOnClickOutside } from "usehooks-ts";
-import { RewardsStatus, rewardsStatus } from "@/app/utils/course";
+import { ChallengeStatus, challengeStatus } from "@/app/utils/challenges";
 import Checkbox from "../Checkbox/Checkbox";
 import { usePersistentStore } from "@/stores/store";
 import Divider from "../Divider/Divider";
@@ -15,19 +15,19 @@ interface FiltersProps {
   className?: string;
 }
 
-export default function RewardFilter({ className }: FiltersProps) {
+export default function ChallengeFilter({ className }: FiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLElement>(null) as React.RefObject<HTMLElement>;
   const { selectedRewardStatus, toggleRewardStatus } = usePersistentStore();
   const t = useTranslations();
 
-  const allStatuses: ReadonlyArray<RewardsStatus> = rewardsStatus;
+  const allStatuses: ReadonlyArray<ChallengeStatus> = challengeStatus;
   const displayText =
     selectedRewardStatus.length === allStatuses.length
-      ? t("rewards.filter__label")
+      ? t("ChallengeCenter.filter__label")
       : selectedRewardStatus.length === 1
         ? selectedRewardStatus[0]
-        : `${selectedRewardStatus.length} ${t("rewards.filter__selected_statuses")}`;
+        : `${selectedRewardStatus.length} ${t("ChallengeCenter.filter__selected_statuses")}`;
 
   const toggleAllStatuses = () => {
     if (selectedRewardStatus.length === allStatuses.length) {
@@ -47,7 +47,7 @@ export default function RewardFilter({ className }: FiltersProps) {
     }
   };
 
-  const handleStatusClick = (status: RewardsStatus) => {
+  const handleStatusClick = (status: ChallengeStatus) => {
     if (selectedRewardStatus.length === allStatuses.length) {
       // If "All" is selected, deselect all and select only the clicked status
       allStatuses.forEach((s) => {
@@ -99,7 +99,7 @@ export default function RewardFilter({ className }: FiltersProps) {
                 checked={selectedRewardStatus.length === allStatuses.length}
               />
               <span className="text-sm font-medium leading-none text-secondary">
-                {t("rewards.filter__all_statuses")}
+                {t("ChallengeCenter.filter__all_statuses")}
               </span>
             </button>
             <Divider />
@@ -141,7 +141,7 @@ export default function RewardFilter({ className }: FiltersProps) {
                         selectedRewardStatus.includes(status) && "!text-primary"
                       )}
                     >
-                      {t(`reward_statuses.${status}`)}
+                      {t(`challenge_statuses.${status}`)}
                     </span>
                   </div>
                 </button>

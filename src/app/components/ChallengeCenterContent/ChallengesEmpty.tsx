@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-export default function RewardsEmpty() {
+export default function ChallengesEmpty() {
   const t = useTranslations();
 
   return (
@@ -13,10 +13,10 @@ export default function RewardsEmpty() {
 
       <div className="flex flex-col items-center justify-center gap-y-3 -mt-20 mx-auto w-[300px]">
         <span className="text-lg font-medium text-primary leading-none text-center">
-          {t("rewards.empty_title")}
+          {t("ChallengeCenter.empty_title")}
         </span>
         <span className="text-secondary leading-[140%] text-center">
-          {t("rewards.empty_description")}
+          {t("ChallengeCenter.empty_description")}
         </span>
       </div>
     </div>

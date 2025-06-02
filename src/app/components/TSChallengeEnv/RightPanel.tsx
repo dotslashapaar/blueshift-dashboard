@@ -172,7 +172,7 @@ export default function RightPanel({
                           <div className="flex items-center gap-x-4">
                             <ChallengeBadge
                               label={t(
-                                `challenge_page.test_results.${requirement.status}`
+                                `ChallengePage.test_results.${requirement.status}`
                               )}
                               variant={requirement.status}
                             />

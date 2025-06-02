@@ -13,15 +13,15 @@ import { notFound } from "next/navigation";
 
 interface ChallengePageProps {
   params: Promise<{
-    courseName: string;
+    challengeName: string;
     locale: string;
   }>;
 }
 
 export default async function ChallengePage({ params }: ChallengePageProps) {
-  const { courseName, locale } = await params;
+  const { challengeName, locale } = await params;
   const t = await getTranslations();
-  const courseMetadata = await getCourse(courseName);
+  const courseMetadata = await getCourse(challengeName);
 
   let ChallengeContent;
   try {

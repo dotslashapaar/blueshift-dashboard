@@ -19,7 +19,7 @@ export default function ChallengeRequirements({
         <div className="flex items-center gap-x-2 text-brand-secondary mb-2">
           <Icon name="Challenge" />
           <div className="font-medium font-mono">
-            {t("challenge_page.requirements_title").toUpperCase()}
+            {t("ChallengePage.requirements_title").toUpperCase()}
           </div>
         </div>
 

@@ -90,17 +90,17 @@ export default function HeaderContent() {
                 {t("header.courses")}
               </span>
             </Link>
-            {/* Desktop Nav Links - Rewards */}
+            {/* Desktop Nav Links - Challenges */}
             <Link
               className={classNames(
                 "py-2.5 px-3 relative transition rounded-xl flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",
                 {
-                  "!text-brand-primary": pathname.includes("/rewards"),
+                  "!text-brand-primary": pathname.includes("/challenges"),
                 }
               )}
-              href="/rewards"
+              href="/challenges"
             >
-              {pathname.includes("/rewards") && (
+              {pathname.includes("/challenges") && (
                 <motion.div
                   layoutId="nav-desktop"
                   style={{ originY: "0px" }}
@@ -109,17 +109,17 @@ export default function HeaderContent() {
                 ></motion.div>
               )}
               <Icon
-                name="Rewards"
+                name="Challenge"
                 className={classNames("text-text-tertiary", {
-                  "!text-brand-primary": pathname === "/rewards",
+                  "!text-brand-primary": pathname === "/challenges",
                 })}
               />
               <span
                 className={classNames("font-mono text-[15px] pt-0.5", {
-                  "text-brand-secondary": pathname === "/rewards",
+                  "text-brand-secondary": pathname === "/challenges",
                 })}
               >
-                {t("header.rewards")}
+                {t("header.challenges")}
               </span>
             </Link>
           </motion.div>
@@ -235,17 +235,17 @@ export default function HeaderContent() {
                       {t("header.courses")}
                     </span>
                   </Link>
-                  {/* Mobile Nav Links - Rewards */}
+                  {/* Mobile Nav Links - Challenges */}
                   <Link
                     className={classNames(
                       "py-2.5 relative px-3 rounded-xl flex items-center text-secondary hover:text-primary justify-center gap-x-2 font-medium",
                       {
-                        " !text-brand-primary": pathname === "/rewards",
+                        " !text-brand-primary": pathname === "/challenges",
                       }
                     )}
-                    href="/rewards"
+                    href="/challenges"
                   >
-                    {pathname === "/rewards" && (
+                    {pathname === "/challengesk" && (
                       <motion.div
                         layoutId="nav-mobile"
                         transition={{ duration: 0.4, ease: anticipate }}
@@ -253,17 +253,17 @@ export default function HeaderContent() {
                       ></motion.div>
                     )}
                     <Icon
-                      name="Rewards"
+                      name="Challenge"
                       className={classNames("text-text-tertiary", {
-                        "!text-brand-primary": pathname === "/rewards",
+                        "!text-brand-primary": pathname === "/challenges",
                       })}
                     />
                     <span
                       className={classNames("font-mono text-[15px] pt-0.5", {
-                        "text-brand-secondary": pathname === "/rewards",
+                        "text-brand-secondary": pathname === "/challenges",
                       })}
                     >
-                      {t("header.rewards")}
+                      {t("header.challenges")}
                     </span>
                   </Link>
                 </div>

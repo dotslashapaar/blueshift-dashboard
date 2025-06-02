@@ -11,7 +11,7 @@
   "header": {
     "lessons": "Lessons",
     "courses": "Courses",
-    "rewards": "Rewards",
+    "challenges": "Challenges",
     "set_goal": "Set your Goal",
     "connect_wallet": "Connect Wallet"
   },
@@ -21,16 +21,6 @@
       "lessons": {
         "introduction": "Anchor 101",
         "code": "The Vault Program"
-      },
-      "challenge": {
-        "requirements": {
-          "deposit": {
-            "title": "Challenge 1: Taking deposits"
-          },
-          "withdraw": {
-            "title": "Challenge 2: Allowing withdrawal"
-          }
-        }
       }
     },
     "anchor-escrow": {
@@ -38,32 +28,12 @@
       "lessons": {
         "introduction": "Chapter 2: The Escrow",
         "code": "The Escrow Program"
-      },
-      "challenge": {
-        "requirements": {
-          "make": {
-            "title": "Challenge 1: Making an escrow swap deal"
-          },
-          "take": {
-            "title": "Challenge 2: Taking an escrow swap deal"
-          },
-          "refund": {
-            "title": "Challenge 3: Canceling an escrow swap deal"
-          }
-        }
       }
     },
     "anchor-memo": {
       "title": "Memo",
       "lessons": {
         "lesson": "Memo"
-      },
-      "challenge": {
-        "requirements": {
-          "log": {
-            "title": "Challenge 1: Logs `instruction_data` to program log"
-          }
-        }
       }
     },
     "pinocchio-vault": {
@@ -71,80 +41,36 @@
       "lessons": {
         "introduction": "Pinocchio 101",
         "code": "The Vault Program"
-      },
-      "challenge": {
-        "requirements": {
-          "deposit": {
-            "title": "Challenge 1: Taking deposits"
-          },
-          "withdraw": {
-            "title": "Challenge 2: Allowing withdrawal"
-          }
-        }
       }
     },
     "pinocchio-memo": {
       "title": "Pinocchio Memo",
       "lessons": {
         "lesson": "Pinocchio Memo"
-      },
-      "challenge": {
-        "requirements": {
-          "log": {
-            "title": "Challenge 1: Logs instruction data to program log"
-          }
-        }
       }
     },
     "assembly-memo": {
       "title": "Assembly Memo",
       "lessons": {
         "lesson": "Assembly Memo"
-      },
-      "challenge": {
-        "requirements": {
-          "log": {
-            "title": "Challenge 1: Logs the instruction data to program log"
-          }
-        }
       }
     },
     "quantum-vault": {
       "title": "Quantum Vault",
       "lessons": {
         "introduction-to-quantum-vault": " Quantum Vault"
-      },
-      "challenge": {}
+      }
     },
     "your-first-spl-token": {
       "title": "Your First SPL Token",
       "lessons": {
         "understanding-spl-tokens": " Your First SPL Token"
-      },
-      "challenge": {
-        "title": "Challenge: Minting an SPL Token",
-        "requirements": {
-          "create_mint": {
-            "title": "Challenge 1: Creating an SPL mint",
-            "description": "Your code should create an SPL mint with 6 decimal places."
-          }
-        }
       }
     },
     "research-crateless-program": {
       "title": "Byte by Byte: The Anatomy of a Crateless Program",
       "lessons": {
         "lesson": "research-crateless-program"
-      },
-      "challenge": {
-        "requirements": {
-          "deposit": {
-            "title": "Challenge 1: Taking deposits"
-          },
-          "withdraw": {
-            "title": "Challenge 2: Allowing withdrawal"
-          }
-        }
       }
     }
   },
@@ -194,15 +120,15 @@
     "assembly": "Assembly",
     "research": "Research"
   },
-  "rewards": {
-    "title": "Claim and View your NFTs",
-    "subtitle": "Rewards",
+  "ChallengeCenter": {
+    "title": "Complete to Earn NFTs",
+    "subtitle": "Challenges",
     "Unclaimed": "Unclaimed",
     "claimed": "Minted",
     "claim": "Mint",
     "locked": "Locked",
-    "empty_title": "No rewards found",
-    "empty_description": "Try changing your filters to see rewards here.",
+    "empty_title": "No challenges found",
+    "empty_description": "Try changing your filters to see challenges here.",
     "locked_description": "Complete Challenge to Unlock",
     "claimed_description": "NFT Is Available in your Wallet",
     "view_nft": "View NFT (coming soon)",
@@ -210,10 +136,96 @@
     "filter__all_statuses": "All",
     "filter__selected_statuses": "Statuses"
   },
-  "reward_statuses": {
-    "Locked": "Locked",
-    "Unlocked": "Unlocked",
+  "challenge_statuses": {
+    "Open": "Open",
+    "Completed": "Completed",
     "Claimed": "Claimed"
+  },
+  "challenge_status_descriptions": {
+    "locked": "This challenge is locked",
+    "locked_cta": "Finish the lessons first to unlock the challenge."
+  },
+  "challenges": {
+    "anchor-vault": {
+      "title": "Vault",
+      "requirements": {
+        "deposit": {
+          "title": "Challenge 1: Taking deposits"
+        },
+        "withdraw": {
+          "title": "Challenge 2: Allowing withdrawal"
+        }
+      }
+    },
+    "anchor-escrow": {
+      "title": "Escrow",
+      "requirements": {
+        "make": {
+          "title": "Challenge 1: Making an escrow swap deal"
+        },
+        "take": {
+          "title": "Challenge 2: Taking an escrow swap deal"
+        },
+        "refund": {
+          "title": "Challenge 3: Canceling an escrow swap deal"
+        }
+      }
+    },
+    "anchor-memo": {
+      "title": "Memo",
+      "requirements": {
+        "log": {
+          "title": "Challenge 1: Logs `instruction_data` to program log"
+        }
+      }
+    },
+    "pinocchio-vault": {
+      "title": "Pinocchio Vault",
+      "requirements": {
+        "deposit": {
+          "title": "Challenge 1: Taking deposits"
+        },
+        "withdraw": {
+          "title": "Challenge 2: Allowing withdrawal"
+        }
+      }
+    },
+    "pinocchio-memo": {
+      "title": "Pinocchio Memo",
+      "requirements": {
+        "log": {
+          "title": "Challenge 1: Logs instruction data to program log"
+        }
+      }
+    },
+    "assembly-memo": {
+      "title": "Assembly Memo",
+      "requirements": {
+        "log": {
+          "title": "Challenge 1: Logs the instruction data to program log"
+        }
+      }
+    },
+    "your-first-spl-token": {
+      "title": "Your First SPL Token",
+      "requirements": {
+        "create_mint": {
+          "title": "Challenge 1: Creating an SPL mint",
+          "description": "Your code should create an SPL mint with 6 decimal places."
+        }
+      }
+    },
+    "research-crateless-program": {
+      "title": "Byte by Byte: The Anatomy of a Crateless Program",
+      "requirements": {
+        "deposit": {
+          "title": "Challenge 1: Taking deposits"
+        },
+        "withdraw": {
+          "title": "Challenge 2: Allowing withdrawal"
+        }
+      }
+    }
   },
   "shift_goal": {
     "title": "Setup Your Shift Goal",
@@ -230,25 +242,13 @@
     "contents": "Contents",
     "view_source": "View Source"
   },
-  "challenges": {
-    "ready": "Ready to finish the course?",
-    "see_challenge": "See Challenge",
-    "back_to_lessons": "Back to Lessons",
-    "locked": "This challenge is locked",
-    "locked_description": "Finish the lessons first to unlock the challenge.",
-    "connect_wallet": "Connect Wallet",
-    "connect_wallet_description": "A Solana wallet is required to complete the challenge and unlock NFTs",
-    "challenge_completed": "Congratulations!",
-    "challenge_completed_description": "You've completed the challenge and unlocked an NFT reward!",
-    "challenge_completed_button": "Mint NFT",
-    "challenge_completed_skip": "Skip for now",
-    "challenge_completed_skip_description": "You can see your unlocks on the rewards page.",
-    "challenge_completed_tweet": "Share on X"
-  },
   "notifications": {
     "session_expired_logout": "Your session has expired. Please log in again."
   },
-  "challenge_page": {
+  "ChallengePage": {
+    "connect_wallet": "Connect Wallet",
+    "connect_wallet_description": "A Solana wallet is required to complete the challenge and unlock NFTs",
+    "back_to_lessons": "Back to Lessons",
     "requirements_title": "Challenge",
     "upload_program_btn": "Upload Program",
     "run_program_btn": "Execute",
@@ -267,6 +267,12 @@
       "view_other_courses": "View Other Courses",
       "divider_label": "Or",
       "redo": "Redo Challenge"
-    }
+    },
+    "mint_modal_title": "Congratulations!",
+    "mint_modal_description": "You've completed the challenge and unlocked an NFT reward!",
+    "mint_modal_button": "Mint NFT",
+    "mint_modal_skip": "Skip for now",
+    "mint_modal_skip_description": "You can see your unlocks on the Challenges page.",
+    "mint_modal_tweet": "Share on X"
   }
 }

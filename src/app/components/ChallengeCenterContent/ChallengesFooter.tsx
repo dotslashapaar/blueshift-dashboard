@@ -3,17 +3,17 @@ import { useTranslations } from "next-intl";
 import classNames from "classnames";
 import { usePersistentStore } from "@/stores/store";
 import Icon from "../Icon/Icon";
-import { CourseMetadata } from "@/app/utils/course";
 import useMintNFT from "@/hooks/useMintNFT";
+import { ChallengeMetadata } from "@/app/utils/challenges";
 
-type RewardsFooterProps = {
-  course: CourseMetadata;
+type ChallengesFooterProps = {
+  challenge: ChallengeMetadata;
 };
 
-export default function RewardsFooter({ course }: RewardsFooterProps) {
+export default function ChallengesFooter({ challenge }: ChallengesFooterProps) {
   const t = useTranslations();
   const { courseStatus } = usePersistentStore();
-  const status = courseStatus[course.slug];
+  const status = courseStatus[challenge.slug];
   const { view } = usePersistentStore();
   const { mint } = useMintNFT();
 
@@ -37,14 +37,14 @@ export default function RewardsFooter({ course }: RewardsFooterProps) {
       {status === "Locked" && (
         <span className="text-tertiary font-medium gap-x-1.5 flex items-center">
           <Icon name="Locked" />
-          {t("rewards.locked_description")}
+          {t("challenge_status_descriptions.locked_cta")}
         </span>
       )}
       {status === "Unlocked" && (
         <Button
           variant="primary"
           size="md"
-          label={t("rewards.claim")}
+          label={t("ChallengeCenter.claim")}
           icon="Claim"
           iconSide="right"
           className="!w-full !min-w-[150px]"
@@ -55,7 +55,7 @@ export default function RewardsFooter({ course }: RewardsFooterProps) {
         <Button
           variant="primary"
           size="md"
-          label={t("rewards.view_nft")}
+          label={t("ChallengeCenter.view_nft")}
           icon="Claim"
           iconSide="right"
           className="!w-full !min-w-[150px]"

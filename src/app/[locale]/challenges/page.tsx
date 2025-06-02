@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
-import Rewards from "@/app/components/RewardsContent/Rewards";
+import Challenges from "@/app/components/ChallengeCenterContent/Challenges";
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 
 export default function RewardsPage() {
@@ -13,7 +13,7 @@ export default function RewardsPage() {
           <div className="flex flex-col gap-y-2">
             <div className="relative w-max">
               <span className="text-secondary font-medium text-xl leading-none font-mono">
-                {t("rewards.subtitle")}
+                {t("ChallengeCenter.subtitle")}
               </span>
               <CrosshairCorners
                 size={5}
@@ -22,16 +22,16 @@ export default function RewardsPage() {
                 spacingX={5}
               />
             </div>
-            <span className="sr-only">{t("rewards.title")}</span>
+            <span className="sr-only">{t("ChallengeCenter.title")}</span>
             <HeadingReveal
-              text={t("rewards.title")}
+              text={t("ChallengeCenter.title")}
               headingLevel="h1"
               className="text-3xl font-semibold"
             />
           </div>
         </div>
       </div>
-      <Rewards />
+      <Challenges />
     </div>
   );
 }

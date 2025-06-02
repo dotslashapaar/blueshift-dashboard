@@ -136,8 +136,8 @@ async function main() {
                     size="sm"
                     label={
                       isCodeRunning
-                        ? t("challenge_page.running_program_btn")
-                        : t("challenge_page.run_program_btn")
+                        ? t("ChallengePage.running_program_btn")
+                        : t("ChallengePage.run_program_btn")
                     }
                     className="w-max !text-brand-primary"
                     disabled={isVerificationLoading}
@@ -146,7 +146,7 @@ async function main() {
                   <Button
                     variant="link"
                     size="sm"
-                    label={t("challenge_page.view_logs_btn")}
+                    label={t("ChallengePage.view_logs_btn")}
                     className="w-max"
                     onClick={() => setIsPanelOpen(true)}
                   />
@@ -155,7 +155,7 @@ async function main() {
                 <Button
                   variant="link"
                   size="sm"
-                  label={t("challenge_page.back_to_editor_btn")}
+                  label={t("ChallengePage.back_to_editor_btn")}
                   className="w-max"
                   onClick={() => setIsPanelOpen(false)}
                 />

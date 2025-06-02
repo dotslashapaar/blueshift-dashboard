@@ -311,10 +311,10 @@ export default function ChallengesContent({
               className="sm:w-[360px] max-w-[80dvw] w-full mx-auto"
             />
             <div className="text-center text-lg sm:text-xl font-medium leading-none">
-              {t("challenges.connect_wallet")}
+              {t("ChallengePage.connect_wallet")}
             </div>
             <div className="text-center text-secondary mx-auto sm:w-2/3 w-full">
-              {t("challenges.connect_wallet_description")}
+              {t("ChallengePage.connect_wallet_description")}
             </div>
           </div>
           <WalletMultiButton
@@ -337,10 +337,10 @@ export default function ChallengesContent({
                 <div className="flex flex-col gap-y-4 sm:!-mt-24 max-w-[90dvw]">
                   <div className="text-center justify-center text-lg sm:text-xl font-medium leading-none gap-x-2 items-center flex">
                     <Icon name="Locked" className="text-secondary" />
-                    {t("challenges.locked")}
+                    {t("challenge_status_descriptions.locked")}
                   </div>
                   <div className="text-center text-secondary mx-auto w-full">
-                    {t("challenges.locked_description")}
+                    {t("challenge_status_descriptions.locked_cta")}
                   </div>
                 </div>
                 <Link href={`/courses/${currentCourse.slug}/${lastLessonSlug}`}>
@@ -396,8 +396,8 @@ export default function ChallengesContent({
                             size="sm"
                             label={
                               isCodeRunning
-                                ? t("challenge_page.running_program_btn")
-                                : t("challenge_page.run_program_btn")
+                                ? t("ChallengePage.running_program_btn")
+                                : t("ChallengePage.run_program_btn")
                             }
                             className="w-max !text-brand-primary"
                             onClick={() => {

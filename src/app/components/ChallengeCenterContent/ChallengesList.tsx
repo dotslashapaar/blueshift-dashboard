@@ -1,0 +1,138 @@
+"use client";
+
+import { usePersistentStore } from "@/stores/store";
+import CourseCard from "../CourseCard/CourseCard";
+import classNames from "classnames";
+import Icon from "../Icon/Icon";
+import { useTranslations } from "next-intl";
+import Divider from "../Divider/Divider";
+import ChallengesEmpty from "./ChallengesEmpty";
+import ChallengesFooter from "./ChallengesFooter";
+import { motion } from "motion/react";
+import { anticipate } from "motion";
+import { useWindowSize } from "usehooks-ts";
+import { useEffect } from "react";
+import { challengeColors, ChallengeMetadata } from "@/app/utils/challenges";
+
+const challengeSections = {
+  Anchor: {
+    icon: "Anchor",
+    title: "languages.anchor",
+  },
+  Rust: {
+    icon: "Rust",
+    title: "languages.rust",
+  },
+  Typescript: {
+    icon: "Typescript",
+    title: "languages.typescript",
+  },
+  Assembly: {
+    icon: "Assembly",
+    title: "languages.assembly",
+  },
+  Research: {
+    icon: "Research",
+    title: "languages.research",
+  },
+} as const;
+
+type ChallengesListProps = {
+  initialChallenges: ChallengeMetadata[];
+};
+
+export default function ChallengesList({
+  initialChallenges,
+}: ChallengesListProps) {
+  const t = useTranslations();
+
+  // TODO refactor this
+  const { view, setView, selectedRewardStatus, courseStatus } =
+    usePersistentStore();
+
+  const filteredChallenges = initialChallenges.filter((challenge) =>
+    selectedRewardStatus.includes(courseStatus[challenge.slug]),
+  );
+
+  const hasNoResults = filteredChallenges.length === 0;
+  const hasNoFilters = selectedRewardStatus.length === 0;
+
+  const { width } = useWindowSize();
+
+  useEffect(() => {
+    if (width < 768) {
+      setView("grid");
+    }
+  }, [width, setView]);
+
+  return (
+    <motion.div
+      key={`${view}`}
+      className="flex flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, ease: anticipate }}
+    >
+      {hasNoFilters ? (
+        <ChallengesEmpty />
+      ) : hasNoResults ? (
+        <ChallengesEmpty />
+      ) : (
+        <>
+          {Object.entries(challengeSections).map(([language, section]) => {
+            const languageChallenges = filteredChallenges.filter(
+              (challenge) => challenge.language === language,
+            );
+            if (languageChallenges.length === 0) return null;
+
+            return (
+              <div key={language} className="flex flex-col group">
+                <div className="flex flex-col gap-y-8">
+                  <div className="flex items-center gap-x-3">
+                    <div
+                      className="w-[24px] h-[24px] rounded-sm flex items-center justify-center"
+                      style={{
+                        backgroundColor: `rgb(${challengeColors[section.icon]},0.10)`,
+                      }}
+                    >
+                      <Icon name={section.icon} className="text-brand-secondary" />
+                    </div>
+                    <span className="text-lg leading-none font-medium text-secondary">
+                      {t(section.title)}
+                    </span>
+                  </div>
+                  <div
+                    className={classNames(
+                      "grid",
+                      view === "grid"
+                        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        : "grid-cols-1",
+                      "gap-5",
+                    )}
+                  >
+                    {languageChallenges.map((challenge) => (
+                      <CourseCard
+                        key={challenge.slug}
+                        name={t(`challenges.${challenge.slug}.title`)}
+                        language={challenge.language}
+                        difficulty={challenge.difficulty}
+                        status={courseStatus[challenge.slug]}
+                        color={challenge.color}
+                        className={classNames(
+                          courseStatus[challenge.slug] === "Locked" &&
+                            "opacity-50",
+                        )}
+                        footer={<ChallengesFooter challenge={challenge} />}
+                      />
+                    ))}
+                  </div>
+                <Divider className="my-12 group-last:hidden" />
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+    </motion.div>
+  );
+}

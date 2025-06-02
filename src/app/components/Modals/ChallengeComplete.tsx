@@ -76,10 +76,10 @@ export default function ChallengeCompleted({
       <div className="flex flex-col gap-y-8 px-6 pt-16 relative z-10">
         <div className="flex flex-col gap-y-2 text-center">
           <div className="text-xl font-medium">
-            {t("challenges.challenge_completed")}
+            {t("ChallengePage.mint_modal_title")}
           </div>
           <span className="text-secondary text-balance">
-            {t("challenges.challenge_completed_description")}
+            {t("ChallengePage.mint_modal_description")}
           </span>
         </div>
 
@@ -87,7 +87,7 @@ export default function ChallengeCompleted({
           {currentCourseStatus === "Unlocked" ? (
             <>
               <Button
-                label={t("challenges.challenge_completed_button")}
+                label={t("ChallengePage.mint_modal_button")}
                 variant="primary"
                 size="lg"
                 icon="Claimed"
@@ -102,7 +102,7 @@ export default function ChallengeCompleted({
                 className="hover:text-primary text-mute transition w-2/3 text-center text-sm font-medium mx-auto cursor-pointer"
               >
                 <DecryptedText
-                  text={t("challenges.challenge_completed_skip")}
+                  text={t("ChallengePage.mint_modal_skip")}
                   isHovering={isHovering}
                 />
               </div>
@@ -111,7 +111,7 @@ export default function ChallengeCompleted({
             <>
               <Link href={`https://x.com/intent/tweet?text=${encodeURIComponent(`I just completed the Anchor Vault challenge from @blueshift_gg.\n\nTry it out here: https://learn.blueshift.gg/en/courses/${course.slug}/lesson\n\nMake the shift. Build on @solana.`)}`} target="_blank">
                 <Button
-                  label={t("challenges.challenge_completed_tweet")}
+                  label={t("ChallengePage.mint_modal_tweet")}
                   variant="primary"
                   size="lg"
                   icon="X"
@@ -125,7 +125,7 @@ export default function ChallengeCompleted({
                 className="hover:text-primary text-mute transition w-2/3 text-center text-sm font-medium mx-auto cursor-pointer"
               >
                 <DecryptedText
-                  text={t("challenges.challenge_completed_skip")}
+                  text={t("ChallengePage.mint_modal_skip")}
                   isHovering={isHovering}
                 />
               </div>
