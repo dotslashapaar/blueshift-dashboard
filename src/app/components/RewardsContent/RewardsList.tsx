@@ -13,14 +13,24 @@ import RewardsFooter from "./RewardsFooter";
 import { motion } from "motion/react";
 import { anticipate } from "motion";
 import { useWindowSize } from "usehooks-ts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useMintNFT from "@/hooks/useMintNFT";
+import NFTViewer from "../NFTViewer/NFTViewer";
+import Button from "../Button/Button";
 
 type RewardsListProps = {
   initialCourses: CourseMetadata[];
 };
 
 export default function RewardsList({ initialCourses }: RewardsListProps) {
+  const [isNFTViewerOpen, setIsNFTViewerOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<CourseMetadata | null>(
+    null
+  );
+  const [buttonPosition, setButtonPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const t = useTranslations();
   const { view, setView, selectedRewardStatus, courseStatus } =
     usePersistentStore();
@@ -40,6 +50,54 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
     }
   }, [width, setView]);
 
+  const handleViewNFT = (
+    course: CourseMetadata,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    // Prevent event bubbling that might interfere with coordinates
+    event.stopPropagation();
+
+    // Get the exact mouse click position relative to the viewport
+    let clickX = event.clientX;
+    let clickY = event.clientY;
+
+    // Fallback: if clientX/Y seem wrong, try to get from the button center
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+
+    // Check if the click coordinates seem reasonable (within button bounds)
+    const isWithinButton =
+      clickX >= buttonRect.left &&
+      clickX <= buttonRect.right &&
+      clickY >= buttonRect.top &&
+      clickY <= buttonRect.bottom;
+
+    if (!isWithinButton) {
+      // If coordinates are outside button, use button center as fallback
+      clickX = buttonRect.left + buttonRect.width / 2;
+      clickY = buttonRect.top + buttonRect.height / 2;
+      console.warn(
+        "Click coordinates outside button bounds, using button center as fallback"
+      );
+    }
+
+    // Debug logging to help identify the issue
+    console.log("Click event:", {
+      originalClientX: event.clientX,
+      originalClientY: event.clientY,
+      finalClickX: clickX,
+      finalClickY: clickY,
+      target: event.target,
+      currentTarget: event.currentTarget,
+      course: course.slug,
+      buttonRect: buttonRect,
+      isWithinButton: isWithinButton,
+    });
+
+    setButtonPosition({ x: clickX, y: clickY });
+    setSelectedCourse(course);
+    setIsNFTViewerOpen(true);
+  };
+
   return (
     <motion.div
       key={`${view}`}
@@ -48,6 +106,14 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, ease: anticipate }}
     >
+      <NFTViewer
+        challengeName={selectedCourse?.unitName || ""}
+        challengeLanguage={selectedCourse?.language || ""}
+        challengeDifficulty={selectedCourse?.difficulty || 1}
+        isOpen={isNFTViewerOpen}
+        onClose={() => setIsNFTViewerOpen(false)}
+        originPosition={buttonPosition}
+      />
       {hasNoFilters && <RewardsEmpty />}
       {hasNoResults && <RewardsEmpty />}
       {!hasNoFilters && !hasNoResults && (
@@ -91,8 +157,19 @@ export default function RewardsList({ initialCourses }: RewardsListProps) {
                       className={classNames(
                         courseStatus[course.slug] === "Locked" && "opacity-50"
                       )}
+                      // footer={<RewardsFooter course={course} />}
                       footer={
-                        <RewardsFooter course={course} />
+                        <Button
+                          label="View NFT"
+                          className="w-full relative z-10"
+                          onClick={(
+                            event?: React.MouseEvent<HTMLButtonElement>
+                          ) => {
+                            if (event) {
+                              handleViewNFT(course, event);
+                            }
+                          }}
+                        />
                       }
                     />
                   ))}

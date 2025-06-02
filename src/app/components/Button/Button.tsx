@@ -9,7 +9,7 @@ import { useState } from "react";
 export interface ButtonProps {
   label?: string;
   className?: string;
-  onClick?: () => void;
+  onClick?: (event?: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
   variant?: "primary" | "secondary" | "tertiary" | "link";
   icon?: IconName;
