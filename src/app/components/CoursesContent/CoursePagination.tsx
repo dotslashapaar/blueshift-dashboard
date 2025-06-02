@@ -8,24 +8,24 @@ import { useRouter } from "@/i18n/navigation";
 import { usePersistentStore } from "@/stores/store";
 import { Link } from "@/i18n/navigation";
 import Icon from "../Icon/Icon";
+import { CourseMetadata } from "@/app/utils/course";
 interface CoursePaginationProps {
-  lessons: {
-    title: string;
-    slug: string;
-  }[];
   currentLesson: number;
   className?: string;
-  courseSlug: string;
+  course: CourseMetadata;
 }
 
 export default function CoursePagination({
   currentLesson,
-  lessons,
   className,
-  courseSlug,
+  course,
 }: CoursePaginationProps) {
   const t = useTranslations();
   const { setCourseProgress, courseStatus } = usePersistentStore();
+
+  const courseSlug = course.slug;
+  const lessons = course.lessons;
+  const currentLessonIndex = currentLesson - 1;
 
   const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -65,7 +65,11 @@ export default function CoursePagination({
         >
           <Icon name="ArrowLeft" />
         </button>
-        <span className="font-medium">{lessons[currentLesson - 1].title}</span>
+        <span className="font-medium">
+          {t(
+            `courses.${courseSlug}.lessons.${lessons[currentLessonIndex].slug}`,
+          )}
+        </span>
         <button
           onClick={() => {
             router.push(
@@ -117,7 +121,7 @@ export default function CoursePagination({
                   {t(`courses.${courseSlug}.lessons.${lesson.slug}`)}
                 </span>
               </div>
-              {index === lessons.length - 1 && (
+              {course.challenge && index === lessons.length - 1 && (
                 <div className="flex items-center gap-x-2 pl-10">
                   <Icon
                     name={

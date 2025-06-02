@@ -109,10 +109,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     isFeatured: true,
     unitName: "Quantum Vault",
     lessons: [{ slug: "introduction-to-quantum-vault" }],
-    challenge: {
-      apiPath: "/v1/verify/quantum/vault",
-      requirements: [],
-    },
   },
   {
     slug: "your-first-spl-token",

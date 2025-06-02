@@ -51,7 +51,7 @@ export type CourseMetadata = {
   isFeatured: boolean;
   unitName: string;
   lessons: LessonMetadata[];
-  challenge: challengeMetadata;
+  challenge?: challengeMetadata;
   collectionMintAddress?: string;
 };
 

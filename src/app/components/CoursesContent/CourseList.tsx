@@ -223,6 +223,7 @@ export default function CourseList({
                                 isChallengeCompleted={
                                   courseStatus[course.slug] !== "Locked"
                                 }
+                                hasChallenge={!!course.challenge}
                               />
                             }
                           />
@@ -367,6 +368,7 @@ export default function CourseList({
                                 totalLessonCount={totalLessons}
                                 currentLessonSlug={currentLessonSlug}
                                 isChallengeCompleted={true}
+                                hasChallenge={!!course.challenge}
                               />
                             }
                           />

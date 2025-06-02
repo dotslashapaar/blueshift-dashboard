@@ -11,7 +11,6 @@ import Button from "@/app/components/Button/Button";
 import LessonTitle from "@/app/components/LessonTitle/LessonTitle";
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 import { notFound } from "next/navigation";
-import defaultOpenGraphImage from "@/../public/graphics/meta-image.png";
 import { getPathname } from "@/i18n/navigation";
 import { Metadata } from "next";
 import { Connection, PublicKey } from "@solana/web3.js";
@@ -120,6 +119,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
   );
   const nextLesson = allLessons[currentLessonIndex + 1];
   const nextLessonSlug = nextLesson ? nextLesson.slug : "";
+  const challenge = courseMetadata.challenge;
 
   return (
     <div className="flex flex-col w-full border-b border-b-border">
@@ -186,12 +186,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
       <div className="max-w-app flex flex-col gap-y-8 h-full relative px-4 md:px-8 lg:px-14 mx-auto w-full mt-[36px]">
         <div className="grid grid-cols-1 lg:grid-cols-10 xl:grid-cols-13 gap-y-24 lg:gap-y-0 gap-x-0 lg:gap-x-6">
           <CoursePagination
-            courseSlug={courseMetadata.slug}
+            course={courseMetadata}
             currentLesson={currentLessonIndex + 1}
-            lessons={allLessons.map((lesson) => ({
-              title: t(`courses.${courseMetadata.slug}.lessons.${lesson.slug}`),
-              slug: lesson.slug,
-            }))}
           />
           <div className="pb-8 pt-[36px] -mt-[36px] order-2 lg:order-1 col-span-1 md:col-span-7 flex flex-col gap-y-8 lg:border-border lg:border-x border-border lg:px-6">
             <MdxLayout>
@@ -199,7 +195,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             </MdxLayout>
 
             <div className=" w-full flex items-center flex-col gap-y-10">
-              {nextLesson ? (
+              {nextLesson && (
                 <>
                   {/* Skip lesson divider. Disabled for now */}
                   {/*<div className="relative w-full -mt-6">*/}
@@ -228,7 +224,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
                     />
                   </Link>
                 </>
-              ) : (
+              )}
+
+              {!nextLesson && challenge && (
                 <div className="w-[calc(100%+32px)] md:w-[calc(100%+64px)] lg:w-[calc(100%+48px)] gap-y-6 md:gap-y-0 flex flex-col md:flex-row justify-between items-center gap-x-12 group -mt-12 pt-24 pb-16 px-8 [background:linear-gradient(180deg,rgba(0,255,255,0)_0%,rgba(0,255,255,0.08)_50%,rgba(0,255,255,0)_100%)]">
                   <span className="text-primary w-auto flex-shrink-0 font-mono">
                     {t("lessons.take_challenge_cta")}
@@ -247,6 +245,27 @@ export default async function LessonPage({ params }: LessonPageProps) {
                   </Link>
                 </div>
               )}
+
+              {!nextLesson && !challenge && (
+                <div className="w-[calc(100%+32px)] md:w-[calc(100%+64px)] lg:w-[calc(100%+48px)] gap-y-6 md:gap-y-0 flex flex-col md:flex-row justify-between items-center gap-x-12 group -mt-12 pt-24 pb-16 px-8 [background:linear-gradient(180deg,rgba(0,255,255,0)_0%,rgba(0,255,255,0.08)_50%,rgba(0,255,255,0)_100%)]">
+                  <span className="text-primary w-auto flex-shrink-0 font-mono">
+                    {t("lessons.lesson_completed")}
+                  </span>
+                  <Link
+                    href={`/courses`}
+                    className="w-max"
+                  >
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      label={t("lessons.view_other_courses")}
+                      icon="Lessons"
+                      className="disabled:opacity-40 w-full disabled:cursor-default"
+                    ></Button>
+                  </Link>
+                </div>
+              )}
+
             </div>
           </div>
           <TableOfContents />
