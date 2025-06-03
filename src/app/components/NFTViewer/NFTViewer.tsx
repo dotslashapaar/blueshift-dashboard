@@ -151,7 +151,7 @@ export default function NFTViewer({
               }}
             >
               <CrosshairCorners baseDelay={0} />
-              <div className="relative aspect-[3/4] md:aspect-square w-[95dvw] md:w-[480px] md:h-[480px]  overflow-hidden p-2 pb-0 col-span-3">
+              <div className="relative aspect-[3/4] md:aspect-square w-[95dvw] xs:w-[80dvw] md:w-[480px] md:h-[480px]  overflow-hidden p-2 pb-0 col-span-3">
                 <NFTScene
                   isAnimationComplete={isAnimationComplete}
                   challengeName={challengeName}

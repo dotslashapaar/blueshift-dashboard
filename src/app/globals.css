@@ -26,6 +26,7 @@
   --font-content: var(--font-switzer);
   --text-3xl: 32px;
   --container-app: 1500px;
+  --breakpoint-xs: 472px;
 }
 
 body {
