@@ -90,6 +90,13 @@ const NFTMaterial = shaderMaterial(
       return rotated + 0.5;
     }
     
+    // Helper for random number generation (white noise)
+    // Used for dithering to break up gradient banding
+    float random(vec2 p) {
+      // Uses gl_FragCoord.xy which provides screen-space pixel coordinates
+      return fract(sin(dot(p.xy, vec2(12.9898, 78.233))) * 43758.5453);
+    }
+    
     // Top to bottom gradient based on local Y position (unaffected by rotation)
     float getTopToBottomGradient() {
       // Use local position Y to get true top-to-bottom gradient
@@ -98,6 +105,11 @@ const NFTMaterial = shaderMaterial(
       
       // Clamp to ensure we stay within bounds
       normalizedY = clamp(normalizedY, 0.0, 1.0);
+
+      // Add a small amount of dither to break up banding artifacts.
+      float ditherStrength = 0.05;
+      normalizedY += (random(gl_FragCoord.xy) - 0.5) * ditherStrength; // Apply centered noise
+      normalizedY = clamp(normalizedY, 0.0, 1.0); // Re-clamp after adding noise to prevent out-of-bounds values
       
       // Use a smoother curve for better gradient transitions
       // Apply smoothstep twice for even smoother interpolation
