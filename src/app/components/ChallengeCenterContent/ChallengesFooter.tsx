@@ -2,9 +2,9 @@ import Button from "../Button/Button";
 import { useTranslations } from "next-intl";
 import classNames from "classnames";
 import { usePersistentStore } from "@/stores/store";
-import Icon from "../Icon/Icon";
 import useMintNFT from "@/hooks/useMintNFT";
 import { ChallengeMetadata } from "@/app/utils/challenges";
+import { Link } from "@/i18n/navigation";
 
 type ChallengesFooterProps = {
   challenge: ChallengeMetadata;
@@ -12,8 +12,8 @@ type ChallengesFooterProps = {
 
 export default function ChallengesFooter({ challenge }: ChallengesFooterProps) {
   const t = useTranslations();
-  const { courseStatus } = usePersistentStore();
-  const status = courseStatus[challenge.slug];
+  const { challengeStatuses } = usePersistentStore();
+  const status = challengeStatuses[challenge.slug];
   const { view } = usePersistentStore();
   const { mint } = useMintNFT();
 
@@ -34,13 +34,22 @@ export default function ChallengesFooter({ challenge }: ChallengesFooterProps) {
         view === "grid" && "w-full justify-between items-end"
       )}
     >
-      {status === "Locked" && (
-        <span className="text-tertiary font-medium gap-x-1.5 flex items-center">
-          <Icon name="Locked" />
-          {t("challenge_status_descriptions.locked_cta")}
-        </span>
+      {status === "open" && (
+        <Link
+          href={`/challenges/${challenge.slug}`}
+          className="text-brand-secondary hover:text-brand-primary transition font-medium !w-full !min-w-[150px]"
+        >
+          <Button
+            variant="primary"
+            size="md"
+            label={t("lessons.take_challenge")}
+            icon="Challenge"
+            className="!w-full"
+            iconSide="left"
+          />
+        </Link>
       )}
-      {status === "Unlocked" && (
+      {status === "completed" && (
         <Button
           variant="primary"
           size="md"
@@ -51,7 +60,7 @@ export default function ChallengesFooter({ challenge }: ChallengesFooterProps) {
           onClick={handleMint}
         />
       )}
-      {status === "Claimed" && (
+      {status === "claimed" && (
         <Button
           variant="primary"
           size="md"

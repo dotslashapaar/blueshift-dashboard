@@ -18,47 +18,47 @@ interface FiltersProps {
 export default function ChallengeFilter({ className }: FiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLElement>(null) as React.RefObject<HTMLElement>;
-  const { selectedRewardStatus, toggleRewardStatus } = usePersistentStore();
+  const { selectedChallengeStatus, toggleChallengeStatus } = usePersistentStore();
   const t = useTranslations();
 
   const allStatuses: ReadonlyArray<ChallengeStatus> = challengeStatus;
   const displayText =
-    selectedRewardStatus.length === allStatuses.length
+    selectedChallengeStatus.length === allStatuses.length
       ? t("ChallengeCenter.filter__label")
-      : selectedRewardStatus.length === 1
-        ? selectedRewardStatus[0]
-        : `${selectedRewardStatus.length} ${t("ChallengeCenter.filter__selected_statuses")}`;
+      : selectedChallengeStatus.length === 1
+        ? selectedChallengeStatus[0]
+        : `${selectedChallengeStatus.length} ${t("ChallengeCenter.filter__selected_statuses")}`;
 
   const toggleAllStatuses = () => {
-    if (selectedRewardStatus.length === allStatuses.length) {
+    if (selectedChallengeStatus.length === allStatuses.length) {
       // If all are selected, deselect all
       allStatuses.forEach((status) => {
-        if (selectedRewardStatus.includes(status)) {
-          toggleRewardStatus(status);
+        if (selectedChallengeStatus.includes(status)) {
+          toggleChallengeStatus(status);
         }
       });
     } else {
       // If not all are selected, select all
       allStatuses.forEach((status) => {
-        if (!selectedRewardStatus.includes(status)) {
-          toggleRewardStatus(status);
+        if (!selectedChallengeStatus.includes(status)) {
+          toggleChallengeStatus(status);
         }
       });
     }
   };
 
   const handleStatusClick = (status: ChallengeStatus) => {
-    if (selectedRewardStatus.length === allStatuses.length) {
+    if (selectedChallengeStatus.length === allStatuses.length) {
       // If "All" is selected, deselect all and select only the clicked status
       allStatuses.forEach((s) => {
-        if (selectedRewardStatus.includes(s)) {
-          toggleRewardStatus(s);
+        if (selectedChallengeStatus.includes(s)) {
+          toggleChallengeStatus(s);
         }
       });
-      toggleRewardStatus(status);
+      toggleChallengeStatus(status);
     } else {
       // Normal toggle behavior
-      toggleRewardStatus(status);
+      toggleChallengeStatus(status);
     }
   };
 
@@ -96,7 +96,7 @@ export default function ChallengeFilter({ className }: FiltersProps) {
               className="flex items-center gap-x-4 py-3 px-2.5 pr-4 rounded-lg transition hover:bg-background-card-foreground"
             >
               <Checkbox
-                checked={selectedRewardStatus.length === allStatuses.length}
+                checked={selectedChallengeStatus.length === allStatuses.length}
               />
               <span className="text-sm font-medium leading-none text-secondary">
                 {t("ChallengeCenter.filter__all_statuses")}
@@ -105,7 +105,7 @@ export default function ChallengeFilter({ className }: FiltersProps) {
             <Divider />
             <div className={classNames("flex relative flex-col gap-y-1")}>
               <AnimatePresence>
-                {selectedRewardStatus.length === allStatuses.length && (
+                {selectedChallengeStatus.length === allStatuses.length && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -123,22 +123,22 @@ export default function ChallengeFilter({ className }: FiltersProps) {
                   onClick={() => handleStatusClick(status)}
                   className={classNames(
                     "flex items-center relative gap-x-4 py-3 px-2.5 pr-4 rounded-lg transition hover:bg-background-card-foreground",
-                    selectedRewardStatus.includes(status) &&
-                      selectedRewardStatus.length !== allStatuses.length &&
+                    selectedChallengeStatus.includes(status) &&
+                      selectedChallengeStatus.length !== allStatuses.length &&
                       "bg-background-card-foreground"
                   )}
                 >
                   <Checkbox
                     theme="secondary"
                     className="z-10 relative"
-                    checked={selectedRewardStatus.includes(status)}
+                    checked={selectedChallengeStatus.includes(status)}
                   />
                   <div className="flex items-center gap-x-2 relative z-10">
                     <Icon className="text-tertiary" name={status} />
                     <span
                       className={classNames(
                         "text-sm font-medium leading-none text-secondary",
-                        selectedRewardStatus.includes(status) && "!text-primary"
+                        selectedChallengeStatus.includes(status) && "!text-primary"
                       )}
                     >
                       {t(`challenge_statuses.${status}`)}

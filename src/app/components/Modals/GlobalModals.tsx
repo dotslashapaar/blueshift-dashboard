@@ -8,7 +8,7 @@ import { useIsClient } from "usehooks-ts";
 import { getAllCourses } from "@/app/utils/mdx";
 
 export default function GlobalModals() {
-  const { connectionRecommendedViewed, courseStatus, setCourseStatus } =
+  const { connectionRecommendedViewed, challengeStatuses, setChallengeStatus } =
     usePersistentStore();
   const { setOpenedModal } = useStore();
   const isClient = useIsClient();
@@ -20,8 +20,8 @@ export default function GlobalModals() {
     const initializeCourseStatuses = async () => {
       const courses = await getAllCourses();
       courses.forEach((course) => {
-        if (!courseStatus[course.slug]) {
-          setCourseStatus(course.slug, "Locked");
+        if (!challengeStatuses[course.slug]) {
+          setChallengeStatus(course.slug, "open");
         }
       });
     };
@@ -37,8 +37,8 @@ export default function GlobalModals() {
     connectionRecommendedViewed,
     setOpenedModal,
     isClient,
-    courseStatus,
-    setCourseStatus,
+    challengeStatuses,
+    setChallengeStatus,
   ]);
 
   return (

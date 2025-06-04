@@ -47,15 +47,15 @@ export default function ChallengesList({
   const t = useTranslations();
 
   // TODO refactor this
-  const { view, setView, selectedRewardStatus, courseStatus } =
+  const { view, setView, selectedChallengeStatus, challengeStatuses } =
     usePersistentStore();
 
   const filteredChallenges = initialChallenges.filter((challenge) =>
-    selectedRewardStatus.includes(courseStatus[challenge.slug]),
+    selectedChallengeStatus.includes(challengeStatuses[challenge.slug]),
   );
 
   const hasNoResults = filteredChallenges.length === 0;
-  const hasNoFilters = selectedRewardStatus.length === 0;
+  const hasNoFilters = selectedChallengeStatus.length === 0;
 
   const { width } = useWindowSize();
 
@@ -116,12 +116,8 @@ export default function ChallengesList({
                         name={t(`challenges.${challenge.slug}.title`)}
                         language={challenge.language}
                         difficulty={challenge.difficulty}
-                        status={courseStatus[challenge.slug]}
+                        status={challengeStatuses[challenge.slug]}
                         color={challenge.color}
-                        className={classNames(
-                          courseStatus[challenge.slug] === "Locked" &&
-                            "opacity-50",
-                        )}
                         footer={<ChallengesFooter challenge={challenge} />}
                       />
                     ))}

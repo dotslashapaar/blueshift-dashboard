@@ -7,6 +7,8 @@ import {
 import { Certificate } from "@/lib/challenges/types";
 import { challengeStatus, ChallengeStatus } from "@/app/utils/challenges";
 
+export type ChallengeStatuses = "open" | "completed" | "claimed";
+
 interface Store {
   // Global Modal
   openedModal: string | null;
@@ -37,21 +39,15 @@ interface PersistentStore {
   courseProgress: Record<string, number>; // key: course slug, value: current lesson number
   setCourseProgress: (courseSlug: string, lessonNumber: number) => void;
 
-  courseStatus: Record<string, "Locked" | "Unlocked" | "Claimed">; // key: course slug, value: status
-  setCourseStatus: (
-    courseSlug: string,
-    status: "Locked" | "Unlocked" | "Claimed"
-  ) => void;
-
   // Filters
   selectedLanguages: CourseLanguages[];
   toggleLanguage: (language: CourseLanguages) => void;
   clearLanguages: () => void;
 
-  // Rewards
-  selectedRewardStatus: ReadonlyArray<ChallengeStatus>;
-  toggleRewardStatus: (status: ChallengeStatus) => void;
-  clearRewardStatus: () => void;
+  // Challenge Center
+  selectedChallengeStatus: ReadonlyArray<ChallengeStatus>;
+  toggleChallengeStatus: (status: ChallengeStatus) => void;
+  clearChallengeStatus: () => void;
 
   // Wallet Recommended Modal
   connectionRecommendedViewed: boolean;
@@ -65,7 +61,39 @@ interface PersistentStore {
   // Certificates
   certificates: Record<string, Certificate>;
   setCertificate: (courseSlug: string, certificate: Certificate) => void;
+
+  // Challenge Statuses
+  challengeStatuses: Record<string, ChallengeStatuses>;
+  setChallengeStatus: (slug: string, status: ChallengeStatuses) => void;
 }
+
+type V0PersistentStore = Omit<PersistentStore, 'challengeStatuses' | 'setNewChallengeStatus'> & {
+  courseStatus?: Record<string, "Locked" | "Unlocked" | "Claimed">;
+};
+
+const migrate = (persistedState: unknown, version: number): Partial<PersistentStore> => {
+  if (version === 0) {
+    const oldState = persistedState as V0PersistentStore;
+    const newChallengeStatuses: Record<string, ChallengeStatuses> = {};
+    if (oldState.courseStatus) {
+      for (const slug in oldState.courseStatus) {
+        const courseSpecificStatus = oldState.courseStatus[slug];
+        if (courseSpecificStatus === "Unlocked") {
+          newChallengeStatuses[slug] = "completed";
+        } else if (courseSpecificStatus === "Claimed") {
+          newChallengeStatuses[slug] = "claimed";
+        } else {
+          newChallengeStatuses[slug] = "open";
+        }
+      }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { courseStatus, ...rest } = oldState;
+    return { ...rest, challengeStatuses: newChallengeStatuses };
+  }
+
+  return persistedState as Partial<PersistentStore>;
+};
 
 export const usePersistentStore = create<PersistentStore>()(
   persist(
@@ -84,13 +112,6 @@ export const usePersistentStore = create<PersistentStore>()(
           },
         })),
 
-      // Course Status
-      courseStatus: {},
-      setCourseStatus: (courseSlug, status) =>
-        set((state) => ({
-          courseStatus: { ...state.courseStatus, [courseSlug]: status },
-        })),
-
       // Filters
       selectedLanguages: Object.keys(courseLanguages) as CourseLanguages[],
       toggleLanguage: (language) =>
@@ -101,15 +122,15 @@ export const usePersistentStore = create<PersistentStore>()(
         })),
       clearLanguages: () => set({ selectedLanguages: [] }),
 
-      // Rewards
-      selectedRewardStatus: challengeStatus,
-      toggleRewardStatus: (status) =>
+      // Challenge Center
+      selectedChallengeStatus: challengeStatus,
+      toggleChallengeStatus: (status) =>
         set((state) => ({
-          selectedRewardStatus: state.selectedRewardStatus.includes(status)
-            ? state.selectedRewardStatus.filter((s) => s !== status)
-            : [...state.selectedRewardStatus, status],
+          selectedChallengeStatus: state.selectedChallengeStatus.includes(status)
+            ? state.selectedChallengeStatus.filter((s) => s !== status)
+            : [...state.selectedChallengeStatus, status],
         })),
-      clearRewardStatus: () => set({ selectedRewardStatus: [] }),
+      clearChallengeStatus: () => set({ selectedChallengeStatus: [] }),
 
       // Wallet Connection Recommended Viewed
       connectionRecommendedViewed: false,
@@ -130,9 +151,17 @@ export const usePersistentStore = create<PersistentStore>()(
             [courseSlug]: certificate,
           },
         })),
+
+      challengeStatuses: {},
+      setChallengeStatus: (slug, status) =>
+        set((state) => ({
+          challengeStatuses: { ...state.challengeStatuses, [slug]: status },
+        })),
     }),
     {
       name: "blueshift-storage",
+      version: 1,
+      migrate,
     }
   )
 );

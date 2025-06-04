@@ -21,9 +21,10 @@ export default function CoursePagination({
   course,
 }: CoursePaginationProps) {
   const t = useTranslations();
-  const { setCourseProgress, courseStatus } = usePersistentStore();
+  const { setCourseProgress, challengeStatuses } = usePersistentStore();
 
   const courseSlug = course.slug;
+  const challengeSlug = course.challenge;
   const lessons = course.lessons;
   const currentLessonIndex = currentLesson - 1;
 
@@ -121,28 +122,28 @@ export default function CoursePagination({
                   {t(`courses.${courseSlug}.lessons.${lesson.slug}`)}
                 </span>
               </div>
-              {course.challenge && index === lessons.length - 1 && (
+              {challengeSlug && index === lessons.length - 1 && (
                 <div className="flex items-center gap-x-2 pl-10">
                   <Icon
                     name={
-                      courseStatus[courseSlug] !== "Locked"
+                      ["completed", "claimed"].includes(challengeStatuses[challengeSlug])
                         ? "SuccessCircle"
                         : "Challenge"
                     }
                     size={16 as 14}
                     className={classNames("-ml-2 text-brand-tertiary", {
-                      "!text-success": courseStatus[courseSlug] !== "Locked",
+                      "!text-success": ["completed", "claimed"].includes(challengeStatuses[challengeSlug]),
                     })}
                   />
                   <span
                     className={classNames(
                       "text-sm font-medium text-brand-tertiary",
                       {
-                        "!text-success": courseStatus[courseSlug] !== "Locked",
+                        "!text-success": ["completed", "claimed"].includes(challengeStatuses[challengeSlug]),
                       },
                     )}
                   >
-                    {courseStatus[courseSlug] !== "Locked"
+                    {["completed", "claimed"].includes(challengeStatuses[challengeSlug])
                       ? t("lessons.challenge_completed")
                       : t("lessons.challenge_incomplete")}
                   </span>

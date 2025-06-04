@@ -34,7 +34,7 @@ const courseStatus = {
   Challenge_Completed: "Challenge_Completed",
 } as const;
 
-export const challengeStatus = ["Open", "Completed", "Claimed"] as const;
+export const challengeStatus = ["open", "completed", "claimed"] as const;
 
 export type ChallengeMetadata = {
   slug: string;

@@ -55,7 +55,7 @@ export default function CourseList({
   courseLessons,
 }: CoursesContentProps) {
   const t = useTranslations();
-  const { view, setView, selectedLanguages, courseProgress, courseStatus } =
+  const { view, setView, selectedLanguages, courseProgress, challengeStatuses } =
     usePersistentStore();
   const { searchValue } = useStore();
   const isProgressEmpty = Object.keys(courseProgress).length === 0;
@@ -172,8 +172,7 @@ export default function CourseList({
               {/* Returning Users */}
               {filteredCourses.some(
                 (course) =>
-                  courseProgress[course.slug] !== undefined &&
-                  courseStatus[course.slug] === "Locked"
+                  courseProgress[course.slug] < course.lessons.length
               ) && (
                 <>
                   <div className="flex items-center gap-x-3">
@@ -193,8 +192,7 @@ export default function CourseList({
                     {filteredCourses
                       .filter(
                         (course) =>
-                          courseProgress[course.slug] !== undefined &&
-                          courseStatus[course.slug] === "Locked"
+                          courseProgress[course.slug] < course.lessons.length
                       )
                       .map((course) => {
                         const totalLessons =
@@ -221,7 +219,7 @@ export default function CourseList({
                                 totalLessonCount={totalLessons}
                                 currentLessonSlug={currentLessonSlug}
                                 isChallengeCompleted={
-                                  courseStatus[course.slug] !== "Locked"
+                                  !!course.challenge && ["completed", "claimed"].includes(challengeStatuses[course.challenge])
                                 }
                                 challengeSlug={course.challenge}
                               />
@@ -315,8 +313,7 @@ export default function CourseList({
               {/* Completed Courses */}
               {filteredCourses.some(
                 (course) =>
-                  courseProgress[course.slug] !== undefined &&
-                  courseStatus[course.slug] !== "Locked"
+                  courseProgress[course.slug] === course.lessons.length
               ) && (
                 <>
                   <div className="flex items-center gap-x-3">
@@ -340,8 +337,7 @@ export default function CourseList({
                     {filteredCourses
                       .filter(
                         (course) =>
-                          courseProgress[course.slug] !== undefined &&
-                          courseStatus[course.slug] !== "Locked"
+                          courseProgress[course.slug] === course.lessons.length
                       )
                       .map((course) => {
                         const totalLessons =
