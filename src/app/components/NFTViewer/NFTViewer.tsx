@@ -6,6 +6,8 @@ import { useOnClickOutside } from "usehooks-ts";
 import Icon from "../Icon/Icon";
 import { AnimatePresence, motion } from "motion/react";
 import { anticipate } from "motion";
+import { CourseDifficulty } from "@/app/utils/course";
+import { CourseLanguages } from "@/app/utils/course";
 
 export default function NFTViewer({
   isOpen = true,
@@ -18,8 +20,8 @@ export default function NFTViewer({
   isOpen: boolean;
   onClose: () => void;
   challengeName: string;
-  challengeLanguage: string;
-  challengeDifficulty: number;
+  challengeLanguage: CourseLanguages;
+  challengeDifficulty: CourseDifficulty;
   originPosition?: { x: number; y: number } | null;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -157,6 +159,7 @@ export default function NFTViewer({
                   challengeName={challengeName}
                   challengeLanguage={challengeLanguage}
                   challengeDifficulty={challengeDifficulty}
+                  useAnimation={true}
                 />
                 {!isAnimationComplete && (
                   <div className="w-full h-full z-10 flex items-center justify-center bg-gradient-to-b from-[#0D0E14] to-black">

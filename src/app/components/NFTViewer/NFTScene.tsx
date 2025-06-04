@@ -1,13 +1,21 @@
 "use client";
 
-import React, { Suspense, useMemo, useRef, useState, useCallback } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import React, {
+  Suspense,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useTexture, shaderMaterial } from "@react-three/drei";
 import * as THREE from "three";
 import { extend } from "@react-three/fiber";
-import { courseColors } from "@/app/utils/course";
+import { courseColors, CourseDifficulty } from "@/app/utils/course";
 import { Text } from "@react-three/drei";
 import { useWindowSize } from "usehooks-ts";
+import { CourseLanguages } from "@/app/utils/course";
 
 // Custom shader material that combines all effects
 const NFTMaterial = shaderMaterial(
@@ -151,11 +159,11 @@ const NFTMaterial = shaderMaterial(
       // Front and back faces have normals close to (0,0,±1)
       vec3 localNormal = normalize(vViewNormal);
       float faceAlignment = abs(localNormal.z); // How aligned the normal is with Z-axis
-      float bevelMask = smoothstep(0.7, 0.9, faceAlignment); // Only apply to faces, not bevels
+      float bevelMask = smoothstep(0.05, 0.05, faceAlignment); // Only apply to faces, not bevels
       
       // Create rim effect - only activate near edges
-      float rimWidth = 0.015; // Slightly increased for better visibility
-      float rimFalloff = 12.0; // Increased for sharper metallic edge
+      float rimWidth = 0.02; // Slightly increased for better visibility
+      float rimFalloff = 0.01; // Increased for sharper metallic edge
       
       // Create smooth rim that's strongest at edges and fades inward
       float rim = 1.0 - smoothstep(0.0, rimWidth, edgeDistance);
@@ -182,8 +190,8 @@ const NFTMaterial = shaderMaterial(
       vec2 matcapUV = getMatcapUV(normalize(vViewNormal));
       
       // Sample matcap textures with rotations
-      vec3 matcap1Color = texture2D(matcap1, rotateUV(matcapUV, 4.1)).rgb;
-      vec3 matcap3Color = texture2D(matcap3, rotateUV(matcapUV, 0.1)).rgb; // 180 degrees
+      vec3 matcap1Color = texture2D(matcap1, rotateUV(matcapUV, 4.2)).rgb;
+      vec3 matcap3Color = texture2D(matcap3, rotateUV(matcapUV, 3.21)).rgb; // 180 degrees
       
       // Top to bottom gradient using course color
       float gradientMask = getTopToBottomGradient();
@@ -196,7 +204,7 @@ const NFTMaterial = shaderMaterial(
       finalColor += matcap1Color;
       
       // Add matcap3 with multiply blending (enhanced rainbow effect)
-      finalColor *= mix(vec3(1.0), matcap3Color, 1.0); // Increased from 0.4 to 0.7
+      finalColor *= mix(vec3(1.0), matcap3Color, 0.99); // Increased from 0.4 to 0.7
       
       finalColor += gradientColorFinal * 0.08;
       
@@ -204,7 +212,7 @@ const NFTMaterial = shaderMaterial(
       float edgeRim = getEdgeRimLighting();
       // Apply rim lighting with screen blending for more natural metallic look
       vec3 metallicColor = vec3(1.0, 1.0, 1.0); // Cool metallic silver-blue
-      vec3 rimHighlight = metallicColor * edgeRim * 0.20; // Reduced intensity for screen blending
+      vec3 rimHighlight = metallicColor * edgeRim * 0.2; // Reduced intensity for screen blending
       
       // Screen blending: 1 - (1 - base) * (1 - highlight)
       finalColor = vec3(1.0) - (vec3(1.0) - finalColor) * (vec3(1.0) - rimHighlight);
@@ -339,7 +347,6 @@ extend({ IridescentSVGMaterial });
 function NFTMesh({
   geometry,
   challengeLanguage,
-  challengeDifficulty,
 }: {
   geometry: THREE.ExtrudeGeometry;
   challengeLanguage: string;
@@ -348,10 +355,9 @@ function NFTMesh({
   const materialRef = useRef<any>(null);
 
   // Load matcap textures
-  const [matcap1, matcap3, matcapIridescent] = useTexture([
+  const [matcap1, matcap3] = useTexture([
     "/textures/new.webp",
-    "/textures/3.webp",
-    "/textures/card-back.png",
+    "/textures/33.png",
   ]);
 
   // Calculate gradient color from course colors
@@ -390,6 +396,7 @@ function SVGImage({
 }) {
   const texture = useTexture(src);
   const materialRef = useRef<any>(null);
+  const { gl } = useThree();
 
   // Load matcap textures for iridescent effect
   const [matcap1, matcap3] = useTexture([
@@ -397,10 +404,9 @@ function SVGImage({
     "/textures/3.webp",
   ]);
 
-  // Configure texture for crisp rendering
-  texture.generateMipmaps = false;
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
+  // Enable anisotropic filtering if available for better quality at angles
+  const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
+  texture.anisotropy = Math.min(16, maxAnisotropy);
 
   // Animate the iridescent effect
   useFrame((state) => {
@@ -438,14 +444,20 @@ function Scene({
   challengeName,
   challengeLanguage,
   challengeDifficulty,
+  useAnimation = true,
+  onScreenshot,
 }: {
   challengeName: string;
   challengeLanguage: string;
   challengeDifficulty: number;
+  useAnimation: boolean;
+  onScreenshot?: () => void;
 }) {
   const orbitControlsRef = useRef<any>(null);
   const meshRef = useRef<any>(null);
   const light = useRef<any>(null);
+  const { gl, scene, camera } = useThree();
+
   // Animation state for the entire group
   const [isInteracting, setIsInteracting] = useState(false);
   const animationStateRef = useRef({
@@ -454,6 +466,243 @@ function Scene({
     lastInteractionTime: 0,
     resumeDelay: 0, // 500ms delay before resuming
   });
+
+  // Screenshot function
+  const takeScreenshot = useCallback(() => {
+    if (!gl || !scene || !camera) return;
+
+    // Create a temporary high-quality renderer for screenshots
+    const screenshotRenderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+      powerPreference: "high-performance",
+      precision: "highp",
+      premultipliedAlpha: false,
+      stencil: false,
+      depth: true,
+    });
+
+    // Create a temporary canvas for high-quality downsampling
+    const tempCanvas = document.createElement("canvas");
+    const tempCtx = tempCanvas.getContext("2d", {
+      alpha: true,
+      willReadFrequently: false,
+    });
+    if (!tempCtx) return;
+
+    // More reasonable quality settings that work reliably
+    const targetSize = 1600;
+    const supersampleFactor = 3; // Good balance of quality vs performance
+    const renderSize = targetSize * supersampleFactor; // 9600x9600
+
+    // Configure the screenshot renderer
+    screenshotRenderer.setPixelRatio(1);
+    screenshotRenderer.setSize(renderSize, renderSize);
+    screenshotRenderer.outputColorSpace = THREE.SRGBColorSpace;
+    screenshotRenderer.toneMapping = THREE.NoToneMapping;
+    screenshotRenderer.toneMappingExposure = 1.0;
+
+    // Enable quality settings
+    screenshotRenderer.shadowMap.enabled = false;
+    screenshotRenderer.sortObjects = true;
+    screenshotRenderer.localClippingEnabled = false;
+
+    // Store original camera settings
+    const originalAspect = (camera as THREE.PerspectiveCamera).aspect;
+    const originalNear = (camera as THREE.PerspectiveCamera).near;
+    const originalFar = (camera as THREE.PerspectiveCamera).far;
+
+    // Set optimal camera settings for screenshot
+    (camera as THREE.PerspectiveCamera).aspect = 1;
+    (camera as THREE.PerspectiveCamera).near = 0.1;
+    (camera as THREE.PerspectiveCamera).far = 1000;
+    (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+
+    try {
+      // Simple high-quality single-pass render
+      screenshotRenderer.render(scene, camera);
+
+      // Set up final canvas
+      tempCanvas.width = targetSize;
+      tempCanvas.height = targetSize;
+
+      // Enable high-quality downsampling
+      tempCtx.imageSmoothingEnabled = true;
+      tempCtx.imageSmoothingQuality = "high";
+
+      // Fill with black background
+      tempCtx.fillStyle = "#000000";
+      tempCtx.fillRect(0, 0, targetSize, targetSize);
+
+      // Get the rendered canvas
+      const renderedCanvas = screenshotRenderer.domElement;
+
+      // Calculate center crop area
+      const sourceSize = Math.min(renderedCanvas.width, renderedCanvas.height);
+      const sourceX = (renderedCanvas.width - sourceSize) / 2;
+      const sourceY = (renderedCanvas.height - sourceSize) / 2;
+
+      // Two-step downsampling for better quality
+      if (supersampleFactor > 3) {
+        // First step: downsample to intermediate size
+        const intermediateSize = targetSize * 2;
+        const intermediateCanvas = document.createElement("canvas");
+        intermediateCanvas.width = intermediateSize;
+        intermediateCanvas.height = intermediateSize;
+        const intermediateCtx = intermediateCanvas.getContext("2d");
+
+        if (intermediateCtx) {
+          intermediateCtx.imageSmoothingEnabled = true;
+          intermediateCtx.imageSmoothingQuality = "high";
+
+          // First downsampling pass
+          intermediateCtx.drawImage(
+            renderedCanvas,
+            sourceX,
+            sourceY,
+            sourceSize,
+            sourceSize,
+            0,
+            0,
+            intermediateSize,
+            intermediateSize
+          );
+
+          // Final downsampling pass
+          tempCtx.drawImage(
+            intermediateCanvas,
+            0,
+            0,
+            intermediateSize,
+            intermediateSize,
+            0,
+            0,
+            targetSize,
+            targetSize
+          );
+        } else {
+          // Fallback to direct downsampling
+          tempCtx.drawImage(
+            renderedCanvas,
+            sourceX,
+            sourceY,
+            sourceSize,
+            sourceSize,
+            0,
+            0,
+            targetSize,
+            targetSize
+          );
+        }
+      } else {
+        // Direct downsampling for smaller supersample factors
+        tempCtx.drawImage(
+          renderedCanvas,
+          sourceX,
+          sourceY,
+          sourceSize,
+          sourceSize,
+          0,
+          0,
+          targetSize,
+          targetSize
+        );
+      }
+
+      // Create download link
+      const dataUrl = tempCanvas.toDataURL("image/png", 1.0);
+      const link = document.createElement("a");
+      link.download = `nft-${challengeName.replace(/\s+/g, "-").toLowerCase()}-${challengeLanguage.toLowerCase()}-difficulty-${challengeDifficulty}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Screenshot failed:", error);
+
+      // Fallback: simpler screenshot approach
+      try {
+        screenshotRenderer.setSize(targetSize * 2, targetSize * 2);
+        screenshotRenderer.render(scene, camera);
+
+        const dataUrl = screenshotRenderer.domElement.toDataURL(
+          "image/png",
+          1.0
+        );
+        const link = document.createElement("a");
+        link.download = `nft-fallback-${challengeName.replace(/\s+/g, "-").toLowerCase()}.png`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (fallbackError) {
+        console.error("Fallback screenshot also failed:", fallbackError);
+        alert("Screenshot failed. Please try again.");
+      }
+    } finally {
+      // Clean up
+      screenshotRenderer.dispose();
+
+      // Restore original camera settings
+      (camera as THREE.PerspectiveCamera).aspect = originalAspect;
+      (camera as THREE.PerspectiveCamera).near = originalNear;
+      (camera as THREE.PerspectiveCamera).far = originalFar;
+      (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+    }
+  }, [
+    gl,
+    scene,
+    camera,
+    challengeName,
+    challengeLanguage,
+    challengeDifficulty,
+  ]);
+
+  // Reset rotation function
+  const resetRotation = useCallback(() => {
+    if (orbitControlsRef.current && camera) {
+      // Temporarily disable damping to prevent continued motion
+      const originalDamping = orbitControlsRef.current.enableDamping;
+      orbitControlsRef.current.enableDamping = false;
+
+      // Reset mesh rotation and animation state
+      if (meshRef.current) {
+        meshRef.current.rotation.set(0, Math.PI / 6.5, Math.PI / 72); // Reset to base rotation
+      }
+
+      // Reset animation state
+      animationStateRef.current.time = 0;
+      animationStateRef.current.isAnimating = useAnimation;
+      animationStateRef.current.lastInteractionTime = 0;
+
+      // Manually set camera position and target to exact initial values
+      camera.position.set(0, 0, 17.5);
+      orbitControlsRef.current.target.set(0, 0, 0);
+
+      // Update camera matrix
+      camera.updateMatrixWorld();
+
+      // Force controls to update to the new position
+      orbitControlsRef.current.update();
+
+      // Re-enable damping after a short delay
+      setTimeout(() => {
+        if (orbitControlsRef.current) {
+          orbitControlsRef.current.enableDamping = originalDamping;
+        }
+      }, 10);
+    }
+  }, [camera, useAnimation]);
+
+  // Expose screenshot and reset functions
+  useEffect(() => {
+    if (onScreenshot) {
+      // Store the screenshot function reference
+      (window as any).__nftSceneScreenshot = takeScreenshot;
+      (window as any).__nftSceneResetRotation = resetRotation;
+    }
+  }, [takeScreenshot, resetRotation, onScreenshot]);
 
   // Handle OrbitControls interaction events
   const handleControlsStart = useCallback(() => {
@@ -473,7 +722,7 @@ function Scene({
 
   // Animation loop for the entire group
   useFrame((state, delta) => {
-    if (!meshRef.current) return;
+    if (!meshRef.current || !useAnimation) return;
 
     const currentTime = Date.now();
     const timeSinceLastInteraction =
@@ -504,7 +753,7 @@ function Scene({
       const rotationAngle = (easedValue * 10 * Math.PI) / 180;
 
       // Apply rotation to the entire group (keeping base rotation + animation)
-      meshRef.current.rotation.y = Math.PI / 6 + rotationAngle;
+      meshRef.current.rotation.y = Math.PI / 6.5 + rotationAngle;
     }
   });
 
@@ -551,10 +800,10 @@ function Scene({
     const extrudeSettings = {
       depth: 0.2, // 24 points of extrusion
       bevelEnabled: true,
-      bevelThickness: 0.09, // 5 bevel thickness
-      bevelSize: 0.12, // 5 bevel size
-      bevelSegments: 8, // Increased from 2 to 3 for smoother bevels
-      curveSegments: 56, // Increased from 30 to 32 for even smoother curves
+      bevelThickness: 0.02, // 5 bevel thickness
+      bevelSize: 0.08, // 5 bevel size
+      bevelSegments: 2, // Increased from 2 to 3 for smoother bevels
+      curveSegments: 100,
     };
 
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
@@ -570,7 +819,7 @@ function Scene({
       {/* Enhanced mesh with lighting integration and animation */}
       <group
         ref={meshRef}
-        rotation={[0, Math.PI / 6, Math.PI / 72]} // Base rotation applied to the entire group
+        rotation={[0, Math.PI / 6.5, Math.PI / 72]} // Base rotation applied to the entire group
       >
         <NFTMesh
           challengeDifficulty={challengeDifficulty}
@@ -581,32 +830,32 @@ function Scene({
         {/* SVG Icons using texture on planes - more reliable approach */}
         <SVGImage
           src={`/textures/language-${challengeLanguage.toLowerCase()}.svg`}
-          position={[0, 0, 0.34]}
+          position={[0, 0, 0.225]}
           scale={[7.5, 10, 1]}
         />
 
         <SVGImage
           src={`/textures/difficulty-${challengeDifficulty}.svg`}
-          position={[0, 0, 0.34]}
+          position={[0, 0, 0.225]}
           scale={[7.5, 10, 1]}
         />
 
         <SVGImage
           src="/textures/qualified-text.svg"
-          position={[0, 0, 0.34]}
+          position={[0, 0, 0.225]}
           scale={[7.5, 10, 1]}
         />
 
         {/* Move card-back to the back of the card with iridescent effect */}
         <SVGImage
           src="/textures/card-back.svg"
-          position={[0, 0, -0.14]}
+          position={[0, 0, -0.025]}
           scale={[-7.5, 10, 1]}
           useIridescent={true}
         />
 
         <Text
-          position={[-3.15, 1, 0.35]}
+          position={[-3.15, 1.1, 0.226]}
           color="white"
           fontSize={0.68}
           lineHeight={1.1}
@@ -634,22 +883,201 @@ function Scene({
   );
 }
 
-// Main NFT Scene React component
-export default function NFTScene({
+// GUI Controls Component
+function GUIControls({
   challengeName,
   challengeLanguage,
   challengeDifficulty,
-  isAnimationComplete = false,
+  useAnimation,
+  onChallengeNameChange,
+  onChallengeLanguageChange,
+  onChallengeDifficultyChange,
+  onUseAnimationChange,
 }: {
   challengeName: string;
   challengeLanguage: string;
   challengeDifficulty: number;
+  useAnimation: boolean;
+  onChallengeNameChange: (value: string) => void;
+  onChallengeLanguageChange: (value: string) => void;
+  onChallengeDifficultyChange: (value: number) => void;
+  onUseAnimationChange: (value: boolean) => void;
+}) {
+  const guiRef = useRef<any>(null);
+  const controlsRef = useRef<any>(null);
+
+  // Initialize GUI once on mount
+  useEffect(() => {
+    // Dynamically import dat.gui only on client side
+    const initializeGUI = async () => {
+      const dat = await import("dat.gui");
+
+      // Create GUI
+      const gui = new dat.GUI({
+        name: "NFT Scene Controls",
+        width: 300,
+      });
+      guiRef.current = gui;
+
+      // Control object for dat.gui
+      const controls = {
+        challengeName: challengeName,
+        challengeLanguage: challengeLanguage,
+        challengeDifficulty: challengeDifficulty,
+        useAnimation: useAnimation,
+        takeScreenshot: () => {
+          // Call the screenshot function exposed on window
+          if ((window as any).__nftSceneScreenshot) {
+            (window as any).__nftSceneScreenshot();
+          }
+        },
+        resetRotation: () => {
+          // Call the reset rotation function exposed on window
+          if ((window as any).__nftSceneResetRotation) {
+            (window as any).__nftSceneResetRotation();
+          }
+        },
+      };
+
+      controlsRef.current = controls;
+
+      // Add controls
+      gui
+        .add(controls, "challengeName")
+        .name("Challenge Name")
+        .onChange((value: string) => {
+          onChallengeNameChange(value);
+        });
+
+      gui
+        .add(controls, "challengeLanguage", [
+          "Anchor",
+          "Rust",
+          "Typescript",
+          "Assembly",
+        ])
+        .name("Language")
+        .onChange((value: string) => {
+          onChallengeLanguageChange(value);
+        });
+
+      gui
+        .add(controls, "challengeDifficulty", {
+          Beginner: 1,
+          Intermediate: 2,
+          Advanced: 3,
+          Expert: 4,
+        })
+        .name("Difficulty")
+        .onChange((value: number) => {
+          onChallengeDifficultyChange(value);
+        });
+
+      gui
+        .add(controls, "useAnimation")
+        .name("Enable Animation")
+        .onChange((value: boolean) => {
+          onUseAnimationChange(value);
+        });
+
+      // Add screenshot button
+      gui.add(controls, "takeScreenshot").name("📸 Take Screenshot (800x800)");
+
+      // Add reset rotation button
+      gui.add(controls, "resetRotation").name("🔄 Reset Rotation");
+    };
+
+    initializeGUI().catch(console.error);
+
+    // Cleanup function
+    return () => {
+      if (guiRef.current) {
+        guiRef.current.destroy();
+      }
+    };
+  }, []); // Empty dependency array - only run on mount/unmount
+
+  // Update GUI controls when props change (without recreating the GUI)
+  useEffect(() => {
+    if (controlsRef.current) {
+      // Update the control object values to sync with props
+      controlsRef.current.challengeName = challengeName;
+      controlsRef.current.challengeLanguage = challengeLanguage;
+      controlsRef.current.challengeDifficulty = challengeDifficulty;
+      controlsRef.current.useAnimation = useAnimation;
+
+      // Update GUI display to reflect the new values
+      if (guiRef.current) {
+        // Update each controller's displayed value
+        guiRef.current.__controllers.forEach((controller: any) => {
+          controller.updateDisplay();
+        });
+      }
+    }
+  }, [challengeName, challengeLanguage, challengeDifficulty, useAnimation]);
+
+  return null;
+}
+
+// Main NFT Scene React component
+export default function NFTScene({
+  challengeName: initialChallengeName,
+  challengeLanguage: initialChallengeLanguage,
+  challengeDifficulty: initialChallengeDifficulty,
+  isAnimationComplete = false,
+  useAnimation: initialUseAnimation = true,
+  showControls = false,
+}: {
+  challengeName: string;
+  challengeLanguage: CourseLanguages;
+  challengeDifficulty: CourseDifficulty;
   isAnimationComplete: boolean;
+  useAnimation: boolean;
+  showControls?: boolean;
 }) {
   const { width } = useWindowSize();
 
+  // State for controllable parameters
+  const [challengeName, setChallengeName] = useState(initialChallengeName);
+  const [challengeLanguage, setChallengeLanguage] = useState(
+    initialChallengeLanguage
+  );
+  const [challengeDifficulty, setChallengeDifficulty] = useState(
+    initialChallengeDifficulty
+  );
+  const [useAnimation, setUseAnimation] = useState(initialUseAnimation);
+
+  // Properly typed callback functions
+  const handleChallengeNameChange = useCallback((value: string) => {
+    setChallengeName(value);
+  }, []);
+
+  const handleChallengeLanguageChange = useCallback((value: string) => {
+    setChallengeLanguage(value as CourseLanguages);
+  }, []);
+
+  const handleChallengeDifficultyChange = useCallback((value: number) => {
+    setChallengeDifficulty(value as CourseDifficulty);
+  }, []);
+
+  const handleUseAnimationChange = useCallback((value: boolean) => {
+    setUseAnimation(value);
+  }, []);
+
   return (
     <div className="h-full w-full overflow-hidden bg-gradient-to-b from-[#0D0E14] to-black">
+      {showControls && (
+        <GUIControls
+          challengeName={challengeName}
+          challengeLanguage={challengeLanguage}
+          challengeDifficulty={challengeDifficulty}
+          useAnimation={useAnimation}
+          onChallengeNameChange={handleChallengeNameChange}
+          onChallengeLanguageChange={handleChallengeLanguageChange}
+          onChallengeDifficultyChange={handleChallengeDifficultyChange}
+          onUseAnimationChange={handleUseAnimationChange}
+        />
+      )}
       {isAnimationComplete && (
         <Canvas
           dpr={[1.5, 2]}
@@ -658,9 +1086,14 @@ export default function NFTScene({
             antialias: true,
             alpha: true,
             toneMapping: THREE.NoToneMapping,
+            outputColorSpace: THREE.SRGBColorSpace,
+            powerPreference: "high-performance",
+            preserveDrawingBuffer: false, // Set to false for better performance during interaction
+            stencil: false,
+            depth: true,
           }}
           camera={{
-            position: [0, 0, 16],
+            position: [0, 0, 17.5],
             rotation: [0, 0, 0],
             near: 0.1,
             far: 1000,
@@ -672,6 +1105,8 @@ export default function NFTScene({
               challengeName={challengeName}
               challengeLanguage={challengeLanguage}
               challengeDifficulty={challengeDifficulty}
+              useAnimation={useAnimation}
+              onScreenshot={showControls ? () => {} : undefined}
             />
           </Suspense>
         </Canvas>
