@@ -356,8 +356,8 @@ function NFTMesh({
 
   // Load matcap textures
   const [matcap1, matcap3] = useTexture([
-    "/textures/new.webp",
-    "/textures/33.png",
+    "/textures/blur.webp",
+    "/textures/holographic.webp",
   ]);
 
   // Calculate gradient color from course colors
@@ -400,8 +400,8 @@ function SVGImage({
 
   // Load matcap textures for iridescent effect
   const [matcap1, matcap3] = useTexture([
-    "/textures/new.webp",
-    "/textures/3.webp",
+    "/textures/blur.webp",
+    "/textures/holographic.webp",
   ]);
 
   // Enable anisotropic filtering if available for better quality at angles
