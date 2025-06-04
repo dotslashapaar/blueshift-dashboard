@@ -137,9 +137,9 @@
     "filter__selected_statuses": "Statuses"
   },
   "challenge_statuses": {
-    "Open": "Open",
-    "Completed": "Completed",
-    "Claimed": "Claimed"
+    "open": "Open",
+    "completed": "Completed",
+    "claimed": "Claimed"
   },
   "challenge_status_descriptions": {
     "locked": "This challenge is locked",
