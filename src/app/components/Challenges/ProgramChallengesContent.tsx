@@ -15,16 +15,17 @@ import { AnimatePresence, motion } from "motion/react";
 import { anticipate } from "motion";
 import { useAuth } from "@/hooks/useAuth";
 import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
+import { ChallengeMetadata } from "@/app/utils/challenges";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 interface ChallengeContentProps {
-  currentCourse: CourseMetadata;
+  currentChallenge: ChallengeMetadata;
   content: ReactNode;
 }
 
 export default function ChallengesContent({
-  currentCourse,
+  currentChallenge,
   content
 }: ChallengeContentProps) {
   const auth = useAuth();

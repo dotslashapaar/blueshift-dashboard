@@ -16,7 +16,7 @@ type ReturningLessonFooterProps = {
   totalLessonCount: number;
   currentLessonSlug: string;
   isChallengeCompleted: boolean;
-  hasChallenge?: boolean;
+  challengeSlug?: string;
 };
 
 export default function ReturningCourseFooter({
@@ -25,12 +25,13 @@ export default function ReturningCourseFooter({
   courseName,
   currentLessonSlug,
   isChallengeCompleted,
-  hasChallenge,
+  challengeSlug,
 }: ReturningLessonFooterProps) {
   const t = useTranslations();
   const [isHovering, setIsHovering] = useState(false);
   const { view } = usePersistentStore();
 
+  console.log(courseName, challengeSlug, isChallengeCompleted);
   return (
     <div
       className={classNames(
@@ -102,7 +103,7 @@ export default function ReturningCourseFooter({
               {completedLessonsCount}/{totalLessonCount}
             </span>
           </div>
-          {hasChallenge === false || isChallengeCompleted ? (
+          {!challengeSlug || isChallengeCompleted ? (
             <Link
               onMouseOver={() => setIsHovering(true)}
               onMouseOut={() => setIsHovering(false)}
@@ -119,7 +120,7 @@ export default function ReturningCourseFooter({
             <Link
               onMouseOver={() => setIsHovering(true)}
               onMouseOut={() => setIsHovering(false)}
-              href={`/courses/${courseName}/challenge`}
+              href={`/challenges/${challengeSlug}`}
               className="text-brand-secondary hover:text-brand-primary transition font-medium flex items-center gap-x-2"
             >
               <Button

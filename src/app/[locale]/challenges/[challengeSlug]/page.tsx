@@ -5,28 +5,35 @@ import Divider from "@/app/components/Divider/Divider";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
 import Icon from "@/app/components/Icon/Icon";
 import { courseColors } from "@/app/utils/course";
-import { getCourse } from "@/app/utils/mdx";
 import ProgramChallengesContent from "@/app/components/Challenges/ProgramChallengesContent";
 import ClientChallengesContent from "@/app/components/Challenges/ClientChallengesContent";
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 import { notFound } from "next/navigation";
+import { getChallenge, getCourse } from "@/app/utils/mdx";
 
 interface ChallengePageProps {
   params: Promise<{
-    challengeName: string;
+    challengeSlug: string;
     locale: string;
   }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function ChallengePage({ params }: ChallengePageProps) {
-  const { challengeName, locale } = await params;
+export default async function ChallengePage({ params, searchParams }: ChallengePageProps) {
+  const { challengeSlug, locale } = await params;
+  const query = await searchParams;
   const t = await getTranslations();
-  const courseMetadata = await getCourse(challengeName);
+  const challengeMetadata = await getChallenge(challengeSlug);
+
+  let courseMetadata;
+  if (query["fromCourse"] && typeof query["fromCourse"] === "string") {
+    courseMetadata = await getCourse(query["fromCourse"]);
+  }
 
   let ChallengeContent;
   try {
     const challengeModule = await import(
-      `@/app/content/courses/${courseMetadata.slug}/challenge/${locale}.mdx`
+      `@/app/content/challenges/${challengeMetadata.slug}/${locale}.mdx`
     );
     ChallengeContent = challengeModule.default;
   } catch {
@@ -38,7 +45,7 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       <div
         className="w-full"
         style={{
-          background: `linear-gradient(180deg, rgb(${courseColors[courseMetadata.language]},0.05) 0%, transparent 100%)`,
+          background: `linear-gradient(180deg, rgb(${courseColors[challengeMetadata.language]},0.05) 0%, transpareksant 100%)`,
         }}
       >
         <div className="px-4 py-14 pb-20 max-w-app md:px-8 lg:px-14 mx-auto w-full flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
@@ -50,59 +57,60 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
                 spacingBottom={2}
                 spacingX={6}
                 style={{
-                  color: `rgb(${courseColors[courseMetadata.language]},1)`,
+                  color: `rgb(${courseColors[challengeMetadata.language]},1)`,
                 }}
               />
               <div
                 className="w-[24px] h-[24px] rounded-sm flex items-center justify-center"
                 style={{
-                  backgroundColor: `rgb(${courseColors[courseMetadata.language]},0.10)`,
+                  backgroundColor: `rgb(${courseColors[challengeMetadata.language]},0.10)`,
                 }}
               >
-                <Icon name={courseMetadata.language} size={16 as 14} />
+                <Icon name={challengeMetadata.language} size={16 as 14} />
               </div>
               <span
                 className="font-medium text-lg font-mono relative top-0.25"
                 style={{
-                  color: `rgb(${courseColors[courseMetadata.language]})`,
+                  color: `rgb(${courseColors[challengeMetadata.language]})`,
                 }}
               >
-                {courseMetadata.language}
+                {challengeMetadata.language}
               </span>
             </div>
             <span className="sr-only">
-              {t(`courses.${courseMetadata.slug}.title`)}
+              {t(`courses.${challengeMetadata.slug}.title`)}
             </span>
             <HeadingReveal
-              text={t(`courses.${courseMetadata.slug}.title`)}
+              text={t(`courses.${challengeMetadata.slug}.title`)}
               headingLevel="h1"
               className="text-3xl font-semibold"
             />
-            <BackToCourseButton course={courseMetadata} />
+
+            {courseMetadata && (<BackToCourseButton course={courseMetadata} />)}
           </div>
         </div>
       </div>
       <Divider />
 
-      {courseMetadata.language === "Typescript" ? (
-        <ClientChallengesContent
-          currentCourse={courseMetadata}
-          content={
-            <MdxLayout>
-              <ChallengeContent />
-            </MdxLayout>
-          }
-        />
-      ) : (
-        <ProgramChallengesContent
-          currentCourse={courseMetadata}
-          content={
-            <MdxLayout>
-              <ChallengeContent />
-            </MdxLayout>
-          }
-        />
-      )}
+      {/*{challengeMetadata.language === "Typescript" ? (*/}
+      {/*  <ClientChallengesContent*/}
+      {/*    currentCourse={challengeMetadata}*/}
+      {/*    content={*/}
+      {/*      <MdxLayout>*/}
+      {/*        <ChallengeContent />*/}
+      {/*      </MdxLayout>*/}
+      {/*    }*/}
+      {/*  />*/}
+      {/*) : (*/}
+      {/*  <ProgramChallengesContent*/}
+      {/*    crrentChallenge={challengeMetadata}*/}
+      {/*    content={*/}
+      {/*      <MdxLayout>*/}
+      {/*        <ChallengeContent />*/}
+      {/*      </MdxLayout>*/}
+      {/*    }*/}
+      {/*  />*/}
+      {/*)}*/}
     </div>
   );
 }

@@ -40,6 +40,20 @@ export async function getCourseLessons(
   return structuredClone(course.lessons)
 }
 
+export async function getChallenge(
+  challengeSlug: string
+): Promise<ChallengeMetadata> {
+  const challenge = challenges.find(
+    (challenge) => challenge.slug === challengeSlug
+  );
+
+  if (!challenge) {
+    notFound();
+  }
+
+  return structuredClone(challenge);
+}
+
 export async function getAllChallenges(): Promise<ChallengeMetadata[]> {
   return structuredClone(challenges);
 }

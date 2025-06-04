@@ -3,10 +3,9 @@ import { persist } from "zustand/middleware";
 import {
   CourseLanguages,
   courseLanguages,
-  rewardsStatus,
-  RewardsStatus,
 } from "@/app/utils/course";
 import { Certificate } from "@/lib/challenges/types";
+import { challengeStatus, ChallengeStatus } from "@/app/utils/challenges";
 
 interface Store {
   // Global Modal
@@ -50,8 +49,8 @@ interface PersistentStore {
   clearLanguages: () => void;
 
   // Rewards
-  selectedRewardStatus: ReadonlyArray<RewardsStatus>;
-  toggleRewardStatus: (status: RewardsStatus) => void;
+  selectedRewardStatus: ReadonlyArray<ChallengeStatus>;
+  toggleRewardStatus: (status: ChallengeStatus) => void;
   clearRewardStatus: () => void;
 
   // Wallet Recommended Modal
@@ -103,7 +102,7 @@ export const usePersistentStore = create<PersistentStore>()(
       clearLanguages: () => set({ selectedLanguages: [] }),
 
       // Rewards
-      selectedRewardStatus: rewardsStatus,
+      selectedRewardStatus: challengeStatus,
       toggleRewardStatus: (status) =>
         set((state) => ({
           selectedRewardStatus: state.selectedRewardStatus.includes(status)
