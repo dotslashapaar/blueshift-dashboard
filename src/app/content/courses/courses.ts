@@ -12,13 +12,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
       { slug: "introduction" },
       { slug: "code" },
     ],
-    challenge: {
-      apiPath: "/v1/verify/anchor/vault",
-      requirements: [
-        { instructionKey: "deposit" },
-        { instructionKey: "withdraw" },
-      ],
-    },
+    challenge: "anchor-vault",
   },
   {
     slug: "anchor-escrow",
@@ -31,14 +25,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
       { slug: "introduction" },
       { slug: "code" },
     ],
-    challenge: {
-      apiPath: "/v1/verify/anchor/escrow",
-      requirements: [
-        { instructionKey: "make" },
-        { instructionKey: "take" },
-        { instructionKey: "refund" },
-      ],
-    },
+    challenge: "anchor-escrow",
   },
   {
     slug: "anchor-memo",
@@ -48,10 +35,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     isFeatured: true,
     unitName: "Anchor Memo",
     lessons: [{ slug: "lesson" }],
-    challenge: {
-      apiPath: "/v1/verify/anchor/memo",
-      requirements: [{ instructionKey: "log" }],
-    },
+    challenge: "anchor-memo",
   },
   {
     slug: "pinocchio-vault",
@@ -64,13 +48,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
       { slug: "introduction" },
       { slug: "code" },
     ],
-    challenge: {
-      apiPath: "/v1/verify/pinocchio/vault",
-      requirements: [
-        { instructionKey: "deposit" },
-        { instructionKey: "withdraw" },
-      ],
-    },
+    challenge: "pinocchio-vault",
   },
   {
     slug: "pinocchio-memo",
@@ -80,10 +58,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     isFeatured: true,
     unitName: "Pinocchio Memo",
     lessons: [{ slug: "lesson" }],
-    challenge: {
-      apiPath: "/v1/verify/pinocchio/memo",
-      requirements: [{ instructionKey: "log" }],
-    },
+    challenge: "pinocchio-memo",
   },
   {
     slug: "assembly-memo",
@@ -93,10 +68,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     isFeatured: true,
     unitName: "Assembly Memo",
     lessons: [{ slug: "lesson" }],
-    challenge: {
-      apiPath: "/v1/verify/assembly/memo",
-      requirements: [{ instructionKey: "log" }],
-    },
+    challenge: "assembly-memo",
   },
   {
     slug: "quantum-vault",
@@ -115,10 +87,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     isFeatured: true,
     unitName: "SPL Token Mint",
     lessons: [{ slug: "understanding-spl-tokens" }],
-    challenge: {
-      apiPath: "/v1/verify/spf-token/create-mint",
-      requirements: [{ instructionKey: "create_mint" }],
-    },
+    challenge: "your-first-spl-token",
   },
   {
     slug: "research-crateless-program",
@@ -128,13 +97,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     isFeatured: true,
     unitName: "Byte by Byte",
     lessons: [{ slug: "lesson" }],
-    challenge: {
-      apiPath: "/v1/verify/research/crateless-program",
-      requirements: [
-        { instructionKey: "deposit" },
-        { instructionKey: "withdraw" },
-      ],
-    },
+    challenge: "research-crateless-program",
   }
 ]);
 

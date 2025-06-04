@@ -34,12 +34,7 @@ export const courseStatus = {
   Challenge_Completed: "Challenge_Completed",
 } as const;
 
-export type challengeMetadata = {
-  apiPath: string;
-  requirements: {
-    instructionKey: string;
-  }[];
-};
+type ChallengeSlug = string;
 
 export type CourseMetadata = {
   slug: string;
@@ -49,7 +44,7 @@ export type CourseMetadata = {
   isFeatured: boolean;
   unitName: string;
   lessons: LessonMetadata[];
-  challenge?: challengeMetadata;
+  challenge?: ChallengeSlug;
 };
 
 export type LessonMetadata = {
