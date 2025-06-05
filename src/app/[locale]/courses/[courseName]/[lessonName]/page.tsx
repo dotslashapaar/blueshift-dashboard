@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import MdxLayout from "@/app/mdx-layout";
-import { getCourse } from "@/app/utils/mdx";
+import { getChallenge, getCourse } from "@/app/utils/mdx";
 import { courseColors } from "@/app/utils/course";
 import Icon from "@/app/components/Icon/Icon";
 import Divider from "@/app/components/Divider/Divider";
@@ -84,7 +84,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
   }
 
   let collectionSize: number | null = null;
-  const collectionMintAddress = courseMetadata.collectionMintAddress;
+
+  const challenge = await getChallenge(courseMetadata.challenge);
+  const collectionMintAddress = challenge?.collectionMintAddress;
 
   if (collectionMintAddress) {
     try {
@@ -119,7 +121,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
   );
   const nextLesson = allLessons[currentLessonIndex + 1];
   const nextLessonSlug = nextLesson ? nextLesson.slug : "";
-  const challenge = courseMetadata.challenge;
 
   return (
     <div className="flex flex-col w-full border-b border-b-border">
@@ -168,12 +169,12 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 target="_blank"
               >
                 <p
-                  className="text-base text-secondary mt-1 text-sm"
+                  className="text-secondary mt-1 text-sm"
                   style={{
-                    color: `rgb(${courseColors[courseMetadata.language]},1)`,
+                    color: `rgb(${courseColors[courseMetadata.language]})`,
                   }}
                 >
-                  {(collectionSize as any).toString()} Graduates
+                  {collectionSize.toString()} Graduates
                 </p>
               </Link>
             )}
@@ -232,7 +233,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                     {t("lessons.take_challenge_cta")}
                   </span>
                   <Link
-                    href={`/courses/${courseMetadata.slug}/challenge`}
+                    href={`/challenges/${challenge.slug}`}
                     className="w-max"
                   >
                     <Button
