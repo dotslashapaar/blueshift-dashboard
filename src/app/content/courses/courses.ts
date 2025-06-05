@@ -7,7 +7,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
-    unitName: "Anchor Vault",
     lessons: [
       { slug: "introduction" },
       { slug: "code" },
@@ -20,7 +19,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
-    unitName: "Anchor Escrow",
     lessons: [
       { slug: "introduction" },
       { slug: "code" },
@@ -33,7 +31,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
-    unitName: "Anchor Memo",
     lessons: [{ slug: "lesson" }],
     challenge: "anchor-memo",
   },
@@ -43,7 +40,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "255,173,102",
     difficulty: 2,
     isFeatured: true,
-    unitName: "Pinocchio Vault",
     lessons: [
       { slug: "introduction" },
       { slug: "code" },
@@ -56,7 +52,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "255,173,102",
     difficulty: 2,
     isFeatured: true,
-    unitName: "Pinocchio Memo",
     lessons: [{ slug: "lesson" }],
     challenge: "pinocchio-memo",
   },
@@ -66,7 +61,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "140,255,102",
     difficulty: 2,
     isFeatured: true,
-    unitName: "Assembly Memo",
     lessons: [{ slug: "lesson" }],
     challenge: "assembly-memo",
   },
@@ -76,7 +70,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "255,173,102",
     difficulty: 4,
     isFeatured: true,
-    unitName: "Quantum Vault",
     lessons: [{ slug: "introduction-to-quantum-vault" }],
   },
   {
@@ -85,7 +78,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "105,162,241",
     difficulty: 2,
     isFeatured: true,
-    unitName: "SPL Token Mint",
     lessons: [{ slug: "understanding-spl-tokens" }],
     challenge: "your-first-spl-token",
   },
@@ -95,7 +87,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     color: "105,162,241",
     difficulty: 2,
     isFeatured: true,
-    unitName: "Byte by Byte",
     lessons: [{ slug: "lesson" }],
     challenge: "research-crateless-program",
   }

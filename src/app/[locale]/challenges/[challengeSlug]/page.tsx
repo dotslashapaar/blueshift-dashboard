@@ -25,6 +25,10 @@ export default async function ChallengePage({ params, searchParams }: ChallengeP
   const t = await getTranslations();
   const challengeMetadata = await getChallenge(challengeSlug);
 
+  if (!challengeMetadata) {
+    notFound();
+  }
+
   let courseMetadata;
   if (query["fromCourse"] && typeof query["fromCourse"] === "string") {
     courseMetadata = await getCourse(query["fromCourse"]);
@@ -92,25 +96,25 @@ export default async function ChallengePage({ params, searchParams }: ChallengeP
       </div>
       <Divider />
 
-      {/*{challengeMetadata.language === "Typescript" ? (*/}
-      {/*  <ClientChallengesContent*/}
-      {/*    currentCourse={challengeMetadata}*/}
-      {/*    content={*/}
-      {/*      <MdxLayout>*/}
-      {/*        <ChallengeContent />*/}
-      {/*      </MdxLayout>*/}
-      {/*    }*/}
-      {/*  />*/}
-      {/*) : (*/}
-      {/*  <ProgramChallengesContent*/}
-      {/*    crrentChallenge={challengeMetadata}*/}
-      {/*    content={*/}
-      {/*      <MdxLayout>*/}
-      {/*        <ChallengeContent />*/}
-      {/*      </MdxLayout>*/}
-      {/*    }*/}
-      {/*  />*/}
-      {/*)}*/}
+      {challengeMetadata.language === "Typescript" ? (
+        <ClientChallengesContent
+          currentCourse={challengeMetadata}
+          content={
+            <MdxLayout>
+              <ChallengeContent />
+            </MdxLayout>
+          }
+        />
+      ) : (
+        <ProgramChallengesContent
+          currentChallenge={challengeMetadata}
+          content={
+            <MdxLayout>
+              <ChallengeContent />
+            </MdxLayout>
+          }
+        />
+      )}
     </div>
   );
 }

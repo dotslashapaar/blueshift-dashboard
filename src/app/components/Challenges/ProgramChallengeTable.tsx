@@ -17,8 +17,8 @@ import HeadingReveal from "../HeadingReveal/HeadingReveal";
 import { usePersistentStore } from "@/stores/store";
 import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { Link } from "@/i18n/navigation";
-import { CourseMetadata } from "@/app/utils/course";
 import { useAuth } from "@/hooks/useAuth";
+import { ChallengeMetadata } from "@/app/utils/challenges";
 
 interface ChallengeTableProps {
   onUploadClick: () => void;
@@ -28,7 +28,7 @@ interface ChallengeTableProps {
   isLoading: boolean;
   error: string | null;
   verificationData: VerificationApiResponse | null;
-  course: CourseMetadata;
+  challenge: ChallengeMetadata;
   onRedoChallenge: () => void;
 }
 
@@ -40,7 +40,7 @@ export default function ChallengeTable({
   isLoading,
   error,
   verificationData,
-  course,
+  challenge,
   onRedoChallenge,
 }: ChallengeTableProps) {
   const t = useTranslations();
@@ -49,10 +49,10 @@ export default function ChallengeTable({
 
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
   const [allowRedo, setAllowRedo] = useState(false);
-  const { setCourseStatus, courseStatus, authToken } = usePersistentStore();
+  const { challengeStatuses, setChallengeStatus } = usePersistentStore();
   const auth = useAuth();
 
-  const courseSlug = course.slug;
+  const challengeSlug = challenge.slug;
 
   useEffect(() => {
     if (verificationData) {
@@ -69,27 +69,26 @@ export default function ChallengeTable({
       );
       if (allRequirementsPassed) {
         setTimeout(() => {
-          if (courseStatus[courseSlug] === "Locked") {
-            console.log("triggered")
-            setCourseStatus(courseSlug, "Unlocked");
+          if (challengeStatuses[challengeSlug] === "open") {
+            setChallengeStatus(challengeSlug, "completed");
           }
           setIsCompletedModalOpen(true);
           setAllowRedo(false);
         }, 1000);
       }
     }
-  }, [verificationData, requirements, setCourseStatus, courseSlug]);
+  }, [verificationData, requirements, setChallengeStatus, challengeSlug, challengeStatuses]);
 
   return (
     <div>
       <ChallengeCompleted
         isOpen={isCompletedModalOpen && !allowRedo}
         onClose={() => setIsCompletedModalOpen(false)}
-        course={course}
+        challenge={challenge}
       />
       <div className="relative flex flex-col gap-y-4 w-full overflow-hidden px-1.5 pt-1.5 pb-12 border rounded-2xl border-border bg-background-card">
-        {(courseStatus[courseSlug] === "Unlocked" ||
-          courseStatus[courseSlug] === "Claimed") && !allowRedo && (
+        {(challengeStatuses[challengeSlug] === "completed" ||
+          challengeStatuses[challengeSlug] === "claimed") && !allowRedo && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -231,7 +230,7 @@ export default function ChallengeTable({
               >
                 <span className="font-medium text-sm sm:text-base truncate max-w-[60%]">
                   {t(
-                    `courses.${courseSlug}.challenge.requirements.${requirement.instructionKey}.title`
+                    `challenges.${challengeSlug}.requirements.${requirement.instructionKey}.title`
                   )}
                 </span>
                 {!isLoading && !error ? (

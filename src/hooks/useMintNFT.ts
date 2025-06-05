@@ -1,16 +1,16 @@
 import useMinter from "@/hooks/useMinter";
 import { usePersistentStore } from "@/stores/store";
 import { findUnitPda } from "@/lib/nft/sdk";
-import { CourseMetadata } from "@/app/utils/course";
 import { useCallback, useState } from "react";
+import { ChallengeMetadata } from "@/app/utils/challenges";
 
 export default function useMintNFT() {
   const { program: minter, error: minterError } = useMinter();
-  const { certificates, setCourseStatus } = usePersistentStore();
+  const { certificates, setChallengeStatus } = usePersistentStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const mint = useCallback(async (course: CourseMetadata) => {
+  const mint = useCallback(async (challenge: ChallengeMetadata) => {
     setIsLoading(true);
     setError(null);
 
@@ -23,12 +23,12 @@ export default function useMintNFT() {
         throw new Error("Minter is not available (possibly due to wallet not being connected or a setup issue).");
       }
 
-      const unit = findUnitPda(course.unitName);
+      const unit = findUnitPda(challenge.unitName);
       const user = minter.provider.wallet?.publicKey;
-      const certificate = certificates[course.slug];
+      const certificate = certificates[challenge.slug];
 
       if (!certificate) {
-        throw new Error(`Certificate not found for course: ${course.slug}`);
+        throw new Error(`Certificate not found for challengeks: ${challenge.slug}`);
       }
 
       if (!user) {
@@ -46,7 +46,7 @@ export default function useMintNFT() {
       });
 
       setIsLoading(false);
-      setCourseStatus(course.slug, "Claimed");
+      setChallengeStatus(challenge.slug, "claimed");
 
       return tx;
     } catch (e) {
@@ -56,7 +56,7 @@ export default function useMintNFT() {
       setIsLoading(false);
       throw err;
     }
-  }, [minter, certificates, minterError]);
+  }, [minterError, minter, certificates, setChallengeStatus]);
 
   return { mint, isLoading, error };
 }

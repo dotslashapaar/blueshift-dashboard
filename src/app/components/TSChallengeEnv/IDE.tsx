@@ -2,7 +2,6 @@
 
 import classNames from "classnames";
 import { anticipate } from "motion";
-import RightPanel from "@/app/components/TSChallengeEnv/RightPanel";
 import BlueshiftEditor from "@/app/components/TSChallengeEnv/BlueshiftEditor";
 import { motion } from "motion/react";
 import { useEsbuildRunner } from "@/hooks/useEsbuildRunner";

@@ -60,7 +60,7 @@ interface PersistentStore {
 
   // Certificates
   certificates: Record<string, Certificate>;
-  setCertificate: (courseSlug: string, certificate: Certificate) => void;
+  setCertificate: (challengeSlug: string, certificate: Certificate) => void;
 
   // Challenge Statuses
   challengeStatuses: Record<string, ChallengeStatuses>;
@@ -144,11 +144,11 @@ export const usePersistentStore = create<PersistentStore>()(
 
       // Certificates
       certificates: {},
-      setCertificate: (courseSlug, certificate) =>
+      setCertificate: (challengeSlug, certificate) =>
         set((state) => ({
           certificates: {
             ...state.certificates,
-            [courseSlug]: certificate,
+            [challengeSlug]: certificate,
           },
         })),
 

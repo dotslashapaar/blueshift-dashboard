@@ -19,7 +19,7 @@ export default function ChallengesFooter({ challenge }: ChallengesFooterProps) {
 
   const handleMint = async () => {
     console.log("minting")
-    mint(course)
+    mint(challenge)
       .catch((error) => {
         console.error("Error minting NFT:", error);
       });
