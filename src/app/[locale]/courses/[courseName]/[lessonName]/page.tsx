@@ -38,7 +38,7 @@ export async function generateMetadata({
     src: `/graphics/banners/${courseName}.png`,
     width: 1200,
     height: 630,
-  }
+  };
 
   return {
     title: t("title"),
@@ -233,7 +233,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                     {t("lessons.take_challenge_cta")}
                   </span>
                   <Link
-                    href={`/challenges/${challenge.slug}`}
+                    href={`/challenges/${challenge.slug}?fromCourse=${courseMetadata.slug}`}
                     className="w-max"
                   >
                     <Button
@@ -252,10 +252,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                   <span className="text-primary w-auto flex-shrink-0 font-mono">
                     {t("lessons.lesson_completed")}
                   </span>
-                  <Link
-                    href={`/courses`}
-                    className="w-max"
-                  >
+                  <Link href={`/courses`} className="w-max">
                     <Button
                       variant="primary"
                       size="lg"
@@ -266,7 +263,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
                   </Link>
                 </div>
               )}
-
             </div>
           </div>
           <TableOfContents />

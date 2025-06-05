@@ -82,7 +82,7 @@
   },
   "challenges": {
     "anchor-vault": {
-      "title": "Vault",
+      "title": "Anchor Vault",
       "requirements": {
         "deposit": {
           "title": "Challenge 1: Taking deposits"
@@ -93,7 +93,7 @@
       }
     },
     "anchor-escrow": {
-      "title": "Escrow",
+      "title": "Anchor Escrow",
       "requirements": {
         "make": {
           "title": "Challenge 1: Making an escrow swap deal"
@@ -107,7 +107,7 @@
       }
     },
     "anchor-memo": {
-      "title": "Memo",
+      "title": "Anchor Memo",
       "requirements": {
         "log": {
           "title": "Challenge 1: Logs `instruction_data` to program log"

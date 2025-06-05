@@ -10,28 +10,22 @@ import ClientChallengesContent from "@/app/components/Challenges/ClientChallenge
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 import { notFound } from "next/navigation";
 import { getChallenge, getCourse } from "@/app/utils/mdx";
+import BackToCourseButtonClient from "@/app/components/Challenges/BackToCourseButtonClient";
 
 interface ChallengePageProps {
   params: Promise<{
     challengeSlug: string;
     locale: string;
   }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function ChallengePage({ params, searchParams }: ChallengePageProps) {
+export default async function ChallengePage({ params }: ChallengePageProps) {
   const { challengeSlug, locale } = await params;
-  const query = await searchParams;
   const t = await getTranslations();
   const challengeMetadata = await getChallenge(challengeSlug);
 
   if (!challengeMetadata) {
     notFound();
-  }
-
-  let courseMetadata;
-  if (query["fromCourse"] && typeof query["fromCourse"] === "string") {
-    courseMetadata = await getCourse(query["fromCourse"]);
   }
 
   let ChallengeContent;
@@ -90,7 +84,7 @@ export default async function ChallengePage({ params, searchParams }: ChallengeP
               className="text-3xl font-semibold"
             />
 
-            {courseMetadata && (<BackToCourseButton course={courseMetadata} />)}
+            <BackToCourseButtonClient />
           </div>
         </div>
       </div>
