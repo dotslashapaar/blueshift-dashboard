@@ -19,6 +19,7 @@ import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { Link } from "@/i18n/navigation";
 import { LogMessage } from "@/hooks/useEsbuildRunner";
 import { ChallengeMetadata } from "@/app/utils/challenges";
+import { useSearchParams } from "next/navigation";
 
 interface ChallengeTableProps {
   onRunCodeClick: () => void;
@@ -47,6 +48,8 @@ export default function ChallengeTable({
   onRedoChallenge,
 }: ChallengeTableProps) {
   const t = useTranslations();
+  const searchParams = useSearchParams();
+  const fromCourse = searchParams.get("fromCourse");
   const [selectedRequirement, setSelectedRequirement] =
     useState<ChallengeRequirement | null>(null);
 
@@ -104,13 +107,16 @@ export default function ChallengeTable({
                 {t("ChallengePage.challenge_completed.body")}
               </span>
             </div>
-            <Link href="/">
+
+            <Link href={`/${fromCourse ? "courses" : "challenges"}`}>
               <Button
                 variant="primary"
                 size="md"
                 icon="Lessons"
                 label={t(
-                  "ChallengePage.challenge_completed.view_other_courses"
+                  fromCourse
+                    ? "ChallengePage.challenge_completed.view_other_courses"
+                    : "ChallengePage.challenge_completed.view_other_challenges"
                 )}
               />
             </Link>

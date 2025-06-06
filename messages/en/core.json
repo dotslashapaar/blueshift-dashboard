@@ -200,6 +200,7 @@
       "title": "Challenge Complete",
       "body": "You have already completed this challenge.",
       "view_other_courses": "View Other Courses",
+      "view_other_challenges": "View Other Challenges",
       "divider_label": "Or",
       "redo": "Redo Challenge"
     },
