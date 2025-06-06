@@ -42,7 +42,7 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       <div
         className="w-full"
         style={{
-          background: `linear-gradient(180deg, rgb(${courseColors[challengeMetadata.language]},0.05) 0%, transpareksant 100%)`,
+          background: `linear-gradient(180deg, rgb(${courseColors[challengeMetadata.language]},0.05) 0%, transparent 100%)`,
         }}
       >
         <div className="px-4 py-14 pb-20 max-w-app md:px-8 lg:px-14 mx-auto w-full flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
