@@ -20,7 +20,7 @@ interface ChallengeContentProps {
 
 export default function ChallengesContent({
   currentChallenge,
-  content
+  content,
 }: ChallengeContentProps) {
   const auth = useAuth();
   const isUserConnected = auth.status === "signed-in";
@@ -45,7 +45,7 @@ export default function ChallengesContent({
     setVerificationData,
     setRequirements,
     initialRequirements,
-  } = useChallengeVerifier({challenge: currentChallenge});
+  } = useChallengeVerifier({ challenge: currentChallenge });
 
   const handleRedoChallenge = () => {
     setVerificationData(null);
@@ -55,8 +55,8 @@ export default function ChallengesContent({
   return (
     <div className="relative w-full h-full">
       {!isUserConnected ? (
-        <div className="absolute z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
-          <div className="flex flex-col gap-y-4 sm:!-mt-24 max-w-[90dvw]">
+        <div className="z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col gap-y-4 mt-24 max-w-[90dvw]">
             <img
               src="/graphics/connect-wallet.svg"
               className="sm:w-[360px] max-w-[80dvw] w-full mx-auto"
@@ -67,7 +67,7 @@ export default function ChallengesContent({
             <div className="text-center text-secondary mx-auto sm:w-2/3 w-full">
               {t("ChallengePage.connect_wallet_description")}
             </div>
-          </div >
+          </div>
           <WalletMultiButton
             status={auth.status}
             address={auth.publicKey?.toBase58()}

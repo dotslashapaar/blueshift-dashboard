@@ -13,6 +13,7 @@ import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
 import Logo from "../Logo/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import Button from "@/app/components/Button/Button";
+import LogoGlyph from "../Logo/LogoGlyph";
 
 export default function HeaderContent() {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,7 +29,7 @@ export default function HeaderContent() {
   const auth = useAuth();
 
   useOnClickOutside(languageDropdownRef as RefObject<HTMLDivElement>, () =>
-    setIsLanguageDropdownOpen(false),
+    setIsLanguageDropdownOpen(false)
   );
 
   const handleLanguageChange = (newLocale: string) => {
@@ -47,7 +48,7 @@ export default function HeaderContent() {
       <div className="flex w-full items-center justify-between max-w-app mx-auto py-3 px-4 md:px-8">
         <div className="flex gap-x-16 items-center">
           <Link href="/" className="md:hidden flex">
-            <Logo showText={false} height={18} />
+            <LogoGlyph height={18} />
           </Link>
           <Link href="/" className="hidden md:flex">
             <Logo showText={true} height={18} />
@@ -150,7 +151,7 @@ export default function HeaderContent() {
                       className={classNames(
                         "flex items-center relative gap-x-4 py-3 px-4 rounded-lg transition hover:bg-background-card-foreground",
                         locale === currentLocale &&
-                          "bg-background-card-foreground",
+                          "bg-background-card-foreground"
                       )}
                     >
                       <span
@@ -158,7 +159,7 @@ export default function HeaderContent() {
                           "text-sm font-medium leading-none",
                           locale === currentLocale
                             ? "text-primary"
-                            : "text-secondary",
+                            : "text-secondary"
                         )}
                       >
                         {t(`locales_native_name.${locale}`)}

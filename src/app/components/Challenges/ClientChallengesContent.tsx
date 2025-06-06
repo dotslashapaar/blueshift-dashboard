@@ -50,11 +50,11 @@ export default function ChallengesContent({
 
   // Example: Intercept 'sendTransaction' and mock its response
   const handleRpcCallForDecision = async (
-    rpcData: InterceptedRpcCallData,
+    rpcData: InterceptedRpcCallData
   ): Promise<FetchDecision> => {
     console.log(
       "[ClientChallengesContent] Intercepted RPC Call, Awaiting Decision:",
-      rpcData,
+      rpcData
     );
 
     if (rpcData.rpcMethod === "sendTransaction") {
@@ -66,14 +66,14 @@ export default function ChallengesContent({
         // even if we are about to mock the client-side response.
         // The verifier might operate independently of the client's view of the transaction result.
         console.log(
-          "[ClientChallengesContent] Uploading transaction for verification before mocking response.",
+          "[ClientChallengesContent] Uploading transaction for verification before mocking response."
         );
         // Not awaiting this intentionally, as we want to return the decision quickly.
         // The verification can happen in the background.
         uploadTransaction(base64EncodedTx).catch((err) => {
           console.error(
             "[ClientChallengesContent] Error uploading transaction during mock decision:",
-            err,
+            err
           );
         });
       }
@@ -82,7 +82,7 @@ export default function ChallengesContent({
       const mockSignature = bs58.encode(tx?.signature ?? []);
 
       console.debug(
-        `[ClientChallengesContent] Mocking successful response for sendTransaction. Signature: ${mockSignature}`,
+        `[ClientChallengesContent] Mocking successful response for sendTransaction. Signature: ${mockSignature}`
       );
 
       return {
@@ -101,7 +101,7 @@ export default function ChallengesContent({
     }
 
     console.debug(
-      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`,
+      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`
     );
 
     // For all other calls, or if rpcMethod is null, proceed as normal
@@ -109,11 +109,11 @@ export default function ChallengesContent({
   };
 
   const handleWsSendForDecision = async (
-    wsSendData: InterceptedWsSendData,
+    wsSendData: InterceptedWsSendData
   ): Promise<WsSendDecision> => {
     console.log(
       "[ClientChallengesContent] Intercepted WebSocket Send, Awaiting Decision:",
-      wsSendData,
+      wsSendData
     );
 
     const targetHost = new URL(rpcEndpoint!).host;
@@ -124,7 +124,7 @@ export default function ChallengesContent({
         wsSendData.data.includes("signatureSubscribe")
       ) {
         console.log(
-          "[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe",
+          "[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe"
         );
 
         const data = JSON.parse(wsSendData.data);
@@ -168,17 +168,17 @@ export default function ChallengesContent({
 
     console.log(
       "[ClientChallengesContent] WebSocket send allowed to PROCEED:",
-      wsSendData,
+      wsSendData
     );
     return { decision: "PROCEED" };
   };
 
   const handleWsReceiveForDecision = async (
-    wsReceiveData: InterceptedWsReceiveData,
+    wsReceiveData: InterceptedWsReceiveData
   ): Promise<WsReceiveDecision> => {
     console.log(
       "[ClientChallengesContent] Intercepted WebSocket Receive, Awaiting Decision:",
-      wsReceiveData,
+      wsReceiveData
     );
 
     return { decision: "PROCEED" };
@@ -201,7 +201,7 @@ export default function ChallengesContent({
   useEffect(() => {
     if (!apiBaseUrl) {
       console.error(
-        "API Base URL is not defined in the environment variables.",
+        "API Base URL is not defined in the environment variables."
       );
     }
   }, []);
@@ -221,7 +221,7 @@ export default function ChallengesContent({
       } catch (err) {
         console.error("Failed to load challenge template:", err);
         setEditorCode(
-          "// Failed to load challenge template. Please check console.",
+          "// Failed to load challenge template. Please check console."
         );
       }
     };
@@ -239,7 +239,7 @@ export default function ChallengesContent({
       (log) =>
         log.type === "SYSTEM" &&
         Array.isArray(log.payload) &&
-        log.payload[0] === "Execution complete.",
+        log.payload[0] === "Execution complete."
     );
 
     if (
@@ -299,8 +299,8 @@ export default function ChallengesContent({
   return (
     <div className="relative w-full h-full">
       {!isUserConnected ? (
-        <div className="absolute z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
-          <div className="flex flex-col gap-y-4 sm:!-mt-24 max-w-[90dvw]">
+        <div className="z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col gap-y-4 mt-24 max-w-[90dvw]">
             <img
               src="/graphics/connect-wallet.svg"
               className="sm:w-[360px] max-w-[80dvw] w-full mx-auto"
