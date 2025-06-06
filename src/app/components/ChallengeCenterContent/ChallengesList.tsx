@@ -116,7 +116,6 @@ export default function ChallengesList({
                         name={t(`challenges.${challenge.slug}.title`)}
                         language={challenge.language}
                         difficulty={challenge.difficulty}
-                        status={challengeStatuses[challenge.slug]}
                         color={challenge.color}
                         footer={<ChallengesFooter challenge={challenge} />}
                       />

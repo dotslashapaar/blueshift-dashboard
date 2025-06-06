@@ -1,4 +1,6 @@
-const courseLanguages = {
+import { IconName } from "@/app/components/Icon/icons";
+
+export const challengeLanguages = {
   Anchor: "Anchor",
   Rust: "Rust",
   Typescript: "TypeScript",
@@ -14,33 +16,20 @@ export const challengeColors = {
   Research: "0,255,255",
 } as const;
 
-const courseDifficulty = {
+export const challengeDifficulty = {
   1: "Beginner",
   2: "Intermediate",
   3: "Advanced",
   4: "Expert",
 } as const;
 
-const difficultyColors = {
-  1: "#00C7E6",
-  2: "#00E66B",
-  3: "#E6D700",
-  4: "#FF285A",
-} as const;
-
-const courseStatus = {
-  Incomplete: "Incomplete",
-  Complete: "Complete",
-  Challenge_Completed: "Challenge_Completed",
-} as const;
-
 export const challengeStatus = ["open", "completed", "claimed"] as const;
 
 export type ChallengeMetadata = {
   slug: string;
-  language: CourseLanguages;
+  language: ChallengeLanguages;
   color: string;
-  difficulty: CourseDifficulty;
+  difficulty: ChallengeDifficulty;
   isFeatured: boolean;
   unitName: string;
   apiPath: string;
@@ -51,5 +40,18 @@ export type ChallengeMetadata = {
 };
 
 export type ChallengeStatus = (typeof challengeStatus)[number];
-type CourseLanguages = keyof typeof courseLanguages;
-type CourseDifficulty = keyof typeof courseDifficulty;
+type ChallengeLanguages = keyof typeof challengeLanguages;
+type ChallengeDifficulty = keyof typeof challengeDifficulty;
+
+export const challengeStatusToIconName = (status: ChallengeStatus): IconName => {
+  switch (status) {
+    case "open":
+      return "Open";
+    case "completed":
+      return "Completed";
+    case "claimed":
+      return "Claimed";
+    default:
+      return "Open"; // Fallback icon
+  }
+}

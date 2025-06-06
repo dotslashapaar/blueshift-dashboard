@@ -6,7 +6,7 @@ import classNames from "classnames";
 import Icon from "../Icon/Icon";
 import { AnimatePresence, anticipate, motion } from "motion/react";
 import { useOnClickOutside } from "usehooks-ts";
-import { ChallengeStatus, challengeStatus } from "@/app/utils/challenges";
+import { ChallengeStatus, challengeStatus, challengeStatusToIconName } from "@/app/utils/challenges";
 import Checkbox from "../Checkbox/Checkbox";
 import { usePersistentStore } from "@/stores/store";
 import Divider from "../Divider/Divider";
@@ -134,7 +134,7 @@ export default function ChallengeFilter({ className }: FiltersProps) {
                     checked={selectedChallengeStatus.includes(status)}
                   />
                   <div className="flex items-center gap-x-2 relative z-10">
-                    <Icon className="text-tertiary" name={status} />
+                    <Icon className="text-tertiary" name={challengeStatusToIconName(status)} />
                     <span
                       className={classNames(
                         "text-sm font-medium leading-none text-secondary",

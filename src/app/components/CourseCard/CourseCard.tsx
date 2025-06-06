@@ -1,5 +1,5 @@
 import { CourseDifficulty } from "@/app/utils/course";
-import { CourseLanguages, RewardsStatus } from "@/app/utils/course";
+import { CourseLanguages } from "@/app/utils/course";
 import React from "react";
 import classNames from "classnames";
 import { usePersistentStore } from "@/stores/store";
@@ -12,7 +12,6 @@ type CourseCardProps = {
   name: string;
   color: string;
   points?: number;
-  status?: RewardsStatus;
   language: CourseLanguages;
   difficulty?: CourseDifficulty;
   footer?: React.ReactNode;
