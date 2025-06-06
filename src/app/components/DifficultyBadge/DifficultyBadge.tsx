@@ -1,5 +1,4 @@
 import {
-  courseDifficulty,
   CourseDifficulty,
   difficultyColors,
 } from "@/app/utils/course";
