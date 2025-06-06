@@ -16,8 +16,7 @@ type CourseCardProps = {
   difficulty?: CourseDifficulty;
   footer?: React.ReactNode;
   className?: string;
-  currentLesson?: string;
-  currentCourse?: string;
+  link?: string;
 };
 
 export default function CourseCard({
@@ -27,18 +26,8 @@ export default function CourseCard({
   difficulty,
   footer,
   className,
-  currentLesson,
-  currentCourse,
+  link,
 }: CourseCardProps) {
-  const getCourseLink = () => {
-    if (currentLesson && currentCourse) {
-      return `/courses/${currentCourse}/${currentLesson}`;
-    } else if (currentCourse && !currentLesson) {
-      return `/courses/${currentCourse}`;
-    }
-    return "#";
-  };
-
   const { view } = usePersistentStore();
   return (
     <div
@@ -48,13 +37,10 @@ export default function CourseCard({
         view === "grid" && "pt-5",
         view === "list" && "pt-5 !pb-5",
         "hover:-translate-y-1 transition-transform duration-300",
-        className
+        className,
       )}
     >
-      <Link
-        href={getCourseLink()}
-        className="absolute inset-0 z-1 w-full h-full"
-      ></Link>
+      {link && <Link href={link} className="absolute inset-0 z-1 w-full h-full"></Link>}
       {view === "grid" && difficulty && (
         <div className="absolute top-6 right-5">
           <DifficultyBadge difficulty={difficulty} />
@@ -64,14 +50,14 @@ export default function CourseCard({
         className={classNames(
           "flex",
           view === "grid" && "flex-col gap-y-24",
-          view === "list" && "flex-row justify-between"
+          view === "list" && "flex-row justify-between",
         )}
       >
         <div
           className={classNames(
             "flex",
             view === "grid" && "flex-col gap-y-6 items-start",
-            view === "list" && "flex items-center gap-x-4"
+            view === "list" && "flex items-center gap-x-4",
           )}
         >
           <img

@@ -117,6 +117,7 @@ export default function ChallengesList({
                         language={challenge.language}
                         difficulty={challenge.difficulty}
                         color={challenge.color}
+                        link={`/challenges/${challenge.slug}`}
                         footer={<ChallengesFooter challenge={challenge} />}
                       />
                     ))}

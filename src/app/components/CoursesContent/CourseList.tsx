@@ -173,6 +173,13 @@ export default function CourseList({
                     const totalLessons =
                       courseLessons.find((c) => c.slug === course.slug)
                         ?.totalLessons || 0;
+                    const currentLessonSlug = getCurrentLessonSlug(course.slug);
+                    let link;
+                    if (currentLessonSlug && course.slug) {
+                      link = `/courses/${course.slug}/${currentLessonSlug}`;
+                    } else if (course.slug && !currentLessonSlug) {
+                      link = `/courses/${course.slug}`;
+                    }
                     return (
                       <CourseCard
                         key={course.slug}
@@ -180,8 +187,7 @@ export default function CourseList({
                         language={course.language}
                         color={course.color}
                         difficulty={course.difficulty}
-                        currentCourse={course.slug}
-                        currentLesson={getCurrentLessonSlug(course.slug)}
+                        link={link}
                         footer={
                           <NewCourseFooter
                             courseSlug={course.slug}
@@ -222,15 +228,20 @@ export default function CourseList({
                       const currentLessonSlug = getCurrentLessonSlug(
                         course.slug,
                       );
+                      let link = "#";
+                      if (currentLessonSlug && course.slug) {
+                        link = `/courses/${course.slug}/${currentLessonSlug}`;
+                      } else if (course.slug && !currentLessonSlug) {
+                        link = `/courses/${course.slug}`;
+                      }
                       return (
                         <CourseCard
-                          currentLesson={currentLessonSlug}
-                          currentCourse={course.slug}
                           key={course.slug}
                           name={t(`courses.${course.slug}.title`)}
                           language={course.language}
                           color={course.color}
                           difficulty={course.difficulty}
+                          link={link}
                           footer={
                             <ReturningCourseFooter
                               courseName={course.slug}
@@ -294,15 +305,21 @@ export default function CourseList({
                         )}
                       >
                         {languageCourses.map((course) => {
+                          const currentLessonSlug = getCurrentLessonSlug(course.slug);
+                          let link = "#";
+                          if (currentLessonSlug && course.slug) {
+                            link = `/courses/${course.slug}/${currentLessonSlug}`;
+                          } else if (course.slug && !currentLessonSlug) {
+                            link = `/courses/${course.slug}`;
+                          }
                           return (
                             <CourseCard
-                              currentLesson={getCurrentLessonSlug(course.slug)}
-                              currentCourse={course.slug}
                               key={course.slug}
                               name={t(`courses.${course.slug}.title`)}
                               language={course.language}
                               color={course.color}
                               difficulty={course.difficulty}
+                              link={link}
                               footer={
                                 <NewCourseFooter
                                   courseSlug={course.slug}
@@ -356,15 +373,20 @@ export default function CourseList({
                       const currentLessonSlug = getCurrentLessonSlug(
                         course.slug,
                       );
+                      let link;
+                      if (currentLessonSlug && course.slug) {
+                        link = `/courses/${course.slug}/${currentLessonSlug}`;
+                      } else if (course.slug && !currentLessonSlug) {
+                        link = `/courses/${course.slug}`;
+                      }
                       return (
                         <CourseCard
-                          currentLesson={currentLessonSlug}
-                          currentCourse={course.slug}
                           key={course.slug}
                           name={t(`courses.${course.slug}.title`)}
                           language={course.language}
                           color={course.color}
                           difficulty={course.difficulty}
+                          link={link}
                           footer={
                             <ReturningCourseFooter
                               courseName={course.slug}
