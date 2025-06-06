@@ -80,88 +80,6 @@
     "locked": "This challenge is locked",
     "locked_cta": "Finish the lessons first to unlock the challenge."
   },
-  "challenges": {
-    "anchor-vault": {
-      "title": "Anchor Vault",
-      "requirements": {
-        "deposit": {
-          "title": "Challenge 1: Taking deposits"
-        },
-        "withdraw": {
-          "title": "Challenge 2: Allowing withdrawal"
-        }
-      }
-    },
-    "anchor-escrow": {
-      "title": "Anchor Escrow",
-      "requirements": {
-        "make": {
-          "title": "Challenge 1: Making an escrow swap deal"
-        },
-        "take": {
-          "title": "Challenge 2: Taking an escrow swap deal"
-        },
-        "refund": {
-          "title": "Challenge 3: Canceling an escrow swap deal"
-        }
-      }
-    },
-    "anchor-memo": {
-      "title": "Anchor Memo",
-      "requirements": {
-        "log": {
-          "title": "Challenge 1: Logs `instruction_data` to program log"
-        }
-      }
-    },
-    "pinocchio-vault": {
-      "title": "Pinocchio Vault",
-      "requirements": {
-        "deposit": {
-          "title": "Challenge 1: Taking deposits"
-        },
-        "withdraw": {
-          "title": "Challenge 2: Allowing withdrawal"
-        }
-      }
-    },
-    "pinocchio-memo": {
-      "title": "Pinocchio Memo",
-      "requirements": {
-        "log": {
-          "title": "Challenge 1: Logs instruction data to program log"
-        }
-      }
-    },
-    "assembly-memo": {
-      "title": "Assembly Memo",
-      "requirements": {
-        "log": {
-          "title": "Challenge 1: Logs the instruction data to program log"
-        }
-      }
-    },
-    "your-first-spl-token": {
-      "title": "Your First SPL Token",
-      "requirements": {
-        "create_mint": {
-          "title": "Challenge 1: Creating an SPL mint",
-          "description": "Your code should create an SPL mint with 6 decimal places."
-        }
-      }
-    },
-    "research-crateless-program": {
-      "title": "Byte by Byte: The Anatomy of a Crateless Program",
-      "requirements": {
-        "deposit": {
-          "title": "Challenge 1: Taking deposits"
-        },
-        "withdraw": {
-          "title": "Challenge 2: Allowing withdrawal"
-        }
-      }
-    }
-  },
   "shift_goal": {
     "title": "Setup Your Shift Goal",
     "description": "Receive weekly reminders to keep you on track of achieving your goals!",
@@ -179,6 +97,12 @@
   },
   "notifications": {
     "session_expired_logout": "Your session has expired. Please log in again."
+  },
+  "course_levels": {
+    "1": "Beginner",
+    "2": "Intermediate",
+    "3": "Advanced",
+    "4": "Expert"
   },
   "ChallengePage": {
     "connect_wallet": "Connect Wallet",
