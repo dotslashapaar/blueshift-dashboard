@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import MdxLayout from "@/app/mdx-layout";
-import BackToCourseButton from "@/app/components/Challenges/BackToCourseButton";
 import Divider from "@/app/components/Divider/Divider";
 import HeadingReveal from "@/app/components/HeadingReveal/HeadingReveal";
 import Icon from "@/app/components/Icon/Icon";
@@ -9,7 +8,7 @@ import ProgramChallengesContent from "@/app/components/Challenges/ProgramChallen
 import ClientChallengesContent from "@/app/components/Challenges/ClientChallengesContent";
 import CrosshairCorners from "@/app/components/Graphics/CrosshairCorners";
 import { notFound } from "next/navigation";
-import { getChallenge, getCourse } from "@/app/utils/mdx";
+import { getChallenge } from "@/app/utils/mdx";
 import BackToCourseButtonClient from "@/app/components/Challenges/BackToCourseButtonClient";
 
 interface ChallengePageProps {
@@ -92,7 +91,7 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
 
       {challengeMetadata.language === "Typescript" ? (
         <ClientChallengesContent
-          currentCourse={challengeMetadata}
+          currentChallenge={challengeMetadata}
           content={
             <MdxLayout>
               <ChallengeContent />
