@@ -31,7 +31,6 @@ export default function ReturningCourseFooter({
   const [isHovering, setIsHovering] = useState(false);
   const { view } = usePersistentStore();
 
-  console.log(courseName, challengeSlug, isChallengeCompleted);
   return (
     <div
       className={classNames(
