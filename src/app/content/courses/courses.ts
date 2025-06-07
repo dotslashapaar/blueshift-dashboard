@@ -101,13 +101,24 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   }
 ]);
 
-const releasedCourses = (
-  process.env.NEXT_PUBLIC_RELEASED_COURSES?.split(",") ?? []
-).map((course) => course.trim());
+const releasedCoursesSetting = process.env.NEXT_PUBLIC_RELEASED_COURSES?.trim();
 
 export const courses = allCourses.filter((course) => {
-  return (
-    process.env.NEXT_PUBLIC_RELEASE_ALL_COURSES?.trim() === "true" ||
-    releasedCourses.includes(course.slug)
-  );
+  // If the setting is undefined, null, or an empty string, release no courses.
+  if (!releasedCoursesSetting) {
+    return false;
+  }
+
+  // If the setting is "*", release all courses.
+  if (releasedCoursesSetting === "*") {
+    return true;
+  }
+
+  // Otherwise, treat the setting as a comma-separated list of course slugs.
+  const releasedSlugs = releasedCoursesSetting
+    .split(",")
+    .map((slug) => slug.trim())
+    .filter(slug => slug.length > 0); // Ensure empty strings from trailing/multiple commas are ignored
+
+  return releasedSlugs.includes(course.slug);
 });
