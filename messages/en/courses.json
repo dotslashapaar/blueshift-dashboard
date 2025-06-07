@@ -1,16 +1,21 @@
 {
   "courses": {
+    "introduction-to-anchor": {
+      "title": "Introduction to Anchor",
+      "lessons": {
+        "anchor-101": "Anchor 101",
+        "anchor-accounts": "Anchor Accounts"
+      }
+    },
     "anchor-vault": {
       "title": "Vault",
       "lessons": {
-        "introduction": "Anchor 101",
         "code": "The Vault Program"
       }
     },
     "anchor-escrow": {
       "title": "Escrow",
       "lessons": {
-        "introduction": "Chapter 2: The Escrow",
         "code": "The Escrow Program"
       }
     },

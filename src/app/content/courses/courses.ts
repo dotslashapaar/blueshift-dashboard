@@ -2,13 +2,23 @@ import { CourseMetadata, withCourseNumber } from "@/app/utils/course";
 
 const allCourses: CourseMetadata[] = withCourseNumber([
   {
+    slug: "introduction-to-anchor",
+    language: "Anchor",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    lessons: [
+      { slug: "anchor-101" },
+      { slug: "anchor-accounts" },
+    ],
+  },
+  {
     slug: "anchor-vault",
     language: "Anchor",
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
     lessons: [
-      { slug: "introduction" },
       { slug: "code" },
     ],
     challenge: "anchor-vault",
@@ -20,7 +30,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     difficulty: 1,
     isFeatured: true,
     lessons: [
-      { slug: "introduction" },
       { slug: "code" },
     ],
     challenge: "anchor-escrow",

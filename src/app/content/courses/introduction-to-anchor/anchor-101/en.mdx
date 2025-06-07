@@ -1,15 +1,9 @@
 import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
 import { Codeblock } from "../../../../components/Codeblock/Codeblock";
 
-# Chapter 1: The Vault
+# Anchor 101
 
-![Anchor 101](/graphics/banners/anchor-vault.png)
-
-In this first lesson you'll get your Anchor workspace running and ship your first Solana program. Don't worry, we're going to hold your hand through all the steps needed.
-
-<ArticleSection name="Anchor 101" id="anchor-101" level="h2" />
-
-### What is Anchor
+<ArticleSection name="What is Anchor" id="what-is-anchor" level="h2" />
 
 Anchor is the premier framework for Solana smart-contract development, offering a complete workflow for writing, testing, deploying, and interacting with onchain programs.
 
@@ -27,7 +21,9 @@ Anchor is the premier framework for Solana smart-contract development, offering 
 
 Together, these declarative macros abstract away low-level byte management, allowing you to deliver secure, production-grade Solana programs with far less effort.
 
-Let's begin with a bare-bones version of the `Vault` program that we're going to build later in this section to explain in detail what each macro actually does:
+### Program Structure
+
+Let's begin with a bare-bones version of a program to explain in detail what each macro actually does:
 
 ```rust
 declare_id!("22222222222222222222222222222222222222222222");
@@ -56,6 +52,20 @@ pub struct VaultAction<'info> {
 pub enum VaultError {
     // ...
 }
+```
+
+This will transform into focused modules instead of cramming everything into the `lib.rs` for more structured programs. The program folder tree will look roughly like this:
+
+```
+src
+├── instructions
+│       ├── instruction1.rs
+│       ├── mod.rs
+│       ├── instruction2.rs
+│       └── instruction3.rs
+├── errors.rs
+├── lib.rs
+└── state.rs
 ```
 
 #### `declare_id!()`

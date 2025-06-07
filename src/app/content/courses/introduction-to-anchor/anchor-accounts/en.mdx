@@ -1,0 +1,322 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+import { AnchorDiscriminatorCalculator } from "../../../../components/AnchorDiscriminatorCalculator/AnchorDiscriminatorCalculator";
+
+# Accounts
+
+We saw the `#[account]` macro, but naturally on solana there are different type of accounts. For this reason is worth taking a moment to see how generally accounts on Solana work, but more in depth, how they work with Anchor.
+
+<ArticleSection name="General Overview" id="general-overview" level="h2" />
+
+On Solana, every piece of state lives in an account; picture the [ledger](https://solana.com/docs/references/terminology#ledger) as one giant table where each row shares the same base schema:
+
+```rust
+pub struct Account {
+    /// lamports in the account
+    pub lamports: u64,
+    /// data held in this account
+    #[cfg_attr(feature = "serde", serde(with = "serde_bytes"))]
+    pub data: Vec<u8>,
+    /// the program that owns this account and can mutate its lamports or data.
+    pub owner: Pubkey,
+    /// `true` if the account is a program; `false` if it merely belongs to one
+    pub executable: bool,
+    /// the epoch at which this account will next owe rent (currently deprecated and is set to `0`)
+    pub rent_epoch: Epoch,
+}
+```
+
+All accounts on Solana share the same base layout. What sets them apart is:
+
+1. The owner: The program that has exclusive rights to modify the account's data and lamports.
+2. The data: Used by the owner program to distinguish between different account types.
+
+When we talk about Token Program Accounts, what we mean is an account where the `owner` is the Token Program. Unlike a System Account whose data field is empty, a Token Program Account can be either a **Mint** or a **Token** account. We use discriminators to distinguish between them.
+
+Just as the Token Program can own accounts, so can any other program even our own.
+
+<ArticleSection name="Program Accounts" id="program-accounts" level="h2" />
+
+To initialize and create an Account with a custom data structure and that is owned by our program, we can use the `#[account]` macro.
+
+PDAs are generally used to create a deterministic address or, when they are owned by our program, they can hold arbitrary data to it.
+
+An important feature of the `#[account]` macro is the use of discriminators that help Anchor distinguish between different accounts. They can be either a **Default Discriminator** or a **Custom Discriminator** (introduced with Anchor 0.31.0).
+
+### Default Discriminators
+
+By default, Anchor creates an 8-byte discriminator; a tiny prefix stored at the start of every serialized struct that is generated using `sha256("account:<StructName>")[0..8]` for accounts, or `sha256("global:<instruction_name>")[0..8]` for instructions. The seeds of each are in PascalCase and snake_case accordingly. You can see how Anchor calculates default discriminators for both `Accounts` and `Instructions` below:
+
+<AnchorDiscriminatorCalculator value={"TestAccount"} displayMode="account" />
+
+When Anchor reads the data of an account or instruction with a default discriminator, it peeks at the first 8 bytes, matches them to a table of known discriminators, and then deserializes into the correct Rust struct, or routes to the correct instruction handler. The hash-based approach gives a high certainty that each type in your program has a unique identifier to tell them apart.
+
+### Custom Discriminators
+
+Starting with Anchor `v0.31.0` you can now override the auto-generated hash and give an account or instruction its own discriminator directly in the `#[account]` or `#[instruction]` macro.
+
+```rust
+#[account(discriminator = 1)]              // single-byte
+pub struct Escrow { … }
+```
+
+**Note**: Discriminators must be unique. If two instructions or accounts share the same prefix, the runtime won't be able to tell them apart, and Anchor's IDL generator will throw an error if it spots a collision. Additionally, using `[1]` as a discriminator prevents you from using `[1, 2, …]` as these discriminators also start with `1`. Accounts also cannot use `[0]` as a discriminator, as there is no way to differentiate between a newly initialized account with null data and a zero-byte discriminator.
+
+### Using the Program Account
+
+Now that we've understood accounts and discriminators, let's apply this knowledge to create an example of a program account:
+
+```rust
+use anchor_lang::prelude::*;
+
+#[derive(InitSpace)]
+#[account(discriminator = 1)]
+pub struct CustomAccountType {
+    data: u64,
+}
+```
+
+Creating a struct is very easy. The only constraint we have with Anchor is that the account's data is capped at 10,240 bytes (10 KiB). If we need more, we'll need to use `zero_copy` and chunked writes; an advanced topic for another course.
+
+Anchor also needs to know the byte size of the struct to allocate the correct amount of space on-chain. The `InitSpace` derive macro takes care of this. When you derive `InitSpace`, it implements the `Space` trait for your struct, calculating and storing its size in an `INIT_SPACE` constant.
+
+The total space in bytes needed for the account is the sum of `INIT_SPACE` (size of all the fields combined) and the discriminator size (`DISCRIMINATOR.len()`).
+
+Solana accounts require a rent deposit in lamports, which depends on the size of the account. Knowing the size helps us calculate how many lamports we need to deposit to make the account open.
+
+Here's how we're going to initiate the account in our `Account` struct:
+
+```rust
+#[account(
+    init,
+    payer = payer,
+    space = CustomAccountType::INIT_SPACE + CustomAccountType::DISCRIMINATOR.len(),
+    seeds = [b"test_seeds"],
+    bump,
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+Here are some of the fields used in the `#[account]` macro, beyond the `seeds` and `bump` fields that we have already covered, and what they do:
+- `init`: tells Anchor to create the account
+- `payer`: which signer funds the rent (here, the maker)
+- `space`: how many bytes to allocate. This is where the rent calculation happens as well
+
+Once we create the account, we can access its data like this:
+
+```rust
+#[account(
+    seeds = [b"test_seeds"],
+    bump,
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+Lastly, since we deposited lamports as rent in the account, we should close the account and retrieve the lamports once this account is not needed anymore.
+
+```rust
+#[account(
+    mut,
+    close = receiver,
+    seeds = [b"test_seeds"],
+    bump,
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+`close` transfers whatever lamports remain in the account back to we assigned as receiver, then zeros out the data.
+
+<ArticleSection name="Token Accounts" id="token-program" level="h2" />
+
+The Token Program, part of the Solana Program Library (SPL), is the built-in toolkit for minting and moving any asset that isn't native SOL. It has instructions to create tokens, mint new supply, transfer balances, burn, freeze, and more.
+
+This program owns two key account types:
+- **Mint Account**: stores the metadata for one specific token: supply, decimals, mint authority, freeze authority, and so on
+- **Token Account**: holds a balance of that mint for a particular owner. Only the owner can reduce the balance (transfer, burn, etc.), but anyone can send tokens to the account, increasing its balance
+
+### Token Accounts in Anchor
+
+Natively, the core Anchor crate only bundles CPI and Accounts helpers for the System Program. If you want the same hand-holding for SPL tokens you pull in the `anchor_spl` crate.
+
+`anchor_spl` adds:
+- Helper builders for every instruction in both the SPL Token and Token-2022 programs
+- Type wrappers that make it painless to verify and deserialize Mint and Token accounts
+
+Let's look at how the `Mint` and `Token` accounts are structured:
+
+```rust
+#[account(
+    mint::authority    = <target_account>,
+    mint::decimals     = <expr>,
+    mint::token_program = <target_account>
+)]
+pub mint: Account<'info, Mint>,
+
+#[account(
+    mut,
+    associated_token::mint       = <target_account>,
+    associated_token::authority  = <target_account>,
+    associated_token::token_program = <target_account>
+)]
+pub maker_ata_a: Account<'info, TokenAccount>,
+```
+
+`Account<'info, Mint>` and `Account<'info, TokenAccount>` tell Anchor to:
+- confirm the account really is a Mint or Token account
+- deserialize its data so you can read fields directly
+- enforce any extra constraints you specify (`authority`, `decimals`, `mint`, `token_program`, etc.)
+
+These token-related accounts follow the same `init` pattern used earlier. Since Anchor knows their fixed byte size, we don't need to specify a `space` value, only the payer funding the account.
+
+Anchor also offers `init_if_needed` macro: it checks whether the token account already exists and, if not, creates it. That shortcut isn't safe for every account type, but it's perfectly suited to token accounts, so we'll rely on it here.
+
+As mentioned, `anchor_spl` creates helpers for both the **Token** and **Token2022** programs, with the latter introducing Token Extensions. The main challenge is that even though these accounts achieve similar goals and have comparable structures, they can't be deserialized and checked the same way since they're owned by two different programs.
+
+We could create more "advanced" logic to handle these different account types, but fortunately Anchor supports this scenario through **InterfaceAccounts**:
+
+```rust
+use anchor_spl::token_interface::{Mint, TokenAccount};
+
+#[account(
+    mint::authority = <target_account>,
+    mint::decimals = <expr>
+    mint::token_program = <target_account>
+)]
+pub mint: InterfaceAccounts<'info, Mint>,
+#[account(
+    mut,
+    associated_token::mint = <target_account>,
+    associated_token::authority = <target_account>,
+    associated_token::token_program = <target_account>
+)]
+pub maker_ata_a: InterfaceAccounts<'info, TokenAccount>,
+```
+
+The key difference here is that we're using `InterfaceAccounts` instead of `Account`. This allows our program to work with both Token and Token2022 accounts without needing to handle the differences in their deserialization logic. The interface provides a common way to interact with both types of accounts while maintaining type safety and proper validation.
+
+This approach is particularly useful when you want your program to be compatible with both token standards, as it eliminates the need to write separate logic for each program. The interface handles all the complexity of dealing with different account structures behind the scenes.
+
+<ArticleSection name="Additional Accounts Type" id="additional-accounts-type" level="h2" />
+
+Naturally, System Accounts, Program Accounts and Token Accounts are not the only types of account that we can have in anchor. So we're going to see here other types of Account that we can have:
+
+### Signer
+
+The `Signer` type is used when you need to verify that an account has signed a transaction. This is crucial for security as it ensures that only authorized accounts can perform certain actions. You'll use this type whenever you need to guarantee that a specific account has approved a transaction, such as when transferring funds or modifying account data that requires explicit permission. Here's how you can use it:
+
+```rust
+#[derive(Accounts)]
+pub struct InstructionAccounts<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+}
+```
+
+The `Signer` type automatically checks if the account has signed the transaction. If it hasn't, the transaction will fail. This is particularly useful when you need to ensure that only specific accounts can perform certain operations.
+
+### AccountInfo & UncheckedAccount
+
+`AccountInfo` and `UncheckedAccount` are used when you need to work with accounts in a more low-level way. They provide direct access to the account's data without any automatic validation. These types are essential when working with accounts that don't have a defined structure, when you need to perform custom validation, or when interacting with accounts from other programs that don't have Anchor types. Here's an example:
+
+```rust
+#[derive(Accounts)]
+pub struct InstructionAccounts<'info> {
+    /// CHECK: This is an unchecked account
+    pub account: UncheckedAccount<'info>,
+    
+    pub account_info: AccountInfo<'info>,
+}
+```
+
+### Option
+
+The `Option` type allows you to make an account optional in your instruction. This means the account doesn't have to be provided in every transaction. This is particularly useful when building flexible instructions that can work with or without certain accounts, or when you have optional parameters in your instruction that might not always be needed. Here's how to implement it:
+
+```rust
+#[derive(Accounts)]
+pub struct InstructionAccounts<'info> {
+    pub optional_account: Option<Account<'info, CustomAccountType>>,
+}
+```
+
+### Box
+
+The `Box` type is used when you need to store an account on the heap rather than the stack. This is particularly useful when dealing with large account structures that would be inefficient to store on the stack, or when you need to work with recursive data structures. The `Box` type helps manage memory more efficiently in these scenarios. Here's an example:
+
+```rust
+#[derive(Accounts)]
+pub struct InstructionAccounts<'info> {
+    pub boxed_account: Box<Account<'info, LargeAccountType>>,
+}
+```
+
+### Program
+
+Program Accounts have a specific way of getting recognized since they have the executable flag set to mutable. For this reason, it's very easy for Anchor to recognize if this specific account is a Program Account or not. In addition to that, usually we need to specify a "type" so we can make sure that the address matches the one that we want, like in this example:
+
+```rust
+use anchor_spl::token::Token;
+ 
+#[derive(Accounts)]
+pub struct InstructionAccounts<'info> {
+    pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+}
+```
+
+When is not possible, we usually do something like this:
+
+```rust
+// Address of the Program
+const PROGRAM_ADDRESS: Pubkey = pubkey!("22222222222222222222222222222222222222222222")
+
+#[derive(Accounts)]
+pub struct InstructionAccounts<'info> {
+    #[account(address = PROGRAM_ADDRESS)]
+    /// CHECK: this is fine since we're checking the address
+    pub program: UncheckedAccount<'info>,
+}
+```
+
+And by checking just the address, this is fine since we know that the program lives at that specific address.
+
+**Note**: to make sure that we can supply both the Legacy Token Program or the Token2022 Program in the same spot, we will need to use the `Interface` type instead of the `Program` type like so:
+
+```rust
+// Token program or Token2022 program
+use anchor_spl::token_interface::TokenInterface;
+ 
+#[derive(Accounts)]
+pub struct InstructionAccounts<'info> {
+    pub program: Interface<'info, TokenInterface>,
+}
+```
+
+<ArticleSection name="Custom Account Validation" id="custom-account-validation" level="h2" />
+
+So far we've leaned on built-in arguments and custom error enums to catch mistakes, but Anchor lets you bolt on extra checks right in the account macro.
+
+Here are some examples:
+
+```rust
+#[account(
+    seeds = [b"test_seeds"],
+    bump,
+    has_one = data @ Error::InvalidField,
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+The `has_one` constraint tells Anchor: "this field on the account struct must equal this account's key." If the keys differ, Anchor throws `Error::InvalidField` before your handler runs.
+
+```rust
+#[account(
+    seeds = [b"test_seeds"],
+    bump,
+    constraint = data == account.data @ Error::InvalidField,
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+When the `has_one` constraint doesn't fit, such as when the field name differs, you can write a custom constraint with any boolean expression. If the expression evaluates to false, Anchor raises the specified error.
+
+These inline constraints keep validation next to the account definition and save you from scattering `require!()` calls throughout your instruction logic.

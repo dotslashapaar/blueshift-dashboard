@@ -3,10 +3,12 @@ import React, { useState, useEffect } from 'react';
 
 export interface AnchorDiscriminatorCalculatorProps {
   value: string;
+  displayMode?: 'account' | 'instruction' | 'both';
 }
 
 export const AnchorDiscriminatorCalculator = ({
-  value
+  value,
+  displayMode = 'both'
 }: AnchorDiscriminatorCalculatorProps) => {
   const [seed, setSeed] = useState(value);
   const [accountDiscriminator, setAccountDiscriminator] = useState('');
@@ -101,28 +103,32 @@ export const AnchorDiscriminatorCalculator = ({
         />
       </div>
       <div className="flex justify-center items-center w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
-        <div className="text-center border border-border rounded-2xl p-2 py-4">
-          <div className="text-lg font-semibold">Account</div>
-          <div className="text-sm text-gray-400 mb-2"> {
-            "sha256(\"account:\" + PascalCase(seed))[0..8]"
-          }
+      <div className={`grid ${displayMode === 'both' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-4 w-full max-w-4xl`}>
+        {(displayMode === 'account' || displayMode === 'both') && (
+          <div className="text-center border border-border rounded-2xl p-2 py-4">
+            <div className="text-lg font-semibold">Account</div>
+            <div className="text-sm text-gray-400 mb-2"> {
+              "sha256(\"account:\" + PascalCase(seed))[0..8]"
+            }
+            </div>
+            <div className="font-mono text-brand-primary text-sm">
+              {accountDiscriminator || "[0, 0, 0, 0, 0, 0, 0, 0]"}
+            </div>
           </div>
-          <div className="font-mono text-brand-primary text-sm">
-            {accountDiscriminator || "[0, 0, 0, 0, 0, 0, 0, 0]"}
-          </div>
-        </div>
+        )}
 
-        <div className="text-center border border-border rounded-2xl p-2 py-4">
-          <div className="text-lg font-semibold">Instruction</div>
-          <div className="text-sm text-gray-400 mb-2">{
-            "sha256(\"global:\" + snake_case(seed))[0..8]"
-          }
+        {(displayMode === 'instruction' || displayMode === 'both') && (
+          <div className="text-center border border-border rounded-2xl p-2 py-4">
+            <div className="text-lg font-semibold">Instruction</div>
+            <div className="text-sm text-gray-400 mb-2">{
+              "sha256(\"global:\" + snake_case(seed))[0..8]"
+            }
+            </div>
+            <div className="font-mono text-brand-primary text-sm">
+              {instructionDiscriminator || "[0, 0, 0, 0, 0, 0, 0, 0]"}
+            </div>
           </div>
-          <div className="font-mono text-brand-primary text-sm">
-            {instructionDiscriminator || "[0, 0, 0, 0, 0, 0, 0, 0]"}
-          </div>
-        </div>
+        )}
       </div>
     </div>
     </div>
