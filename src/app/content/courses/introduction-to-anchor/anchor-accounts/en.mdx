@@ -36,34 +36,31 @@ Just as the Token Program can own accounts, so can any other program even our ow
 
 <ArticleSection name="Program Accounts" id="program-accounts" level="h2" />
 
-To initialize and create an Account with a custom data structure and that is owned by our program, we can use the `#[account]` macro.
+Program accounts are the foundation of state management in Anchor programs. They allow you to create custom data structures that are owned by your program. Let's explore how to work with them effectively.
 
-PDAs are generally used to create a deterministic address or, when they are owned by our program, they can hold arbitrary data to it.
+### Account Structure and Discriminators
 
-An important feature of the `#[account]` macro is the use of discriminators that help Anchor distinguish between different accounts. They can be either a **Default Discriminator** or a **Custom Discriminator** (introduced with Anchor 0.31.0).
+Every program account in Anchor needs a way to identify its type. This is handled through discriminators, which can be either:
 
-### Default Discriminators
-
-By default, Anchor creates an 8-byte discriminator; a tiny prefix stored at the start of every serialized struct that is generated using `sha256("account:<StructName>")[0..8]` for accounts, or `sha256("global:<instruction_name>")[0..8]` for instructions. The seeds of each are in PascalCase and snake_case accordingly. You can see how Anchor calculates default discriminators for both `Accounts` and `Instructions` below:
+1. **Default Discriminators**: An 8-byte prefix generated using `sha256("account:<StructName>")[0..8]` for accounts, or `sha256("global:<instruction_name>")[0..8]` for instructions. The seeds use PascalCase for accounts and snake_case for instructions.
 
 <AnchorDiscriminatorCalculator value={"TestAccount"} displayMode="account" />
 
-When Anchor reads the data of an account or instruction with a default discriminator, it peeks at the first 8 bytes, matches them to a table of known discriminators, and then deserializes into the correct Rust struct, or routes to the correct instruction handler. The hash-based approach gives a high certainty that each type in your program has a unique identifier to tell them apart.
-
-### Custom Discriminators
-
-Starting with Anchor `v0.31.0` you can now override the auto-generated hash and give an account or instruction its own discriminator directly in the `#[account]` or `#[instruction]` macro.
+2. **Custom Discriminators**: Starting with Anchor `v0.31.0`, you can specify your own discriminator:
 
 ```rust
 #[account(discriminator = 1)]              // single-byte
 pub struct Escrow { … }
 ```
 
-**Note**: Discriminators must be unique. If two instructions or accounts share the same prefix, the runtime won't be able to tell them apart, and Anchor's IDL generator will throw an error if it spots a collision. Additionally, using `[1]` as a discriminator prevents you from using `[1, 2, …]` as these discriminators also start with `1`. Accounts also cannot use `[0]` as a discriminator, as there is no way to differentiate between a newly initialized account with null data and a zero-byte discriminator.
+**Important Notes about Discriminators**:
+- They must be unique across your program
+- Using `[1]` prevents using `[1, 2, …]` as these also start with `1`
+- `[0]` cannot be used as it conflicts with uninitialized accounts
 
-### Using the Program Account
+### Creating Program Accounts
 
-Now that we've understood accounts and discriminators, let's apply this knowledge to create an example of a program account:
+To create a program account, you first define your data structure:
 
 ```rust
 use anchor_lang::prelude::*;
@@ -75,9 +72,11 @@ pub struct CustomAccountType {
 }
 ```
 
-Creating a struct is very easy. The only constraint we have with Anchor is that the account's data is capped at 10,240 bytes (10 KiB). If we need more, we'll need to use `zero_copy` and chunked writes; an advanced topic for another course.
-
-Anchor also needs to know the byte size of the struct to allocate the correct amount of space on-chain. The `InitSpace` derive macro takes care of this. When you derive `InitSpace`, it implements the `Space` trait for your struct, calculating and storing its size in an `INIT_SPACE` constant.
+Key points about program accounts:
+- Maximum size is 10,240 bytes (10 KiB)
+- For larger accounts, you'll need `zero_copy` and chunked writes
+- The `InitSpace` derive macro automatically calculates the required space
+- Total space = `INIT_SPACE` + `DISCRIMINATOR.len()`
 
 The total space in bytes needed for the account is the sum of `INIT_SPACE` (size of all the fields combined) and the discriminator size (`DISCRIMINATOR.len()`).
 
@@ -88,10 +87,8 @@ Here's how we're going to initiate the account in our `Account` struct:
 ```rust
 #[account(
     init,
-    payer = payer,
-    space = CustomAccountType::INIT_SPACE + CustomAccountType::DISCRIMINATOR.len(),
-    seeds = [b"test_seeds"],
-    bump,
+    payer = <target_account>,
+    space = <num_bytes>                 // CustomAccountType::INIT_SPACE + CustomAccountType::DISCRIMINATOR.len(),
 )]
 pub account: Account<'info, CustomAccountType>,
 ```
@@ -101,29 +98,61 @@ Here are some of the fields used in the `#[account]` macro, beyond the `seeds` a
 - `payer`: which signer funds the rent (here, the maker)
 - `space`: how many bytes to allocate. This is where the rent calculation happens as well
 
-Once we create the account, we can access its data like this:
+After creation, you can modify the account's data. If you need to change its size, use reallocation:
 
 ```rust
 #[account(
-    seeds = [b"test_seeds"],
-    bump,
+    mut,                       // Mark as mutable
+    realloc = <space>,         // New size
+    realloc::payer = <target>, // Who pays for the change
+    realloc::zero = <bool>     // Whether to zero new space
+)]
+```
+
+**Note**: When reducing account size, set `realloc::zero = true` to ensure old data is properly cleared.
+
+Lastly, when the account is no longer needed, we can close it to recover rent:
+
+```rust
+#[account(
+    mut,                       // Mark as mutable
+    close = <target_account>,  // Where to send remaining lamports
 )]
 pub account: Account<'info, CustomAccountType>,
 ```
 
-Lastly, since we deposited lamports as rent in the account, we should close the account and retrieve the lamports once this account is not needed anymore.
+We then can add PDAs, deterministic addresses derived from seeds and a program ID that are particularly useful for creating predictable account addresses, into these constraints like this:
 
 ```rust
 #[account(
-    mut,
-    close = receiver,
-    seeds = [b"test_seeds"],
-    bump,
+    seeds = <seeds>,            // Seeds for derivation
+    bump                        // Standard bump seed
 )]
 pub account: Account<'info, CustomAccountType>,
 ```
 
-`close` transfers whatever lamports remain in the account back to we assigned as receiver, then zeros out the data.
+**Note**: that PDAs are deterministic: same seeds + program + bump always produce the same address and that the bump ensures the address is off the ed25519 curve
+
+Since the calculating the bump can "burn" a lot of CUs, it's always good to save it into the account or pass it into the instruction and validate it without having to calculate like this: 
+
+```
+#[account(
+    seeds = <seeds>,
+    bump = <expr>
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+And it's possible to derive a PDA that is derived from another program by passing the address of the program is derived from like this:
+
+```
+#[account(
+    seeds = <seeds>,
+    bump = <expr>,
+    seeds::program = <expr>
+)]
+pub account: Account<'info, CustomAccountType>,
+```
 
 <ArticleSection name="Token Accounts" id="token-program" level="h2" />
 
@@ -145,8 +174,9 @@ Let's look at how the `Mint` and `Token` accounts are structured:
 
 ```rust
 #[account(
-    mint::authority    = <target_account>,
     mint::decimals     = <expr>,
+    mint::authority    = <target_account>,
+    mint::freeze_authority = <target_account>
     mint::token_program = <target_account>
 )]
 pub mint: Account<'info, Mint>,
@@ -177,11 +207,12 @@ We could create more "advanced" logic to handle these different account types, b
 use anchor_spl::token_interface::{Mint, TokenAccount};
 
 #[account(
-    mint::authority = <target_account>,
-    mint::decimals = <expr>
-    mint::token_program = <target_account>
+    mint::decimals     = <expr>,
+    mint::authority    = <target_account>,
+    mint::freeze_authority = <target_account>
 )]
 pub mint: InterfaceAccounts<'info, Mint>,
+
 #[account(
     mut,
     associated_token::mint = <target_account>,
@@ -215,7 +246,16 @@ The `Signer` type automatically checks if the account has signed the transaction
 
 ### AccountInfo & UncheckedAccount
 
-`AccountInfo` and `UncheckedAccount` are used when you need to work with accounts in a more low-level way. They provide direct access to the account's data without any automatic validation. These types are essential when working with accounts that don't have a defined structure, when you need to perform custom validation, or when interacting with accounts from other programs that don't have Anchor types. Here's an example:
+`AccountInfo` and `UncheckedAccount` are low-level account types that provide direct access to account data without automatic validation. They are identical in functionality, but `UncheckedAccount` is the preferred choice as its name better reflects its purpose.
+
+These types are useful in three main scenarios:
+1. Working with accounts that lack a defined structure
+2. Implementing custom validation logic
+3. Interacting with accounts from other programs that don't have Anchor type definitions
+
+Since these types bypass Anchor's safety checks, they are inherently unsafe and require explicit acknowledgment using the `/// CHECK` comment. This comment serves as documentation that you understand the risks and have implemented appropriate validation.
+
+Here's an example of how to use them:
 
 ```rust
 #[derive(Accounts)]
@@ -223,13 +263,21 @@ pub struct InstructionAccounts<'info> {
     /// CHECK: This is an unchecked account
     pub account: UncheckedAccount<'info>,
     
+    /// CHECK: This is an unchecked account
     pub account_info: AccountInfo<'info>,
 }
 ```
 
 ### Option
 
-The `Option` type allows you to make an account optional in your instruction. This means the account doesn't have to be provided in every transaction. This is particularly useful when building flexible instructions that can work with or without certain accounts, or when you have optional parameters in your instruction that might not always be needed. Here's how to implement it:
+The `Option` type in Anchor allows you to make accounts optional in your instruction. When an account is wrapped in `Option`, it can either be provided or omitted in the transaction. This is particularly useful for:
+- Building flexible instructions that can work with or without certain accounts
+- Implementing optional parameters that may not always be needed
+- Creating backward-compatible instructions that can work with new or old account structures
+
+When an `Option` account is set to `None`, Anchor will use the Program ID as the account address. This behavior is important to understand when working with optional accounts.
+
+Here's how to implement it:
 
 ```rust
 #[derive(Accounts)]
@@ -240,7 +288,12 @@ pub struct InstructionAccounts<'info> {
 
 ### Box
 
-The `Box` type is used when you need to store an account on the heap rather than the stack. This is particularly useful when dealing with large account structures that would be inefficient to store on the stack, or when you need to work with recursive data structures. The `Box` type helps manage memory more efficiently in these scenarios. Here's an example:
+The `Box` type is used to store accounts on the heap rather than the stack. This is necessary in several scenarios:
+- When dealing with large account structures that would be inefficient to store on the stack
+- When working with recursive data structures
+- When you need to work with accounts that have a size that can't be determined at compile time
+
+Using `Box` helps manage memory more efficiently in these cases by allocating the account data on the heap. Here's an example:
 
 ```rust
 #[derive(Accounts)]
@@ -251,8 +304,15 @@ pub struct InstructionAccounts<'info> {
 
 ### Program
 
-Program Accounts have a specific way of getting recognized since they have the executable flag set to mutable. For this reason, it's very easy for Anchor to recognize if this specific account is a Program Account or not. In addition to that, usually we need to specify a "type" so we can make sure that the address matches the one that we want, like in this example:
+The `Program` type is used to validate and interact with other Solana programs. Anchor can easily identify program accounts because they have their `executable` flag set to `true`. This type is particularly useful when:
 
+- You need to make Cross-Program Invocations (CPIs)
+- You want to ensure you're interacting with the correct program
+- You need to verify program ownership of accounts
+
+There are two main ways to use the `Program` type:
+
+1. Using built-in program types (recommended when available):
 ```rust
 use anchor_spl::token::Token;
  
@@ -263,8 +323,7 @@ pub struct InstructionAccounts<'info> {
 }
 ```
 
-When is not possible, we usually do something like this:
-
+2. Using a custom program address when the program type isn't available:
 ```rust
 // Address of the Program
 const PROGRAM_ADDRESS: Pubkey = pubkey!("22222222222222222222222222222222222222222222")
@@ -277,12 +336,9 @@ pub struct InstructionAccounts<'info> {
 }
 ```
 
-And by checking just the address, this is fine since we know that the program lives at that specific address.
-
-**Note**: to make sure that we can supply both the Legacy Token Program or the Token2022 Program in the same spot, we will need to use the `Interface` type instead of the `Program` type like so:
+**Note**: When working with token programs, you might need to support both the Legacy Token Program and Token-2022 Program. In such cases, use the `Interface` type instead of `Program`:
 
 ```rust
-// Token program or Token2022 program
 use anchor_spl::token_interface::TokenInterface;
  
 #[derive(Accounts)]
@@ -293,30 +349,85 @@ pub struct InstructionAccounts<'info> {
 
 <ArticleSection name="Custom Account Validation" id="custom-account-validation" level="h2" />
 
-So far we've leaned on built-in arguments and custom error enums to catch mistakes, but Anchor lets you bolt on extra checks right in the account macro.
+Anchor provides a powerful set of constraints that can be applied directly in the `#[account]` attribute. These constraints help ensure account validity and enforce program rules at the account level, before your instruction logic runs. Here are the available constraints:
 
-Here are some examples:
+### Address Constraint
+
+The `address` constraint verifies that an account's public key matches a specific value. This is essential when you need to ensure you're interacting with a known account, such as a specific PDA or a program account:
 
 ```rust
 #[account(
-    seeds = [b"test_seeds"],
-    bump,
-    has_one = data @ Error::InvalidField,
+    address = <expr>,                    // Basic usage
+    address = <expr> @ CustomError       // With custom error
 )]
 pub account: Account<'info, CustomAccountType>,
 ```
 
-The `has_one` constraint tells Anchor: "this field on the account struct must equal this account's key." If the keys differ, Anchor throws `Error::InvalidField` before your handler runs.
+### Owner Constraint
+
+The `owner` constraint ensures that an account is owned by a specific program. This is a critical security check when working with program-owned accounts, as it prevents unauthorized access to accounts that should be managed by a particular program:
 
 ```rust
 #[account(
-    seeds = [b"test_seeds"],
-    bump,
-    constraint = data == account.data @ Error::InvalidField,
+    owner = <expr>,                      // Basic usage
+    owner = <expr> @ CustomError         // With custom error
 )]
 pub account: Account<'info, CustomAccountType>,
 ```
 
-When the `has_one` constraint doesn't fit, such as when the field name differs, you can write a custom constraint with any boolean expression. If the expression evaluates to false, Anchor raises the specified error.
+### Executable Constraint
 
-These inline constraints keep validation next to the account definition and save you from scattering `require!()` calls throughout your instruction logic.
+The `executable` constraint verifies that an account is a program account (has its `executable` flag set to `true`). This is particularly useful when making Cross-Program Invocations (CPIs) to ensure you're interacting with a program rather than a data account:
+
+```rust
+#[account(executable)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+### Mutable Constraint
+
+The `mut` constraint marks an account as mutable, allowing its data to be modified during the instruction. This is required for any account that will be updated, as Anchor enforces immutability by default for safety:
+
+```rust
+#[account(
+    mut,                                 // Basic usage
+    mut @ CustomError                    // With custom error
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+### Signer Constraint
+
+The `signer` constraint verifies that an account has signed the transaction. This is crucial for security when an account needs to authorize an action, such as transferring funds or modifying data. It's a more explicit way to require signatures compared to using the `Signer` type:
+
+```rust
+#[account(
+    signer,                              // Basic usage
+    signer @ CustomError                 // With custom error
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+### Has One Constraint
+
+The `has_one` constraint verifies that a specific field on the account struct matches another account's public key. This is useful for maintaining relationships between accounts, such as ensuring a token account belongs to the correct owner:
+
+```rust
+#[account(
+    has_one = data @ Error::InvalidField
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+### Custom Constraint
+
+When the built-in constraints don't meet your needs, you can write a custom validation expression. This allows for complex validation logic that can't be expressed with other constraints, such as checking account data length or validating relationships between multiple fields:
+
+```rust
+#[account(
+    constraint = data == account.data @ Error::InvalidField
+)]
+pub account: Account<'info, CustomAccountType>,
+```
+
+These constraints can be combined to create powerful validation rules for your accounts. By placing validation at the account level, you keep your security checks close to the account definitions and avoid scattering `require!()` calls throughout your instruction logic.

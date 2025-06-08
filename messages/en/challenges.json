@@ -68,17 +68,6 @@
           "description": "Your code should create an SPL mint with 6 decimal places."
         }
       }
-    },
-    "research-crateless-program": {
-      "title": "Byte by Byte: The Anatomy of a Crateless Program",
-      "requirements": {
-        "deposit": {
-          "title": "Challenge 1: Taking deposits"
-        },
-        "withdraw": {
-          "title": "Challenge 2: Allowing withdrawal"
-        }
-      }
     }
   }
 }

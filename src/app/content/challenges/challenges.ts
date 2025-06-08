@@ -84,19 +84,6 @@ const allChallenges: ChallengeMetadata[] = [
     apiPath: "/v1/verify/spf-token/create-mint",
     requirements: [{ instructionKey: "create_mint" }],
   },
-  {
-    slug: "research-crateless-program",
-    language: "Research",
-    color: "105,162,241",
-    difficulty: 2,
-    isFeatured: true,
-    unitName: "Byte by Byte",
-    apiPath: "/v1/verify/research/crateless-program",
-    requirements: [
-      { instructionKey: "deposit" },
-      { instructionKey: "withdraw" },
-    ],
-  },
 ];
 
 const releasedChallengesSetting = process.env.NEXT_PUBLIC_RELEASED_CHALLENGES?.trim();

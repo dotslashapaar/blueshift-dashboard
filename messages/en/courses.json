@@ -6,61 +6,6 @@
         "anchor-101": "Anchor 101",
         "anchor-accounts": "Anchor Accounts"
       }
-    },
-    "anchor-vault": {
-      "title": "Vault",
-      "lessons": {
-        "code": "The Vault Program"
-      }
-    },
-    "anchor-escrow": {
-      "title": "Escrow",
-      "lessons": {
-        "code": "The Escrow Program"
-      }
-    },
-    "anchor-memo": {
-      "title": "Memo",
-      "lessons": {
-        "lesson": "Memo"
-      }
-    },
-    "pinocchio-vault": {
-      "title": "Pinocchio Vault",
-      "lessons": {
-        "introduction": "Pinocchio 101",
-        "code": "The Vault Program"
-      }
-    },
-    "pinocchio-memo": {
-      "title": "Pinocchio Memo",
-      "lessons": {
-        "lesson": "Pinocchio Memo"
-      }
-    },
-    "assembly-memo": {
-      "title": "Assembly Memo",
-      "lessons": {
-        "lesson": "Assembly Memo"
-      }
-    },
-    "quantum-vault": {
-      "title": "Quantum Vault",
-      "lessons": {
-        "introduction-to-quantum-vault": " Quantum Vault"
-      }
-    },
-    "your-first-spl-token": {
-      "title": "Your First SPL Token",
-      "lessons": {
-        "understanding-spl-tokens": " Your First SPL Token"
-      }
-    },
-    "research-crateless-program": {
-      "title": "Byte by Byte: The Anatomy of a Crateless Program",
-      "lessons": {
-        "lesson": "research-crateless-program"
-      }
     }
   }
 }
