@@ -13,28 +13,6 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     ],
   },
   {
-    slug: "anchor-vault",
-    language: "Anchor",
-    color: "221,234,224",
-    difficulty: 1,
-    isFeatured: true,
-    lessons: [
-      { slug: "code" },
-    ],
-    challenge: "anchor-vault",
-  },
-  {
-    slug: "anchor-escrow",
-    language: "Anchor",
-    color: "221,234,224",
-    difficulty: 1,
-    isFeatured: true,
-    lessons: [
-      { slug: "code" },
-    ],
-    challenge: "anchor-escrow",
-  },
-  {
     slug: "anchor-memo",
     language: "Anchor",
     color: "221,234,224",
