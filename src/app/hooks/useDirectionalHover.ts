@@ -1,4 +1,4 @@
-import { useState, useCallback, RefObject, useRef } from "react";
+import { useState, useCallback, RefObject } from "react";
 
 type Direction =
   | "top-left"
@@ -41,17 +41,10 @@ export const useDirectionalHover = (
     swooshAngle: 180,
   });
   const [isHovered, setIsHovered] = useState(false);
-  const [isSwooshAnimating, setIsSwooshAnimating] = useState(false);
-  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = useCallback(
     (event: React.MouseEvent) => {
       if (!elementRef.current) return;
-
-      // Clear any existing animation timeout
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
-      }
 
       const rect = elementRef.current.getBoundingClientRect();
       const x = event.clientX - rect.left;
@@ -116,12 +109,6 @@ export const useDirectionalHover = (
       const swooshAngle = getSwooshAngle(direction);
       setTransform({ x: transformX, y: transformY, direction, swooshAngle });
       setIsHovered(true);
-      setIsSwooshAnimating(true);
-
-      // Set timeout to finish animation (0.7s as per CSS)
-      animationTimeoutRef.current = setTimeout(() => {
-        setIsSwooshAnimating(false);
-      }, 700);
     },
     [elementRef]
   );
@@ -129,13 +116,11 @@ export const useDirectionalHover = (
   const handleMouseLeave = useCallback(() => {
     setTransform({ x: 0, y: 0, direction: "top", swooshAngle: 180 });
     setIsHovered(false);
-    // Don't immediately stop swoosh animation - let it finish
   }, []);
 
   return {
     transform,
     isHovered,
-    isSwooshAnimating,
     direction: transform.direction,
     swooshAngle: transform.swooshAngle,
     handleMouseEnter,

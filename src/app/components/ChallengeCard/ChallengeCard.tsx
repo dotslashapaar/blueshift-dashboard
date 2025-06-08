@@ -32,7 +32,6 @@ export default function ChallengeCard({
   const {
     transform,
     isHovered,
-    isSwooshAnimating,
     direction,
     swooshAngle,
     handleMouseEnter,
@@ -55,7 +54,7 @@ export default function ChallengeCard({
         "transition-transform overflow-hidden duration-300 animate-card-swoosh",
         "gradient-border rounded-[18px] pt-5 pb-8 px-5 aspect-square sm:aspect-[3/4] relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.05),transparent_75%),linear-gradient(180deg,#11141A_0%,#0B0E14_125%)]",
         "before:[background:linear-gradient(145deg,rgba(97,99,107,0.25)_30%,rgba(129,105,196,0.33)_40%,rgba(142,179,212,0.33)_45%,rgba(157,211,187,0.33)_50%,rgba(189,199,128,0.33)_55%,rgba(145,119,94,0.33)_60%,rgba(97,99,107,0.25)_70%),linear-gradient(180deg,rgba(173,185,210,0.05)_0%,rgba(173,185,210,0.05)_100%)]",
-        isSwooshAnimating && `swoosh-${direction}`,
+        isHovered && `swoosh-${direction}`,
         className
       )}
     >
