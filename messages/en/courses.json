@@ -4,7 +4,9 @@
       "title": "Introduction to Anchor",
       "lessons": {
         "anchor-101": "Anchor 101",
-        "anchor-accounts": "Anchor Accounts"
+        "anchor-accounts": "Anchor Accounts",
+        "anchor-instructions": "Anchor Instructions",
+        "conclusions": "Conclusions"
       }
     }
   }

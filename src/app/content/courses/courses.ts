@@ -10,6 +10,8 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     lessons: [
       { slug: "anchor-101" },
       { slug: "anchor-accounts" },
+      { slug: "anchor-instructions" },
+      { slug: "conclusions" },
     ],
   },
 ]);
