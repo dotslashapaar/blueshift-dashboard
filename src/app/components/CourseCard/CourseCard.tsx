@@ -34,7 +34,6 @@ export default function CourseCard({
   const {
     transform,
     isHovered,
-    isSwooshAnimating,
     direction,
     swooshAngle,
     handleMouseEnter,
@@ -58,7 +57,7 @@ export default function CourseCard({
         view === "grid" && "pt-5",
         view === "list" && "pt-5 !pb-5",
         "transition-transform duration-300 animate-card-swoosh",
-        isSwooshAnimating && `swoosh-${direction}`,
+        isHovered && `swoosh-${direction}`,
         className
       )}
     >
