@@ -18,11 +18,10 @@ export default function ChallengesFooter({ challenge }: ChallengesFooterProps) {
   const { mint } = useMintNFT();
 
   const handleMint = async () => {
-    console.log("minting")
-    mint(challenge)
-      .catch((error) => {
-        console.error("Error minting NFT:", error);
-      });
+    console.log("minting");
+    mint(challenge).catch((error) => {
+      console.error("Error minting NFT:", error);
+    });
   };
 
   return (
@@ -40,7 +39,7 @@ export default function ChallengesFooter({ challenge }: ChallengesFooterProps) {
           className="text-brand-secondary hover:text-brand-primary transition font-medium !w-full !min-w-[150px]"
         >
           <Button
-            variant="primary"
+            variant={challenge.language.toLowerCase() as any}
             size="md"
             label={t("lessons.take_challenge")}
             icon="Challenge"

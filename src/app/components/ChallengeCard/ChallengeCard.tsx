@@ -2,14 +2,13 @@ import { CourseDifficulty } from "@/app/utils/course";
 import { CourseLanguages } from "@/app/utils/course";
 import React, { useRef } from "react";
 import classNames from "classnames";
-import { usePersistentStore } from "@/stores/store";
 import DifficultyBadge from "../DifficultyBadge/DifficultyBadge";
-import { motion } from "motion/react";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
 import { Link } from "@/i18n/navigation";
+import { motion } from "motion/react";
 import { useDirectionalHover } from "@/app/hooks/useDirectionalHover";
 
-type CourseCardProps = {
+type ChallengeCardProps = {
   name: string;
   color: string;
   points?: number;
@@ -20,7 +19,7 @@ type CourseCardProps = {
   link?: string;
 };
 
-export default function CourseCard({
+export default function ChallengeCard({
   name,
   color,
   language,
@@ -28,8 +27,7 @@ export default function CourseCard({
   footer,
   className,
   link,
-}: CourseCardProps) {
-  const { view } = usePersistentStore();
+}: ChallengeCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const {
     transform,
@@ -42,7 +40,7 @@ export default function CourseCard({
   } = useDirectionalHover(cardRef);
 
   return (
-    <div
+    <motion.div
       ref={cardRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -54,10 +52,9 @@ export default function CourseCard({
         } as React.CSSProperties
       }
       className={classNames(
-        "gradient-border overflow-hidden rounded-2xl pb-8 px-5 relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.03),transparent_75%),linear-gradient(180deg,var(--color-background-card),var(--color-background-card))] before:[background:linear-gradient(180deg,rgba(var(--courseColor),0.1),rgba(var(--courseColor),0.05))]",
-        view === "grid" && "pt-5",
-        view === "list" && "pt-5 !pb-5",
-        "transition-transform duration-300 animate-card-swoosh",
+        "transition-transform overflow-hidden duration-300 animate-card-swoosh",
+        "gradient-border rounded-[18px] pt-5 pb-8 px-5 aspect-square sm:aspect-[3/4] relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.05),transparent_75%),linear-gradient(180deg,#11141A_0%,#0B0E14_125%)]",
+        "before:[background:linear-gradient(145deg,rgba(97,99,107,0.25)_30%,rgba(129,105,196,0.33)_40%,rgba(142,179,212,0.33)_45%,rgba(157,211,187,0.33)_50%,rgba(189,199,128,0.33)_55%,rgba(145,119,94,0.33)_60%,rgba(97,99,107,0.25)_70%),linear-gradient(180deg,rgba(173,185,210,0.05)_0%,rgba(173,185,210,0.05)_100%)]",
         isSwooshAnimating && `swoosh-${direction}`,
         className
       )}
@@ -65,27 +62,17 @@ export default function CourseCard({
       {link && (
         <Link href={link} className="absolute inset-0 z-1 w-full h-full"></Link>
       )}
-      {view === "grid" && difficulty && (
+      {difficulty && (
         <div className="absolute top-6 right-5">
           <DifficultyBadge difficulty={difficulty} />
         </div>
       )}
       <div
-        className={classNames(
-          "flex",
-          view === "grid" && "flex-col gap-y-24 h-full justify-between",
-          view === "list" && "flex-row justify-between"
-        )}
+        className={classNames("flex flex-col gap-y-24 h-full justify-between")}
       >
-        <div
-          className={classNames(
-            "flex",
-            view === "grid" && "flex-col gap-y-6 items-start",
-            view === "list" && "flex items-center gap-x-4"
-          )}
-        >
+        <div className={classNames("flex", "flex-col gap-y-6 items-start")}>
           <img
-            src={`/graphics/${language.toLowerCase()}-course.svg`}
+            src={`/graphics/challenge-${language.toLowerCase()}.svg`}
             className="h-16 -ml-1.5 [filter:drop-shadow(0_6px_4px_rgba(0,0,0,0.25))]"
           />
           <div className="flex flex-col gap-y-2.5">
@@ -99,12 +86,6 @@ export default function CourseCard({
                 splitBy="chars"
                 baseDelay={0.2}
               />
-              {view === "list" && difficulty && (
-                <DifficultyBadge
-                  difficulty={difficulty}
-                  className="relative bottom-[2px]"
-                />
-              )}
             </div>
             <div className="text-xl font-medium text-primary leading-[120%]">
               {name}
@@ -113,6 +94,6 @@ export default function CourseCard({
         </div>
         {footer && footer}
       </div>
-    </div>
+    </motion.div>
   );
 }

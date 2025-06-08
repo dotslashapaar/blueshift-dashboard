@@ -28,6 +28,10 @@
   --container-app: 1500px;
 }
 
+:root {
+  --swoosh-easing: cubic-bezier(0, 0.61, 0.355, 1);
+}
+
 body {
   @apply w-screen h-auto overflow-x-hidden;
   background: var(--color-background);
@@ -156,25 +160,170 @@ h2 code {
   }
 }
 
-.pixelBackground {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  position: absolute;
-  z-index: 50;
-  pointer-events: none;
-  top: 0;
+.animate-card-swoosh::after {
+  @apply content-[''] absolute pointer-events-none opacity-0 overflow-hidden;
+  left: -25%;
+  top: -25%;
+  width: 150%;
+  height: 150%;
+  background: linear-gradient(
+    var(--swoosh-angle, 135deg),
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.04) 45%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 55%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transition: opacity 0.3s ease-in-out;
 }
 
-.pixelBackground-row {
-  display: flex;
-  width: 100%;
-  height: 100px;
+.animate-card-swoosh.swoosh-active::after {
+  opacity: 1;
 }
 
-.pixelBackground-block {
-  width: 100px;
-  height: 100%;
-  background-color: #020303;
+/* Directional swoosh animations */
+.animate-card-swoosh.swoosh-top::after {
+  animation: swoosh-top 1.1s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-right::after {
+  animation: swoosh-right 1.1s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-bottom::after {
+  animation: swoosh-bottom 1.1s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-left::after {
+  animation: swoosh-left 1.1s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-top-left::after {
+  animation: swoosh-top-left 1.1s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-top-right::after {
+  animation: swoosh-top-right 1.1s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-bottom-left::after {
+  animation: swoosh-bottom-left 1.1s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-bottom-right::after {
+  animation: swoosh-bottom-right 1.1s var(--swoosh-easing);
+}
+
+@keyframes swoosh-top {
+  0% {
+    transform: translateY(-50%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(50%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-right {
+  0% {
+    transform: translateX(50%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-bottom {
+  0% {
+    transform: translateY(50%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-left {
+  0% {
+    transform: translateX(-50%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(50%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-top-left {
+  0% {
+    transform: translate(-50%, -50%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(50%, 50%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-top-right {
+  0% {
+    transform: translate(50%, -50%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 50%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-bottom-left {
+  0% {
+    transform: translate(-50%, 50%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(50%, -50%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-bottom-right {
+  0% {
+    transform: translate(50%, 50%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%);
+    opacity: 0.5;
+  }
 }

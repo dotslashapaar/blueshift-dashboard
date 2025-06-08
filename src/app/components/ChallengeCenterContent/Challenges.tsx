@@ -8,8 +8,7 @@ export default function Challenges() {
       <div className="relative">
         <div className="content-wrapper">
           <div className="flex flex-wrap md:flex-row gap-y-4 md:gap-y-0 md:items-center gap-x-3 w-full">
-            <ChallengeFilter />
-            <ViewToggle layoutName="challenges-view-toggle" />
+            <ChallengeFilter className="!w-[200px]" />
           </div>
         </div>
         <img

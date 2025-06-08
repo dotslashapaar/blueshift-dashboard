@@ -1,7 +1,6 @@
 "use client";
 
 import { usePersistentStore } from "@/stores/store";
-import CourseCard from "../CourseCard/CourseCard";
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
 import { useTranslations } from "next-intl";
@@ -13,6 +12,7 @@ import { anticipate } from "motion";
 import { useWindowSize } from "usehooks-ts";
 import { useEffect } from "react";
 import { challengeColors, ChallengeMetadata } from "@/app/utils/challenges";
+import ChallengeCard from "../ChallengeCard/ChallengeCard";
 
 const challengeSections = {
   Anchor: {
@@ -47,27 +47,18 @@ export default function ChallengesList({
   const t = useTranslations();
 
   // TODO refactor this
-  const { view, setView, selectedChallengeStatus, challengeStatuses } =
+  const { view, selectedChallengeStatus, challengeStatuses } =
     usePersistentStore();
 
   const filteredChallenges = initialChallenges.filter((challenge) =>
-    selectedChallengeStatus.includes(challengeStatuses[challenge.slug]),
+    selectedChallengeStatus.includes(challengeStatuses[challenge.slug])
   );
 
   const hasNoResults = filteredChallenges.length === 0;
   const hasNoFilters = selectedChallengeStatus.length === 0;
 
-  const { width } = useWindowSize();
-
-  useEffect(() => {
-    if (width < 768) {
-      setView("grid");
-    }
-  }, [width, setView]);
-
   return (
     <motion.div
-      key={`${view}`}
       className="flex flex-col"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -81,7 +72,7 @@ export default function ChallengesList({
         <>
           {Object.entries(challengeSections).map(([language, section]) => {
             const languageChallenges = filteredChallenges.filter(
-              (challenge) => challenge.language === language,
+              (challenge) => challenge.language === language
             );
             if (languageChallenges.length === 0) return null;
 
@@ -95,7 +86,10 @@ export default function ChallengesList({
                         backgroundColor: `rgb(${challengeColors[section.icon]},0.10)`,
                       }}
                     >
-                      <Icon name={section.icon} className="text-brand-secondary" />
+                      <Icon
+                        name={section.icon}
+                        className="text-brand-secondary"
+                      />
                     </div>
                     <span className="text-lg leading-none font-medium text-secondary">
                       {t(section.title)}
@@ -103,15 +97,11 @@ export default function ChallengesList({
                   </div>
                   <div
                     className={classNames(
-                      "grid",
-                      view === "grid"
-                        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "grid-cols-1",
-                      "gap-5",
+                      "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
                     )}
                   >
                     {languageChallenges.map((challenge) => (
-                      <CourseCard
+                      <ChallengeCard
                         key={challenge.slug}
                         name={t(`challenges.${challenge.slug}.title`)}
                         language={challenge.language}
@@ -122,7 +112,7 @@ export default function ChallengesList({
                       />
                     ))}
                   </div>
-                <Divider className="my-12 group-last:hidden" />
+                  <Divider className="my-12 group-last:hidden" />
                 </div>
               </div>
             );
