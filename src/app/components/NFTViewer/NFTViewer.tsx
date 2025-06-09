@@ -89,17 +89,6 @@ export default function NFTViewer({
     const desiredCenterX = clickX - (cardAnchorX - 0.5) * cardWidth;
     const desiredCenterY = clickY - (cardAnchorY - 0.5) * cardHeight;
 
-    // Debug logging for position calculations
-    console.log("NFTViewer position calculation:", {
-      clickPosition: { x: clickX, y: clickY },
-      viewportSize: { width: window.innerWidth, height: window.innerHeight },
-      relativePosition: { x: relativeX, y: relativeY },
-      cardDimensions: { width: cardWidth, height: cardHeight },
-      cardAnchor: { x: cardAnchorX, y: cardAnchorY },
-      desiredCenter: { x: desiredCenterX, y: desiredCenterY },
-      finalOffset: { x: desiredCenterX - centerX, y: desiredCenterY - centerY },
-    });
-
     // Return offset from viewport center
     return {
       x: desiredCenterX - centerX,
