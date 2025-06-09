@@ -134,15 +134,35 @@ export function useChallengeVerifier({
           }
           setCertificate(challenge.slug, result.certificate);
         } else {
-          const errorText = await response.text();
-          console.error(
-            "Verification request failed:",
-            response.statusText,
-            errorText,
-          );
-          setError(
-            `Verification failed: ${response.statusText} - ${errorText}`,
-          );
+          let errorMessage = `Verification failed: ${response.statusText}`;
+
+          try {
+            const errorText = await response.text();
+
+            try {
+              const errorJson = JSON.parse(errorText);
+              if (errorJson.error && errorJson.message) {
+                if (errorJson.error === "ProgramLoadError") {
+                  errorMessage =
+                    "Unable to load program. Please make sure you upload the correct .so file from your `target/deploy` folder.";
+                } else {
+                  errorMessage =
+                    "Upload failed. Please check your program file and try again.";
+                }
+              } else {
+                errorMessage = "Upload failed. Please try again.";
+              }
+            } catch (jsonParseError) {
+              // If not JSON, use a generic user-friendly message
+              errorMessage = "Upload failed. Please try again.";
+            }
+          } catch (textError) {
+            // If we can't read the response text, use a generic user-friendly message
+            errorMessage = "Upload failed. Please try again.";
+          }
+
+          console.error("Verification request failed:", errorMessage);
+          setError(errorMessage);
           setVerificationData(null);
         }
       } catch (err) {
@@ -168,6 +188,9 @@ export function useChallengeVerifier({
       );
       return;
     }
+
+    // Clear any previous error when starting a new upload
+    setError(null);
 
     const input = document.createElement("input");
     input.type = "file";

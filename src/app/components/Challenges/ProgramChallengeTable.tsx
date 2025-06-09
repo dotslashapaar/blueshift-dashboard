@@ -207,6 +207,28 @@ export default function ChallengeTable({
           />
         </div>
 
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="mx-4 p-4 bg-red-50 border border-red-200 rounded-xl"
+          >
+            <div className="flex items-start gap-x-3">
+              <Icon name="Warning" size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-red-800 mb-1">
+                  Upload Error
+                </h4>
+                <p className="text-sm text-red-700 leading-relaxed">
+                  {error}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <div className="flex flex-col gap-y-2 px-2">
           {requirements.map((requirement) => (
             <motion.button
@@ -238,7 +260,11 @@ export default function ChallengeTable({
                     `challenges.${challengeSlug}.requirements.${requirement.instructionKey}.title`
                   )}
                 </span>
-                {!isLoading && !error ? (
+                {isLoading ? (
+                  <ChallengeBadge label="Loading" variant="loading" />
+                ) : error ? (
+                  <ChallengeBadge label="Error" variant="failed" />
+                ) : (
                   <div className="flex items-center gap-x-4">
                     <ChallengeBadge
                       label={t(
@@ -255,14 +281,6 @@ export default function ChallengeTable({
                       )}
                       size={14}
                     />
-                  </div>
-                ) : (
-                  <ChallengeBadge label="Loading" variant="loading" />
-                )}
-
-                {!isLoading && error && (
-                  <div className="text-xs font-medium">
-                    An error occured. Please try again.
                   </div>
                 )}
               </div>
