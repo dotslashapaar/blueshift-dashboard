@@ -8,15 +8,15 @@
         "anchor-instructions": "Anchor Instructions",
         "conclusions": "Conclusions"
       }
-    }
-  },
-  "introduction-to-pinocchio": {
-    "title": "Introduction to Pinocchio",
-    "lessons": {
-      "pinocchio-101": "Pinocchio 101",
-      "pinocchio-accounts": "Pinocchio Accounts",
-      "pinocchio-instructions": "Pinocchio Instructions",
-      "conclusions": "Conclusions"
+    },
+    "introduction-to-pinocchio": {
+      "title": "Introduction to Pinocchio",
+      "lessons": {
+        "pinocchio-101": "Pinocchio 101",
+        "pinocchio-accounts": "Pinocchio Accounts",
+        "pinocchio-instructions": "Pinocchio Instructions",
+        "conclusions": "Conclusions"
+      }
     }
   }
 }

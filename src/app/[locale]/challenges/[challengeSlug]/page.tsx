@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import MdxLayout from "@/app/mdx-layout";
 import { getChallenge } from "@/app/utils/mdx";
-import { courseColors } from "@/app/utils/course";
+import { challengeColors } from "@/app/utils/challenges";
 import Icon from "@/app/components/Icon/Icon";
 import Divider from "@/app/components/Divider/Divider";
 import TableOfContents from "@/app/components/TableOfContents/TableOfContents";
@@ -75,14 +75,14 @@ export default async function LessonPage({ params }: LessonPageProps) {
     notFound();
   }
 
-  const courseMetadata = await getChallenge(challengeSlug);
+  const challengeMetadata = await getChallenge(challengeSlug);
 
-  if (!courseMetadata) {
+  if (!challengeMetadata) {
     console.error(`No metadata found for challenge: ${challengeSlug}`);
     notFound();
   }
 
-  const coursePageTitle = t(`challenges.${challengeSlug}.title`);
+  const challengePageTitle = t(`challenges.${challengeSlug}.title`);
   const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
 
   if (!rpcEndpoint) {
@@ -91,7 +91,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   let collectionSize: number | null = null;
 
-  const collectionMintAddress = courseMetadata.collectionMintAddress;
+  const collectionMintAddress = challengeMetadata.collectionMintAddress;
 
   if (collectionMintAddress) {
     try {
@@ -125,7 +125,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
       <div
         className="w-full"
         style={{
-          background: `linear-gradient(180deg, rgb(${courseColors[courseMetadata.language]},0.05) 0%, transparent 100%)`,
+          background: `linear-gradient(180deg, rgb(${challengeColors[challengeMetadata.language]},0.05) 0%, transparent 100%)`,
         }}
       >
         <div className="px-4 py-14 pb-20 md:px-8 lg:px-14 max-w-app w-full mx-auto flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
@@ -137,30 +137,30 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 spacingBottom={2}
                 spacingX={6}
                 style={{
-                  color: `rgb(${courseColors[courseMetadata.language]},1)`,
+                  color: `rgb(${challengeColors[challengeMetadata.language]},1)`,
                 }}
               />
               <div
                 className="w-[24px] h-[24px] rounded-sm flex items-center justify-center text-brand-primary"
                 style={{
-                  backgroundColor: `rgb(${courseColors[courseMetadata.language]},0.10)`,
+                  backgroundColor: `rgb(${challengeColors[challengeMetadata.language]},0.10)`,
                 }}
               >
-                <Icon name={courseMetadata.language} size={16 as 14} />
+                <Icon name={challengeMetadata.language} size={16 as 14} />
               </div>
               <span
                 className="font-medium text-lg font-mono relative top-0.25"
                 style={{
-                  color: `rgb(${courseColors[courseMetadata.language]})`,
+                  color: `rgb(${challengeColors[challengeMetadata.language]})`,
                 }}
               >
-                {courseMetadata.language}
+                {challengeMetadata.language}
               </span>
             </div>
             <span className="sr-only">
-              {t(`courses.${courseMetadata.slug}.title`)}
+              {t(`challenges.${challengeMetadata.slug}.title`)}
             </span>
-            <LessonTitle title={coursePageTitle} />
+            <LessonTitle title={challengePageTitle} />
             {collectionMintAddress && typeof collectionSize === "number" && (
               <Link
                 href={`https://solana.fm/address/${collectionMintAddress}`}
@@ -169,7 +169,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 <p
                   className="text-secondary mt-1 text-sm"
                   style={{
-                    color: `rgb(${courseColors[courseMetadata.language]})`,
+                    color: `rgb(${challengeColors[challengeMetadata.language]})`,
                   }}
                 >
                   {collectionSize.toString()} Graduates
