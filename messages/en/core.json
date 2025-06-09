@@ -66,7 +66,7 @@
     "empty_description": "Try changing your filters to see challenges here.",
     "locked_description": "Complete Challenge to Unlock",
     "claimed_description": "NFT Is Available in your Wallet",
-    "view_nft": "View NFT (coming soon)",
+    "view_nft": "View NFT",
     "filter__label": "All Statuses",
     "filter__all_statuses": "All",
     "filter__selected_statuses": "Statuses"
