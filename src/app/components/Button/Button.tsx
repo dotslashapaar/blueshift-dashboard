@@ -6,21 +6,23 @@ import Icon from "../Icon/Icon";
 import DecryptedText from "../HeadingReveal/DecryptText";
 import { useState } from "react";
 
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "tertiary"
+  | "link"
+  | "rust"
+  | "typescript"
+  | "assembly"
+  | "anchor"
+  | "research";
+
 export interface ButtonProps {
   label?: string;
   className?: string;
-  onClick?: () => void;
+  onClick?: (event?: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
-  variant?:
-    | "primary"
-    | "secondary"
-    | "tertiary"
-    | "link"
-    | "rust"
-    | "typescript"
-    | "assembly"
-    | "anchor"
-    | "research";
+  variant?: ButtonVariant;
   icon?: IconName;
   iconSide?: "left" | "right";
   size?: "sm" | "md" | "lg";

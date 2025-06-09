@@ -10,9 +10,10 @@ import ChallengesFooter from "./ChallengesFooter";
 import { motion } from "motion/react";
 import { anticipate } from "motion";
 import { useWindowSize } from "usehooks-ts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { challengeColors, ChallengeMetadata } from "@/app/utils/challenges";
 import ChallengeCard from "../ChallengeCard/ChallengeCard";
+import NFTViewer from "../NFTViewer/NFTViewer";
 
 const challengeSections = {
   Anchor: {
@@ -57,6 +58,20 @@ export default function ChallengesList({
   const hasNoResults = filteredChallenges.length === 0;
   const hasNoFilters = selectedChallengeStatus.length === 0;
 
+  const [isNFTViewerOpen, setIsNFTViewerOpen] = useState(false);
+  const [selectedChallenge, setSelectedChallenge] = useState<ChallengeMetadata>(
+    {
+      unitName: "",
+      language: "Typescript",
+      difficulty: 1,
+      slug: "",
+      color: "",
+      isFeatured: false,
+      apiPath: "",
+      requirements: [],
+    }
+  );
+
   return (
     <motion.div
       className="flex flex-col"
@@ -64,6 +79,13 @@ export default function ChallengesList({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, ease: anticipate }}
     >
+      <NFTViewer
+        isOpen={isNFTViewerOpen}
+        onClose={() => setIsNFTViewerOpen(false)}
+        challengeName={selectedChallenge.unitName}
+        challengeLanguage={selectedChallenge.language}
+        challengeDifficulty={selectedChallenge.difficulty}
+      />
       {hasNoFilters ? (
         <ChallengesEmpty />
       ) : hasNoResults ? (
@@ -108,7 +130,13 @@ export default function ChallengesList({
                         difficulty={challenge.difficulty}
                         color={challenge.color}
                         link={`/challenges/${challenge.slug}`}
-                        footer={<ChallengesFooter challenge={challenge} />}
+                        footer={
+                          <ChallengesFooter
+                            challenge={challenge}
+                            setIsNFTViewerOpen={setIsNFTViewerOpen}
+                            setSelectedChallenge={setSelectedChallenge}
+                          />
+                        }
                       />
                     ))}
                   </div>
