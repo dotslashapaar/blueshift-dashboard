@@ -1,18 +1,24 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+import { Codeblock } from "../../../../components/Codeblock/Codeblock";
 
+# Instructions
 
+As we saw earlier, using the `TryFrom` trait allows us to cleanly separate validation from business logic, improving both maintainability and security.
 
-Using `TryFrom` everywhere cleanly separates validation from business logic, improving maintainability and security.
+<ArticleSection name="Instruction Structure" id="instruction-structure" level="h2" />
 
-### Logic
-
-Next, we combine the validated accounts and instruction data into a single handler struct:
+When it's time to process the logic, we can create a structure like this: 
 
 ```rust
 pub struct Deposit<'a> {
     pub accounts: DepositAccounts<'a>,
     pub instruction_datas: DepositInstructionData,
 }
+```
 
+This structure defines what data will be accessible during the logic processing. We then deserialize this using the `try_from` function that you can find in the `lib.rs` file:
+
+```rust
 impl<'a> TryFrom<(&'a [u8], &'a [AccountInfo])> for Deposit<'a> {
     type Error = ProgramError;
 
@@ -28,38 +34,32 @@ impl<'a> TryFrom<(&'a [u8], &'a [AccountInfo])> for Deposit<'a> {
 }
 ```
 
-This wrapper:
-1. Accepts both raw inputs (bytes and accounts).
-2. Delegates validation to the individual `TryFrom` implementations.
-3. Returns a fully-typed, fully-checked Deposit struct.
+This wrapper provides three key benefits:
+1. It accepts both raw inputs (bytes and accounts)
+2. It delegates validation to the individual `TryFrom` implementations
+3. It returns a fully-typed, fully-validated Deposit struct
 
-Now the actual logic is concise:
+We can then implement the processing logic like this:
 
 ```rust
 impl<'a> Deposit<'a> {
     pub const DISCRIMINATOR: &'a u8 = &0;
 
     pub fn process(&self) -> ProgramResult {
-        Transfer {
-            from: self.accounts.owner,
-            to: self.accounts.vault,
-            lamports: self.instruction_datas.amount,
-        }
-        .invoke()?;
-
+        // deposit logic
         Ok(())
     }
 }
 ```
 
-- `DISCRIMINATOR` is the byte we pattern-match on in entrypoint.
-- `process()` contains only business logic; all checks are already complete.
+- The `DISCRIMINATOR` is the byte we use for pattern matching in the entrypoint
+- The `process()` method contains only business logic, as all validation checks are already complete
 
-The result? Anchor-style ergonomics, but with all the benefits of being fully native; explicit, predictable, and fast.
+The result? We get Anchor-style ergonomics with all the benefits of being fully native: explicit, predictable, and fast.
 
-### Cross-Program Invocations (CPIs)
+<ArticleSection name="Cross Program Invocation" id="cross-program-invocation" level="h2" />
 
-As mentioned, Pinocchio has some helper crates like `pinocchio-system` and `pinocchio-token` that make it super easy to perform Cross-Program Invocations (CPIs) to these native programs. 
+As mentioned earlier, Pinocchio provides helper crates like `pinocchio-system` and `pinocchio-token` that simplify Cross-Program Invocations (CPIs) to native programs. 
 
 These helper structs and methods replace Anchor's `CpiContext` approach we used previously:
 
@@ -72,9 +72,9 @@ Transfer {
 .invoke()?;
 ```
 
-The `Transfer` struct (from `pinocchio-system`) packages every field the System Program needs, and `.invoke()` fires the CPI. No context builder, no extra boilerplate.
+The `Transfer` struct (from `pinocchio-system`) encapsulates all the fields required by the System Program, and `.invoke()` executes the CPI. No context builder or extra boilerplate needed.
 
-When the caller must be a Program-Derived Address (PDA), Pinocchio keeps the API equally concise:
+When the caller must be a Program-Derived Address (PDA), Pinocchio maintains the same concise API:
 
 ```rust
 let seeds = [
@@ -92,9 +92,9 @@ Transfer {
 .invoke_signed(&signers)?;
 ```
 
-**Here's what happens:**
-1. `Seeds` builds an array of Seed objects that match the PDA derivation.
-2. `Signer` wraps those seeds in a Signer helper.
-3. `invoke_signed` calls the CPI, passing the signer array so the PDA can authorize the transfer.
+**Here's how it works:**
+1. `Seeds` creates an array of Seed objects that match the PDA derivation
+2. `Signer` wraps these seeds in a Signer helper
+3. `invoke_signed` executes the CPI, passing the signer array to authorize the transfer
 
-The result? a clean, first-class interface for both regular and signed CPIs; no macros required, and no hidden magic.
+The result? A clean, first-class interface for both regular and signed CPIs - no macros required, and no hidden magic.
