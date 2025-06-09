@@ -14,6 +14,19 @@ const allCourses: CourseMetadata[] = withCourseNumber([
       { slug: "conclusions" },
     ],
   },
+  {
+    slug: "introduction-to-pinocchio",
+    language: "Rust",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    lessons: [
+      { slug: "pinocchio-101" },
+      { slug: "pinocchio-accounts" },
+      { slug: "pinocchio-instructions" },
+      { slug: "conclusions" },
+    ],
+  },
 ]);
 
 const releasedCoursesSetting = process.env.NEXT_PUBLIC_RELEASED_COURSES?.trim();

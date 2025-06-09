@@ -1,0 +1,100 @@
+
+
+
+Using `TryFrom` everywhere cleanly separates validation from business logic, improving maintainability and security.
+
+### Logic
+
+Next, we combine the validated accounts and instruction data into a single handler struct:
+
+```rust
+pub struct Deposit<'a> {
+    pub accounts: DepositAccounts<'a>,
+    pub instruction_datas: DepositInstructionData,
+}
+
+impl<'a> TryFrom<(&'a [u8], &'a [AccountInfo])> for Deposit<'a> {
+    type Error = ProgramError;
+
+    fn try_from((data, accounts): (&'a [u8], &'a [AccountInfo])) -> Result<Self, Self::Error> {
+        let accounts = DepositAccounts::try_from(accounts)?;
+        let instruction_datas = DepositInstructionData::try_from(data)?;
+
+        Ok(Self {
+            accounts,
+            instruction_datas,
+        })
+    }
+}
+```
+
+This wrapper:
+1. Accepts both raw inputs (bytes and accounts).
+2. Delegates validation to the individual `TryFrom` implementations.
+3. Returns a fully-typed, fully-checked Deposit struct.
+
+Now the actual logic is concise:
+
+```rust
+impl<'a> Deposit<'a> {
+    pub const DISCRIMINATOR: &'a u8 = &0;
+
+    pub fn process(&self) -> ProgramResult {
+        Transfer {
+            from: self.accounts.owner,
+            to: self.accounts.vault,
+            lamports: self.instruction_datas.amount,
+        }
+        .invoke()?;
+
+        Ok(())
+    }
+}
+```
+
+- `DISCRIMINATOR` is the byte we pattern-match on in entrypoint.
+- `process()` contains only business logic; all checks are already complete.
+
+The result? Anchor-style ergonomics, but with all the benefits of being fully native; explicit, predictable, and fast.
+
+### Cross-Program Invocations (CPIs)
+
+As mentioned, Pinocchio has some helper crates like `pinocchio-system` and `pinocchio-token` that make it super easy to perform Cross-Program Invocations (CPIs) to these native programs. 
+
+These helper structs and methods replace Anchor's `CpiContext` approach we used previously:
+
+```rust
+Transfer {
+    from: self.accounts.owner,
+    to: self.accounts.vault,
+    lamports: self.instruction_datas.amount,
+}
+.invoke()?;
+```
+
+The `Transfer` struct (from `pinocchio-system`) packages every field the System Program needs, and `.invoke()` fires the CPI. No context builder, no extra boilerplate.
+
+When the caller must be a Program-Derived Address (PDA), Pinocchio keeps the API equally concise:
+
+```rust
+let seeds = [
+    Seed::from(b"vault"),
+    Seed::from(self.accounts.owner.key().as_ref()),
+    Seed::from(&[bump]),
+];
+let signers = [Signer::from(&seeds)];
+
+Transfer {
+    from: self.accounts.vault,
+    to: self.accounts.owner,
+    lamports: self.accounts.vault.lamports(),
+}
+.invoke_signed(&signers)?;
+```
+
+**Here's what happens:**
+1. `Seeds` builds an array of Seed objects that match the PDA derivation.
+2. `Signer` wraps those seeds in a Signer helper.
+3. `invoke_signed` calls the CPI, passing the signer array so the PDA can authorize the transfer.
+
+The result? a clean, first-class interface for both regular and signed CPIs; no macros required, and no hidden magic.
