@@ -39,8 +39,8 @@
     "take_challenge_cta": "Ready to take the challenge?",
     "skip_lesson_divider_title": "Or skip to the challenge",
     "skip_lesson": "Skip Lesson",
-    "lesson_completed": "Congratulations, you have completed this course!",
-    "view_other_courses": "View other courses"
+    "lesson_completed": "Congrats, you've finished this course!",
+    "view_other_courses": "View Other Courses"
   },
   "ui": {
     "search_placeholder": "Search by name, category, or level...",
