@@ -50,10 +50,11 @@ export default function CourseCard({
           "--courseColor": color,
           "--swoosh-angle": `${swooshAngle}deg`,
           transform: `translate(${transform.x}px, ${transform.y}px)`,
+          willChange: "opacity",
         } as React.CSSProperties
       }
       className={classNames(
-        "gradient-border overflow-hidden rounded-2xl pb-8 px-5 relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.03),transparent_75%),linear-gradient(180deg,var(--color-background-card),var(--color-background-card))] before:[background:linear-gradient(180deg,rgba(var(--courseColor),0.1),rgba(var(--courseColor),0.05))]",
+        "gradient-border flex overflow-hidden rounded-2xl pb-8 px-5 relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.03),transparent_75%),linear-gradient(180deg,var(--color-background-card),var(--color-background-card))] before:[background:linear-gradient(180deg,rgba(var(--courseColor),0.1),rgba(var(--courseColor),0.05))]",
         view === "grid" && "pt-5",
         view === "list" && "pt-5 !pb-5",
         "transition-transform duration-300 animate-card-swoosh",
@@ -72,8 +73,8 @@ export default function CourseCard({
       <div
         className={classNames(
           "flex",
-          view === "grid" && "flex-col gap-y-24 h-full justify-between",
-          view === "list" && "flex-row justify-between"
+          view === "grid" && "flex-col gap-y-24 flex-grow justify-between",
+          view === "list" && "flex-row justify-between w-full"
         )}
       >
         <div
