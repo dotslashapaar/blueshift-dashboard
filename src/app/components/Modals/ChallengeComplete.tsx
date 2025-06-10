@@ -92,7 +92,11 @@ export default function ChallengeCompleted({
           {currentCourseStatus === "completed" ? (
             <>
               <Button
-                label={t("ChallengePage.mint_modal_button")}
+                label={
+                  isLoading
+                    ? t("ChallengePage.minting")
+                    : t("ChallengePage.mint_modal_button")
+                }
                 variant="primary"
                 size="lg"
                 icon="Claimed"

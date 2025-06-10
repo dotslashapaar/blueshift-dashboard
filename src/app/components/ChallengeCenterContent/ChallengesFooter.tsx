@@ -24,7 +24,7 @@ export default function ChallengesFooter({
   const { challengeStatuses } = usePersistentStore();
   const status = challengeStatuses[challenge.slug];
   const { view } = usePersistentStore();
-  const { mint } = useMintNFT();
+  const { mint, isLoading } = useMintNFT();
   const auth = useAuth();
 
   const handleMint = async () => {
@@ -43,7 +43,7 @@ export default function ChallengesFooter({
         "relative z-10 flex",
         view === "list" &&
           "ml-auto flex-col items-end gap-y-2.5 justify-center",
-        view === "grid" && "w-full justify-between items-end"
+        view === "grid" && "w-full justify-between items-end",
       )}
     >
       {status === "open" && (
@@ -65,11 +65,14 @@ export default function ChallengesFooter({
         <Button
           variant="primary"
           size="md"
-          label={t("ChallengeCenter.claim")}
+          label={
+            isLoading ? t("ChallengePage.minting") : t("ChallengeCenter.claim")
+          }
           icon="Claim"
           iconSide="right"
           className="!w-full !min-w-[150px]"
           onClick={handleMint}
+          disabled={isLoading}
         />
       )}
       {status === "claimed" && (

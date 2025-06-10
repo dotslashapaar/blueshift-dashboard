@@ -132,6 +132,7 @@
     "mint_modal_title": "Congratulations!",
     "mint_modal_description": "You've completed the challenge and unlocked an NFT reward!",
     "mint_modal_button": "Mint NFT",
+    "minting": "Minting NFT...",
     "mint_modal_skip": "Skip for now",
     "mint_modal_skip_description": "You can see your unlocks on the Challenges page.",
     "mint_modal_tweet": "Share on X"
