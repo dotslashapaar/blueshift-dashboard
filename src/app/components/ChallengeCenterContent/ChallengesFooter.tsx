@@ -7,6 +7,7 @@ import { ChallengeMetadata } from "@/app/utils/challenges";
 import { Link } from "@/i18n/navigation";
 import NFTViewer from "../NFTViewer/NFTViewer";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 type ChallengesFooterProps = {
   challenge: ChallengeMetadata;
@@ -24,8 +25,12 @@ export default function ChallengesFooter({
   const status = challengeStatuses[challenge.slug];
   const { view } = usePersistentStore();
   const { mint } = useMintNFT();
+  const auth = useAuth();
 
   const handleMint = async () => {
+    if (!auth.connected) {
+      return auth.login();
+    }
     console.log("minting");
     mint(challenge).catch((error) => {
       console.error("Error minting NFT:", error);

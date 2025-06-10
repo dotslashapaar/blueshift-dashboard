@@ -55,8 +55,10 @@ export function isTokenExpired(token: string | null): boolean {
 }
 
 export function useAuth() {
-  const { publicKey, signMessage, disconnect, connected, connecting } = useWallet();
-  const { setVisible: setModalVisible, visible: isModalVisible } = useWalletModal();
+  const { publicKey, signMessage, disconnect, connected, connecting } =
+    useWallet();
+  const { setVisible: setModalVisible, visible: isModalVisible } =
+    useWalletModal();
   const { authToken, setAuthToken, clearAuthToken } = usePersistentStore();
 
   const authExpiry = useMemo(() => {
@@ -73,7 +75,7 @@ export function useAuth() {
 
   /**
    * Checks if the current authentication token has an 'exp' claim and if that time is in the past.
-   * @returns True if the token has an 'exp' claim and is expired. 
+   * @returns True if the token has an 'exp' claim and is expired.
    *          False if the token is not expired, or if the 'exp' claim is missing (treated as non-expiring by this check).
    */
   const checkTokenExpired = useCallback((): boolean => {
@@ -85,7 +87,9 @@ export function useAuth() {
       const expirationTime = decodedJwt.exp;
       if (typeof expirationTime === "undefined") {
         // No expiration claim, treat as non-expiring for the purpose of this specific check.
-        console.warn("JWT token does not have an expiration (exp) claim. Treating as non-expiring.");
+        console.warn(
+          "JWT token does not have an expiration (exp) claim. Treating as non-expiring.",
+        );
         return false;
       }
       const nowInSeconds = Date.now() / 1000;
@@ -100,7 +104,9 @@ export function useAuth() {
     if (!publicKey || !signMessage) {
       setAuthState({
         loading: false,
-        error: new Error("Wallet not ready for signing: publicKey or signMessage missing."),
+        error: new Error(
+          "Wallet not ready for signing: publicKey or signMessage missing.",
+        ),
         status: "signed-out",
       });
       return;
@@ -110,7 +116,9 @@ export function useAuth() {
     setAuthState({ loading: true, error: null, status: "signing-in" });
 
     try {
-      const { pubkey, timestamp, message } = prepareSignInMessage(publicKey.toBase58());
+      const { pubkey, timestamp, message } = prepareSignInMessage(
+        publicKey.toBase58(),
+      );
       const encodedMessage = new TextEncoder().encode(message);
       const signature = await signMessage(encodedMessage);
       const serializedSignature = bs58.encode(signature);
@@ -128,14 +136,16 @@ export function useAuth() {
       });
 
       if (!response.ok) {
-        const errorBody = await response.text().catch(() => "Failed to read error response body.");
+        const errorBody = await response
+          .text()
+          .catch(() => "Failed to read error response body.");
         throw new Error(
-          `Authentication API request failed with status ${response.status}: ${errorBody || response.statusText}`
+          `Authentication API request failed with status ${response.status}: ${errorBody || response.statusText}`,
         );
       }
       const data: AuthResponse = await response.json();
 
-      const decodedJwt = decodeJwt(data.token)
+      const decodedJwt = decodeJwt(data.token);
 
       setAuthToken(data.token);
       // Explicitly set signed-in state and clear loading on success
@@ -172,7 +182,9 @@ export function useAuth() {
       // Fallback for any other unusual states.
       setAuthState({
         loading: false,
-        error: new Error("Cannot initiate login: wallet state is not conducive to signing."),
+        error: new Error(
+          "Cannot initiate login: wallet state is not conducive to signing.",
+        ),
         status: "signed-out",
       });
     }
@@ -191,7 +203,10 @@ export function useAuth() {
     // This effect transitions to "signed-in" state when conditions are met.
     if (authToken && connected) {
       // Only transition to "signed-in" if not already signed-in and not in the process of signing out.
-      if (authState.status !== "signed-in" && authState.status !== "signing-out") {
+      if (
+        authState.status !== "signed-in" &&
+        authState.status !== "signing-out"
+      ) {
         setAuthState({ loading: false, error: null, status: "signed-in" });
       }
     } else if (!authToken && authState.status === "signed-in") {
@@ -208,10 +223,21 @@ export function useAuth() {
     // This effect triggers if status is "signing-in" AND the wallet is connected and ready.
     // If login() called _performSignInSequence directly, the status would have already transitioned
     // from "signing-in" by the time _performSignInSequence completes, preventing a redundant call here.
-    if (authState.status === "signing-in" && connected && publicKey && signMessage) {
+    if (
+      authState.status === "signing-in" &&
+      connected &&
+      publicKey &&
+      signMessage
+    ) {
       _performSignInSequence();
     }
-  }, [authState.status, connected, publicKey, signMessage, _performSignInSequence]);
+  }, [
+    authState.status,
+    connected,
+    publicKey,
+    signMessage,
+    _performSignInSequence,
+  ]);
 
   // Effect to handle cancellation of sign-in (e.g. modal closed before connection)
   useEffect(() => {
@@ -258,5 +284,14 @@ export function useAuth() {
     }
   }, [clearAuthToken, disconnect, connected, setAuthState]);
 
-  return { ...authState, login, logout, publicKey, authToken, authExpiry, checkTokenExpired };
+  return {
+    login,
+    logout,
+    publicKey,
+    authToken,
+    authExpiry,
+    checkTokenExpired,
+    connected,
+    ...authState,
+  };
 }
