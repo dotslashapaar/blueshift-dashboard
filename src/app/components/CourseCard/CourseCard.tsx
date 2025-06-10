@@ -55,9 +55,9 @@ export default function CourseCard({
       }
       className={classNames(
         "gradient-border flex overflow-hidden rounded-2xl pb-8 px-5 relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.03),transparent_75%),linear-gradient(180deg,var(--color-background-card),var(--color-background-card))] before:[background:linear-gradient(180deg,rgba(var(--courseColor),0.1),rgba(var(--courseColor),0.05))]",
-        view === "grid" && "pt-5",
+        view === "grid" && "pt-5 animate-card-swoosh",
         view === "list" && "pt-5 !pb-5",
-        "transition-transform duration-300 animate-card-swoosh",
+        "transition-transform duration-300",
         isHovered && `swoosh-${direction}`,
         className
       )}
