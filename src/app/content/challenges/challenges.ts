@@ -68,6 +68,19 @@ const allChallenges: ChallengeMetadata[] = [
       { instructionKey: "refund" },
     ],
   },
+  {
+    slug: "pinocchio-passkey-vault",
+    language: "Rust",
+    color: "221,234,224",
+    difficulty: 2,
+    isFeatured: true,
+    unitName: "Pinocchio Passkey Vault",
+    apiPath: "/v1/verify/pinocchio/passkey-vault",
+    requirements: [
+      { instructionKey: "deposit" },
+      { instructionKey: "withdraw" },
+    ],
+  },
 ];
 
 const releasedChallengesSetting = process.env.NEXT_PUBLIC_RELEASED_CHALLENGES?.trim();

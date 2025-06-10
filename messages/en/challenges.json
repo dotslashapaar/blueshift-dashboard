@@ -80,6 +80,17 @@
         }
       }
     },
+    "pinocchio-passkey-vault": {
+      "title": "Pinocchio Passkey Vault",
+      "requirements": {
+        "deposit": {
+          "title": "Challenge 1: Taking deposits"
+        },
+        "withdraw": {
+          "title": "Challenge 2: Allowing withdrawal"
+        }
+      }
+    },
     "pinocchio-memo": {
       "title": "Pinocchio Memo",
       "requirements": {
