@@ -44,6 +44,31 @@
         }
       }
     },
+    "pinocchio-escrow": {
+      "title": "Pinocchio Escrow",
+      "requirements": {
+        "make": {
+          "title": "Challenge 1: Making an escrow swap deal"
+        },
+        "take": {
+          "title": "Challenge 2: Taking an escrow swap deal"
+        },
+        "refund": {
+          "title": "Challenge 3: Canceling an escrow swap deal"
+        }
+      }
+    },
+    "pinocchio-passkey-vault": {
+      "title": "Pinocchio Passkey Vault",
+      "requirements": {
+        "deposit": {
+          "title": "Challenge 1: Taking deposits"
+        },
+        "withdraw": {
+          "title": "Challenge 2: Allowing withdrawal"
+        }
+      }
+    },
     "pinocchio-memo": {
       "title": "Pinocchio Memo",
       "requirements": {
