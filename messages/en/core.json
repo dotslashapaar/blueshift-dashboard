@@ -64,7 +64,7 @@
     "locked": "Locked",
     "empty_title": "No challenges found",
     "empty_description": "Try changing your filters to see challenges here.",
-    "locked_description": "Complete Challenge to Unlock",
+    "locked_description": "Connect wallet to mint your NFT",
     "claimed_description": "NFT Is Available in your Wallet",
     "view_nft": "View NFT",
     "filter__label": "All Statuses",

@@ -5,9 +5,8 @@ import { usePersistentStore } from "@/stores/store";
 import useMintNFT from "@/hooks/useMintNFT";
 import { ChallengeMetadata } from "@/app/utils/challenges";
 import { Link } from "@/i18n/navigation";
-import NFTViewer from "../NFTViewer/NFTViewer";
-import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import Icon from "../Icon/Icon";
 
 type ChallengesFooterProps = {
   challenge: ChallengeMetadata;
@@ -31,7 +30,6 @@ export default function ChallengesFooter({
     if (!auth.connected) {
       return auth.login();
     }
-    console.log("minting");
     mint(challenge).catch((error) => {
       console.error("Error minting NFT:", error);
     });
@@ -61,7 +59,13 @@ export default function ChallengesFooter({
           />
         </Link>
       )}
-      {status === "completed" && (
+      {status === "completed" && !auth.connected && (
+        <span className="text-tertiary font-medium gap-x-1.5 flex items-center">
+          <Icon name="Locked" />
+          {t("ChallengeCenter.locked_description")}
+        </span>
+      )}
+      {status === "completed" && auth.connected && (
         <Button
           variant="primary"
           size="md"
