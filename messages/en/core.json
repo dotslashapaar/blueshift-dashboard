@@ -105,6 +105,7 @@
     "4": "Expert"
   },
   "ChallengePage": {
+    "pagination_header": "Challenges",
     "connect_wallet": "Connect Wallet",
     "connect_wallet_description": "A Solana wallet is required to complete the challenge and unlock NFTs",
     "back_to_lessons": "Back to Lessons",

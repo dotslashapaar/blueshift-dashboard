@@ -17,54 +17,16 @@ import ContentPagination from "@/app/components/CoursesContent/ContentPagination
 interface ChallengePageProps {
   params: Promise<{
     challengeSlug: string;
+    pageSlug: string;
     locale: string;
   }>;
 }
 
-// Disabled for now, until we have the OG images ready
-// export async function generateMetadata({
-//   params,
-// }: LessonPageProps): Promise<Metadata> {
-//   const { challengeSlug, locale } = await params;
-//
-//   Disabled for now, until we have the OG images ready
-//   const t = await getTranslations({ locale, namespace: "metadata" });
-//   const pathname = getPathname({
-//     locale,
-//     href: `/courses/${courseName}/${lessonName}`,
-//   });
-//
-//   const ogImage = {
-//     src: `/graphics/banners/${courseName}.png`,
-//     width: 1200,
-//     height: 630,
-//   };
-//
-//   return {
-//     title: t("title"),
-//     description: t("description"),
-//     openGraph: {
-//       title: t("title"),
-//       type: "website",
-//       description: t("description"),
-//       siteName: t("title"),
-//       url: pathname,
-//       images: [
-//         {
-//           url: ogImage.src,
-//           width: ogImage.width,
-//           height: ogImage.height,
-//         },
-//       ],
-//     },
-//   };
-// }
-
 export default async function ChallengePage({ params }: ChallengePageProps) {
   const t = await getTranslations();
-  const { challengeSlug, locale } = await params;
+  const { challengeSlug, pageSlug, locale } = await params;
 
-  let Challenge;
+  let Page;
   let challengeMetadata: ChallengeMetadata | undefined;
   try {
     challengeMetadata = await getChallenge(challengeSlug);
@@ -73,12 +35,18 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       notFound();
     }
 
+    const pageExists = challengeMetadata.pages?.some(
+      (p) => p.slug === pageSlug,
+    );
+    if (!pageExists) {
+      notFound();
+    }
+
     const mdxModule = await import(
-      `@/app/content/challenges/${challengeSlug}/${locale}/challenge.mdx`
+      `@/app/content/challenges/${challengeSlug}/${locale}/pages/${pageSlug}.mdx`
     );
 
-
-    Challenge = mdxModule.default;
+    Page = mdxModule.default;
   } catch (error) {
     console.error(error);
     notFound();
@@ -89,9 +57,14 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
     notFound();
   }
 
+  const currentPageIndex = challengeMetadata.pages?.findIndex(
+    (p) => p.slug === pageSlug,
+  );
   const nextPage =
-    challengeMetadata.pages && challengeMetadata.pages.length > 0
-      ? challengeMetadata.pages[0]
+    currentPageIndex !== undefined &&
+    currentPageIndex > -1 &&
+    challengeMetadata.pages
+      ? challengeMetadata.pages[currentPageIndex + 1]
       : null;
 
   const challengePageTitle = t(`challenges.${challengeSlug}.title`);
@@ -137,7 +110,9 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       <div
         className="w-full"
         style={{
-          background: `linear-gradient(180deg, rgb(${challengeColors[challengeMetadata.language]},0.05) 0%, transparent 100%)`,
+          background: `linear-gradient(180deg, rgb(${
+            challengeColors[challengeMetadata.language]
+          },0.05) 0%, transparent 100%)`,
         }}
       >
         <div className="px-4 py-14 pb-20 md:px-8 lg:px-14 max-w-app w-full mx-auto flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
@@ -149,13 +124,17 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
                 spacingBottom={2}
                 spacingX={6}
                 style={{
-                  color: `rgb(${challengeColors[challengeMetadata.language]},1)`,
+                  color: `rgb(${
+                    challengeColors[challengeMetadata.language]
+                  },1)`,
                 }}
               />
               <div
                 className="w-[24px] h-[24px] rounded-sm flex items-center justify-center text-brand-primary"
                 style={{
-                  backgroundColor: `rgb(${challengeColors[challengeMetadata.language]},0.10)`,
+                  backgroundColor: `rgb(${
+                    challengeColors[challengeMetadata.language]
+                  },0.10)`,
                 }}
               >
                 <Icon name={challengeMetadata.language} size={16 as 14} />
@@ -181,7 +160,9 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
                 <p
                   className="text-secondary mt-1 text-sm"
                   style={{
-                    color: `rgb(${challengeColors[challengeMetadata.language]})`,
+                    color: `rgb(${
+                      challengeColors[challengeMetadata.language]
+                    })`,
                   }}
                 >
                   {collectionSize.toString()} Graduates
@@ -199,10 +180,11 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
           <ContentPagination
             type="challenge"
             challenge={challengeMetadata}
+            currentPageSlug={pageSlug}
           />
           <div className="pb-8 pt-[36px] -mt-[36px] order-2 lg:order-1 col-span-1 md:col-span-7 flex flex-col gap-y-8 lg:border-border lg:border-x border-border lg:px-6">
             <MdxLayout>
-              <Challenge />
+              <Page />
             </MdxLayout>
 
             <div className=" w-full flex items-center flex-col gap-y-10">
@@ -252,4 +234,4 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
       </div>
     </div>
   );
-}
+} 

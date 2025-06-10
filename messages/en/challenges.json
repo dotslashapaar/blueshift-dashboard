@@ -13,6 +13,17 @@
     },
     "anchor-escrow": {
       "title": "Anchor Escrow",
+      "pages": {
+        "make": {
+          "title": "Make"
+        },
+        "take": {
+          "title": "Take"
+        },
+        "refund": {
+          "title": "Refund"
+        }
+      },
       "requirements": {
         "make": {
           "title": "Challenge 1: Making an escrow swap deal"
@@ -46,6 +57,17 @@
     },
     "pinocchio-escrow": {
       "title": "Pinocchio Escrow",
+      "pages": {
+        "make": {
+          "title": "Make"
+        },
+        "take": {
+          "title": "Take"
+        },
+        "refund": {
+          "title": "Refund"
+        }
+      },
       "requirements": {
         "make": {
           "title": "Challenge 1: Making an escrow swap deal"

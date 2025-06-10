@@ -33,6 +33,9 @@ export type ChallengeMetadata = {
   isFeatured: boolean;
   unitName: string;
   apiPath: string;
+  pages?: {
+    slug: string;
+  }[];
   requirements: {
     instructionKey: string;
   }[];

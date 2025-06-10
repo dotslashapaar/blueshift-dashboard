@@ -5,7 +5,7 @@ import { courseColors } from "@/app/utils/course";
 import Icon from "@/app/components/Icon/Icon";
 import Divider from "@/app/components/Divider/Divider";
 import TableOfContents from "@/app/components/TableOfContents/TableOfContents";
-import CoursePagination from "@/app/components/CoursesContent/CoursePagination";
+import ContentPagination from "@/app/components/CoursesContent/ContentPagination";
 import { Link } from "@/i18n/navigation";
 import Button from "@/app/components/Button/Button";
 import LessonTitle from "@/app/components/LessonTitle/LessonTitle";
@@ -186,7 +186,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
       <div className="max-w-app flex flex-col gap-y-8 h-full relative px-4 md:px-8 lg:px-14 mx-auto w-full mt-[36px]">
         <div className="grid grid-cols-1 lg:grid-cols-10 xl:grid-cols-13 gap-y-24 lg:gap-y-0 gap-x-0 lg:gap-x-6">
-          <CoursePagination
+          <ContentPagination
+            type="course"
             course={courseMetadata}
             currentLesson={currentLessonIndex + 1}
           />
