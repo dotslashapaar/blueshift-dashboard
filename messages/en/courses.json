@@ -17,6 +17,15 @@
         "pinocchio-instructions": "Pinocchio Instructions",
         "conclusions": "Conclusions"
       }
+    },
+    "passkeys-on-solana": {
+      "title": "Passkeys on Solana",
+      "lessons": {
+        "introduction": "Passkeys on Solana",
+        "passkeys-with-anchor": "Passkeys with Anchor",
+        "passkeys-with-pinocchio": "Passkeys with Pinocchio",
+        "conclusions": "Conclusions"
+      }
     }
   }
 }
