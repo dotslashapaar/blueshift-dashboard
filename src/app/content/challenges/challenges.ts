@@ -23,6 +23,11 @@ const allChallenges: ChallengeMetadata[] = [
     isFeatured: true,
     unitName: "Anchor Escrow",
     apiPath: "/v1/verify/anchor/escrow",
+    pages: [
+      { slug: "make" },
+      { slug: "take" },
+      { slug: "refund" },
+    ],
     requirements: [
       { instructionKey: "make" },
       { instructionKey: "take" },
@@ -52,12 +57,16 @@ const allChallenges: ChallengeMetadata[] = [
     isFeatured: true,
     unitName: "Pinocchio Escrow",
     apiPath: "/v1/verify/pinocchio/escrow",
+    pages: [
+      { slug: "make" },
+      { slug: "take" },
+      { slug: "refund" },
+    ],
     requirements: [
       { instructionKey: "make" },
       { instructionKey: "take" },
       { instructionKey: "refund" },
     ],
-    collectionMintAddress: "...",
   },
   {
     slug: "pinocchio-passkey-vault",
