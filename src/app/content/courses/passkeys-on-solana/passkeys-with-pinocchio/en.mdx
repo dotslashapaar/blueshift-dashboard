@@ -1,0 +1,81 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+import { Codeblock } from "../../../../components/Codeblock/Codeblock";
+
+# Passkeys with Pinocchio
+
+[Deanmlittle](https://x.com/deanmlittle) from the Blueshift team has released the first crate that enables Pinocchio compatibility for verifying instructions that execute the `Secp256r1` precompile.
+
+<ArticleSection name="Introduction" id="introduction" level="h2" />
+
+To verify `Secp256r1` signatures, we need two main components:
+1. The instruction sysvar: This allows us to introspect the `Secp256r1` signature
+2. The `pinocchio-secp256r1-instruction` crate: This provides the tools to deserialize the instruction
+
+The instruction sysvar is already included in the Pinocchio crate, so no additional installation is needed. 
+
+However, we need to add the `pinocchio-secp256r1-instruction` crate to our Pinocchio program:
+
+```
+cargo add pinocchio-secp256r1-instruction
+```
+
+<ArticleSection name="Implementation" id="implementation" level="h2" />
+
+To implement the verification, we need to:
+1. Include the Instruction Sysvar program (`Sysvar1nstructions1111111111111111111111111`, which we'll refer to as `instructions`)
+2. Place the `Secp256r1` instruction after our current instruction
+
+Here's how to access and deserialize the instructions:
+
+```rust
+// Deserialize the instructions sysvar
+let instructions: Instructions<Ref<[u8]>> = Instructions::try_from(self.accounts.instructions)?;
+// Get the instruction that follows our current one
+let ix: IntrospectedInstruction = instructions.get_instruction_relative(1)?;
+```
+
+Next, we deserialize the `Secp256r1` instruction:
+
+```rust
+// Deserialize the Secp256r1 instruction
+let secp256r1_ix = Secp256r1Instruction::try_from(&ix)?;
+```
+
+We then perform some security checks.
+
+It's crucial to implement several security checks:
+1. **Authority Check**: Ensures that only authorized recipients can receive funds from the PDA that wraps the passkey public key. This prevents MEV attacks where someone could intercept the transaction, capture the valid signature, and replace the intended recipient.
+2. **Expiry Check**: Enforces a time limit on signature validity. Since validated signatures remain valid indefinitely, implementing an expiry timestamp prevents replay attacks.
+
+We perform these checks by putting this data in the message of the signature.
+
+Here's how to implement these security checks:
+
+```rust
+// Verify the fee payer is authorized
+let (receiver, expiry) = secp256r1_ix.get_message_data(0)?.split_at_checked(32).ok_or(ProgramError::InvalidInstructionData)?;
+if self.accounts.payer.key().ne(payer) {
+    return Err(ProgramError::InvalidAccountOwner);
+}
+
+// Check signature expiration
+let now = Clock::get()?.unix_timestamp;
+let expiry = i64::from_le_bytes(expiry.try_into().map_err(|_| ProgramError::InvalidInstructionData)?);
+if now > expiry {
+    return Err(ProgramError::InvalidInstructionData);
+}
+```
+
+Finally, we can use the public key to create the signer seeds for our CPI (Cross-Program Invocation):
+
+```rust
+// Verify the first signature matches our PDA owner
+let signer: Secp256r1Pubkey = *secp256r1_ix.get_signer(0)?;
+// Create signer seeds for CPI
+let seeds = [
+    Seed::from(signer[..1].as_ref()),
+    Seed::from(signer[1..].as_ref()),
+];
+let signers = [Signer::from(&seeds)];
+```
+
