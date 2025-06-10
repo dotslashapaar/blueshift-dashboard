@@ -1,7 +1,12 @@
 import { ImageResponse } from "next/og";
 import { createTranslator } from 'use-intl/core';
 
-import { getCourse } from "@/app/utils/mdx";
+import {
+  CourseMetadata,
+  LessonMetadata,
+} from "@/app/utils/course";
+import { getCourse, getChallenge } from "@/app/utils/mdx";
+import { ChallengeMetadata } from "@/app/utils/challenges";
 
 export interface GeneratedBannerData {
   data: ArrayBuffer;
@@ -10,42 +15,60 @@ export interface GeneratedBannerData {
   height: number;
 }
 
+type BannerableItem = CourseMetadata | ChallengeMetadata;
+
 interface GenerateBannerDataParams {
-  courseSlug: string;
+  itemSlug: string;
+  type: "course" | "challenge";
   lessonSlug?: string;
   locale?: string;
 }
 
 export const generateBannerData = async ({
-  courseSlug,
+  itemSlug,
+  type,
   lessonSlug,
   locale = "en",
 }: GenerateBannerDataParams): Promise<GeneratedBannerData | null> => {
   try {
-    const course = await getCourse(courseSlug);
+    let item: BannerableItem | undefined;
+    if (type === "course") {
+      item = await getCourse(itemSlug);
+    } else {
+      item = await getChallenge(itemSlug);
+    }
 
-    if (!course) {
-      console.warn(`[BannerGenerator] Course '${courseSlug}' not found by getCourse. Skipping banner generation.`);
+    if (!item) {
+      console.warn(
+        `[BannerGenerator] ${type} '${itemSlug}' not found. Skipping banner generation.`,
+      );
       return null;
     }
 
     let lessonMetaData;
-    if (lessonSlug) {
-      lessonMetaData = Array.isArray(course.lessons) ? course.lessons.find(l => l.slug === lessonSlug) : undefined;
+    if (lessonSlug && "lessons" in item && Array.isArray(item.lessons)) {
+      lessonMetaData = item.lessons.find(
+        (l: LessonMetadata) => l.slug === lessonSlug,
+      );
       if (!lessonMetaData) {
-        console.warn(`[BannerGenerator] Lesson slug '${lessonSlug}' not found in course '${courseSlug}' lessons metadata. Skipping banner for this lesson.`);
+        console.warn(
+          `[BannerGenerator] Lesson slug '${lessonSlug}' not found in ${type} '${itemSlug}' lessons metadata. Skipping banner for this lesson.`,
+        );
         return null;
       }
     }
 
-    const messages = await import(`@/../messages/${locale}/courses.json`);
-    const t = createTranslator({locale, messages});
+    const messages = await import(`@/../messages/${locale}/${type}s.json`);
+    const t = createTranslator({ locale, messages });
 
-    const courseTitle = t(`courses.${courseSlug}.title`);
-    const lessonTitle = lessonSlug ? t(`courses.${courseSlug}.lessons.${lessonSlug}`) : null;
-    const title = lessonTitle ? `${courseTitle} - ${lessonTitle}` : courseTitle;
+    const itemTitle = t(`${type}s.${itemSlug}.title`);
+    const lessonTitle =
+      lessonSlug && "lessons" in item
+        ? t(`${type}s.${itemSlug}.lessons.${lessonSlug}`)
+        : null;
+    const title = lessonTitle ? `${itemTitle} - ${lessonTitle}` : itemTitle;
 
-    const language: string = course.language.toLowerCase();
+    const language: string = item.language.toLowerCase();
 
     const getLanguageColor = (opacity: number = 1) => {
       switch (language) {
@@ -115,7 +138,7 @@ export const generateBannerData = async ({
               left: 0,
               transform: "scale(1.45)",
               backdropFilter: "blur(10px)",
-              zIndex: "1px",
+              zIndex: 1,
             }}
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -733,7 +756,7 @@ export const generateBannerData = async ({
               position: "absolute",
               top: 24,
               left: 24,
-              zIndex: "1px",
+              zIndex: 1,
             }}
             xmlns="http://www.w3.org/2000/svg">
             <path d="M0 582L7.49333e-07 576.286L19.9998 576.286L19.9998 582L0 582Z" fill={getLanguageColor(1)} />
@@ -761,7 +784,7 @@ export const generateBannerData = async ({
     };
 
   } catch (e: any) {
-    console.error(`[BannerGenerator] Failed to generate banner for ${courseSlug}${lessonSlug ? '/' + lessonSlug : ''}: ${e.message}`);
+    console.error(`[BannerGenerator] Failed to generate banner for ${itemSlug}${lessonSlug ? '/' + lessonSlug : ''}: ${e.message}`);
     return null;
   }
 };

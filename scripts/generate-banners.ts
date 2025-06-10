@@ -2,44 +2,70 @@ import fs from "fs/promises";
 import path from "path";
 import { generateBannerData } from "@/lib/banners/banner-generator";
 import { courses } from "@/app/content/courses/courses";
+import { challenges } from "@/app/content/challenges/challenges";
 
-const OUTPUT_DIR = path.join(process.cwd(), "public", "graphics", "banners");
+const COURSE_BANNERS_DIR = path.join(
+  process.cwd(),
+  "public",
+  "graphics",
+  "course-banners",
+);
+const CHALLENGE_BANNERS_DIR = path.join(
+  process.cwd(),
+  "public",
+  "graphics",
+  "challenge-banners",
+);
 
-async function main() {
-  await fs.mkdir(OUTPUT_DIR, { recursive: true });
-  console.log(`Output directory ensured: ${OUTPUT_DIR}`);
+async function generateBannersFor(
+  items: any[],
+  type: "course" | "challenge",
+  outputDir: string,
+) {
+  await fs.mkdir(outputDir, { recursive: true });
+  console.log(`Output directory ensured: ${outputDir}`);
 
-  if (!courses || !Array.isArray(courses) || courses.length === 0) {
-    console.error("No courses found to generate banners for.");
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    console.error(`No ${type}s found to generate banners for.`);
     return;
   }
 
-  console.log(`Found ${courses.length} courses to generate banners for.`);
+  console.log(`Found ${items.length} ${type}s to generate banners for.`);
 
-  for (const course of courses) {
-    if (!course.slug) {
-      console.warn(`Course with no slug found, skipping: ${JSON.stringify(course)}`);
+  for (const item of items) {
+    if (!item.slug) {
+      console.warn(
+        `${type} with no slug found, skipping: ${JSON.stringify(item)}`,
+      );
       continue;
     }
 
-    const courseSlug = course.slug;
-    console.log(`Processing course overview for: ${courseSlug}`);
+    const itemSlug = item.slug;
+    console.log(`Processing ${type} overview for: ${itemSlug}`);
 
-    const bannerInfo = await generateBannerData({ courseSlug });
+    const bannerInfo = await generateBannerData({
+      itemSlug,
+      type,
+    });
 
     if (bannerInfo && bannerInfo.data) {
-      const safeCourseSlug = courseSlug.replace(/[^a-zA-Z0-9_\-]/g, "");
-      const filename = `${safeCourseSlug}.png`;
-      const filePath = path.join(OUTPUT_DIR, filename);
+      const safeItemSlug = itemSlug.replace(/[^a-zA-Z0-9_\-]/g, "");
+      const filename = `${safeItemSlug}.png`;
+      const filePath = path.join(outputDir, filename);
 
       await fs.writeFile(filePath, Buffer.from(bannerInfo.data));
       console.log(`Successfully generated and saved: ${filePath}`);
     } else {
       console.warn(
-        `Skipped banner for ${courseSlug} (generation failed or no data returned).`,
+        `Skipped banner for ${itemSlug} (generation failed or no data returned).`,
       );
     }
   }
+}
+
+async function main() {
+  await generateBannersFor(courses, "course", COURSE_BANNERS_DIR);
+  await generateBannersFor(challenges, "challenge", CHALLENGE_BANNERS_DIR);
 
   console.log("Banner generation process complete.");
 }
