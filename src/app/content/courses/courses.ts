@@ -27,6 +27,19 @@ const allCourses: CourseMetadata[] = withCourseNumber([
       { slug: "conclusions" },
     ],
   },
+  {
+    slug: "passkeys-on-solana",
+    language: "Rust",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    lessons: [
+      { slug: "introduction" },
+      { slug: "passkeys-with-anchor" },
+      { slug: "passkeys-with-pinocchio" },
+      { slug: "conclusions" },
+    ],
+  },
 ]);
 
 const releasedCoursesSetting = process.env.NEXT_PUBLIC_RELEASED_COURSES?.trim();
