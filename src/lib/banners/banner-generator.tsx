@@ -38,7 +38,7 @@ export const generateBannerData = async ({
       }
     }
 
-    const messages = await import(`@/../messages/${locale}.json`);
+    const messages = await import(`@/../messages/${locale}/courses.json`);
     const t = createTranslator({locale, messages});
 
     const courseTitle = t(`courses.${courseSlug}.title`);
