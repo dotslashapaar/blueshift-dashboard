@@ -117,7 +117,6 @@ export default async function RootLayout({
                   {children}
                 </div>
                 <Footer />
-                <div className="bg-black p-5 text-green-500">{pathname}</div>
               </>
             ) : (
               children
