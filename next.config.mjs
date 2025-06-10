@@ -1,8 +1,12 @@
 import createMDX from "@next/mdx";
 import rehypePrettyCode from "rehype-pretty-code";
 import createNextIntlPlugin from "next-intl/plugin";
+import redirects from "./redirects.mjs";
 
 const nextConfig = {
+  async redirects() {
+    return redirects;
+  },
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   eslint: {
     ignoreDuringBuilds: true,
