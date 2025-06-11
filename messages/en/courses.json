@@ -18,12 +18,12 @@
         "conclusions": "Conclusions"
       }
     },
-    "passkeys-on-solana": {
+    "secp256r1-on-solana": {
       "title": "secp256r1 on Solana",
       "lessons": {
         "introduction": "secp256r1 on Solana",
-        "passkeys-with-anchor": "secp256r1 with Anchor",
-        "passkeys-with-pinocchio": "secp256r1 with Pinocchio",
+        "secp256r1-with-anchor": "secp256r1 with Anchor",
+        "secp256r1-with-pinocchio": "secp256r1 with Pinocchio",
         "conclusions": "Conclusions"
       }
     }
