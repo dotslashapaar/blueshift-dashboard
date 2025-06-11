@@ -12,6 +12,7 @@ export default function NFTGeneratorPage() {
         isAnimationComplete={true}
         useAnimation={false}
         showControls={true}
+        showBackground={true}
       />
     </div>
   );
