@@ -68,12 +68,6 @@ However, given any x-coordinate, only two possible y-coordinates satisfy the cur
 
 The compressed format stores the 32-byte x-coordinate plus a single parity byte (0x02 for even y, 0x03 for odd y), allowing full point reconstruction with 48% less storage.
 
-### Architectural Implementation 
-
-Programs can verify Secp256r1 signatures by parsing the instruction sysvar and calling `Secp256r1Instruction::try_from()` on `secp256r1` instructions found in the same transaction.
-
-The library handles all offset calculations and bounds checking, exposing simple methods like `get_signer()`, `get_signature()`, and `get_message_data()` to extract verified components.
-
 ### PDAs as wallets
 
 The Secp256r1 support enables a revolutionary architecture where users can authenticate using modern methods like passkeys.
