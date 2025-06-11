@@ -46,7 +46,7 @@ let secp256r1_ix = Secp256r1Instruction::try_from(&ix)?;
 We then perform some security checks.
 
 It's crucial to implement several security checks:
-1. **Authority Check**: Ensures that only authorized recipients can receive funds from the PDA that wraps the secp256r1 public key. This prevents MEV attacks where someone could intercept the transaction, capture the valid signature, and replace the intended recipient.
+1. **Authority Check**: Ensures that only authorized recipients can receive funds from the PDA that wraps the Secp256r1 public key. This prevents MEV attacks where someone could intercept the transaction, capture the valid signature, and replace the intended recipient.
 2. **Expiry Check**: Enforces a time limit on signature validity. Since validated signatures remain valid indefinitely, implementing an expiry timestamp prevents replay attacks.
 
 We perform these checks by putting this data in the message of the signature.

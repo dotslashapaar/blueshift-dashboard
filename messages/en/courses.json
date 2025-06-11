@@ -19,11 +19,11 @@
       }
     },
     "secp256r1-on-solana": {
-      "title": "secp256r1 on Solana",
+      "title": "Secp256r1 on Solana",
       "lessons": {
-        "introduction": "secp256r1 on Solana",
-        "secp256r1-with-anchor": "secp256r1 with Anchor",
-        "secp256r1-with-pinocchio": "secp256r1 with Pinocchio",
+        "introduction": "Secp256r1 on Solana",
+        "secp256r1-with-anchor": "Secp256r1 with Anchor",
+        "secp256r1-with-pinocchio": "Secp256r1 with Pinocchio",
         "conclusions": "Conclusions"
       }
     }
