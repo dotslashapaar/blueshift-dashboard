@@ -1,11 +1,11 @@
-<ArticleSection name="Make" id="make" level="h2" />
+# Make
 
 The `make` instruction does three jobs:
 - Initialises the Escrow record and stores all deal terms.
 - Creates the Vault (an ATA for `mint_a` owned by the `escrow`).
 - Moves the maker's Token A into that vault with a CPI to the SPL-Token program.
 
-### Required Accounts
+<ArticleSection name="Required Accounts" id="required-accounts" level="h2" />
 
 Below are the accounts the context needs:
 
@@ -19,13 +19,13 @@ Below are the accounts the context needs:
 - token_program: the token program. Must be executable
 - system_program: the system program. Must be executable
 
-We're going to use the types that live in the `helper.rs` file that we discussed in the previous section.
+**Note**: We're going to use the types that introduced in the [Introduction to Pinocchio](https://learn.blueshift.gg/en/courses/introduction-to-pinocchio/pinocchio-accounts).
 
 In code, this looks like:
 
 <Codeblock lang="rust">
-  ```rust
-  pub struct MakeAccounts<'a> {
+```rust
+pub struct MakeAccounts<'a> {
   pub maker: &'a AccountInfo,
   pub escrow: &'a AccountInfo,
   pub mint_a: &'a AccountInfo,
@@ -36,37 +36,37 @@ In code, this looks like:
   pub token_program: &'a AccountInfo,
 }
 
-  impl<'a> TryFrom<&'a [AccountInfo]> for MakeAccounts<'a> {
+impl<'a> TryFrom<&'a [AccountInfo]> for MakeAccounts<'a> {
   type Error = ProgramError;
 
   fn try_from(accounts: &'a [AccountInfo]) -> Result<Self, Self::Error> {
-  let [maker, escrow, mint_a, mint_b, maker_ata_a, vault, system_program, token_program, _] = accounts else {
-  return Err(ProgramError::NotEnoughAccountKeys);
-};
+    let [maker, escrow, mint_a, mint_b, maker_ata_a, vault, system_program, token_program, _] = accounts else {
+      return Err(ProgramError::NotEnoughAccountKeys);
+    };
 
-  // Basic Accounts Checks
-  SignerAccount::check(maker)?;
-  MintInterface::check(mint_a)?;
-  MintInterface::check(mint_b)?;
-  AssociatedTokenAccount::check(maker_ata_a, maker, mint_a, token_program)?;
+    // Basic Accounts Checks
+    SignerAccount::check(maker)?;
+    MintInterface::check(mint_a)?;
+    MintInterface::check(mint_b)?;
+    AssociatedTokenAccount::check(maker_ata_a, maker, mint_a, token_program)?;
 
-  // Return the accounts
-  Ok(Self {
-  maker,
-  escrow,
-  mint_a,
-  mint_b,
-  maker_ata_a,
-  vault,
-  system_program,
-  token_program,
-})
-}
+    // Return the accounts
+    Ok(Self {
+      maker,
+      escrow,
+      mint_a,
+      mint_b,
+      maker_ata_a,
+      vault,
+      system_program,
+      token_program,
+    })
   }
-  ```
+}
+```
 </Codeblock>
 
-### Instruction Data
+<ArticleSection name="Instruction Data" id="instruction-data" level="h2" />
 
 Here's the instruction data we need to pass in:
 - seed: the random number used during seed derivation. Must be a u64
@@ -78,46 +78,128 @@ We'll check to make sure the `amount` isn't zero, since that wouldn't make sense
 Here's how it looks in code:
 
 <Codeblock lang="rust">
-  ```rust
-  pub struct MakeInstructionData {
+```rust
+pub struct MakeInstructionData {
   pub seed: u64,
   pub receive: u64,
   pub amount: u64,
 }
 
-  impl<'a> TryFrom<&'a [u8]> for MakeInstructionData {
+impl<'a> TryFrom<&'a [u8]> for MakeInstructionData {
   type Error = ProgramError;
 
   fn try_from(data: &'a [u8]) -> Result<Self, Self::Error> {
-  if data.len() != size_of::<u64>() * 3 {
-  return Err(ProgramError::InvalidInstructionData);
-}
+    if data.len() != size_of::<u64>() * 3 {
+      return Err(ProgramError::InvalidInstructionData);
+    }
 
-  let seed = u64::from_le_bytes(data[0..8].try_into().unwrap());
-  let receive = u64::from_le_bytes(data[8..16].try_into().unwrap());
-  let amount = u64::from_le_bytes(data[16..24].try_into().unwrap());
+    let seed = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let receive = u64::from_le_bytes(data[8..16].try_into().unwrap());
+    let amount = u64::from_le_bytes(data[16..24].try_into().unwrap());
 
-  // Instruction Checks
-  if amount == 0 {
-  return Err(ProgramError::InvalidInstructionData);
-}
+    // Instruction Checks
+    if amount == 0 {
+      return Err(ProgramError::InvalidInstructionData);
+    }
 
-  Ok(Self {
-  seed,
-  receive,
-  amount,
-})
-}
+    Ok(Self {
+      seed,
+      receive,
+      amount,
+    })
   }
-  ```
+}
+```
 </Codeblock>
 
-### Instruction Logic
+<ArticleSection name="Instruction Logic" id="instruction-logic" level="h2" />
 
-The implementation follows a clear sequence:
+We begin by initializing the required accounts in the `TryFrom` implementation, after we've deserialized both the `instruction_data` and the `accounts`.
 
-1. **Account Validation**: First, we validate all accounts to ensure they're correct and have the right permissions
-2. **PDA Derivation**: We derive the escrow's address using the maker's pubkey and seed
-3. **Account Initialization**: We create both the escrow and vault accounts
-4. **State Setup**: We populate the escrow account with all the trade terms
-5. **Token Transfer**: Finally, we move the maker's tokens into the vault
+For this step, we create the `Escrow` account using the `ProgramAccount::init::<Escrow>` trait from the helper functions introduced in the [Introduction to Pinocchio](https://learn.blueshift.gg/en/courses/introduction-to-pinocchio/pinocchio-accounts). Similarly, we initialize the Vault account since it needs to be created fresh:
+
+<Codeblock lang="rust">
+```rust
+pub struct Make<'a> {
+  pub accounts: MakeAccounts<'a>,
+  pub instruction_data: MakeInstructionData,
+  pub bump: u8,
+}
+
+impl<'a> TryFrom<(&'a [u8], &'a [AccountInfo])> for Make<'a> {
+  type Error = ProgramError;
+  
+  fn try_from((data, accounts): (&'a [u8], &'a [AccountInfo])) -> Result<Self, Self::Error> {
+    let accounts = MakeAccounts::try_from(accounts)?;
+    let instruction_data = MakeInstructionData::try_from(data)?;
+
+    let seed_binding = instruction_data.seed.to_le_bytes();
+    let bump_binding = [bump];
+    let escrow_seeds = [
+      Seed::from(b"escrow"),
+      Seed::from(accounts.maker.key().as_ref()),
+      Seed::from(&seed_binding),
+      Seed::from(&bump_binding),
+    ];
+            
+    ProgramAccount::init::<Escrow>(
+      accounts.maker,
+      accounts.escrow,
+      &escrow_seeds,
+      Escrow::LEN
+    )?;
+
+    // Initialize the vault
+    AssociatedTokenAccount::init(
+      accounts.vault,
+      accounts.mint_a,
+      accounts.maker,
+      accounts.escrow,
+      accounts.system_program,
+      accounts.token_program,
+    )?;
+
+    Ok(Self {
+      accounts,
+      instruction_data,
+      bump,
+    })
+  }
+}
+```
+</Codeblock>
+
+We can now focus on the logic itself that will just be populating the escrow account and then transfering tokens to the vault.
+
+<Codeblock lang="rust">
+```rust
+impl<'a> Make<'a> {
+  pub const DISCRIMINATOR: &'a u8 = &0;
+  
+  pub fn process(&mut self) -> ProgramResult {
+    // Populate the escrow account
+    let mut data = self.accounts.escrow.try_borrow_mut_data()?;
+    let escrow = Escrow::load_mut(data.as_mut())?;
+    
+    escrow.set_inner(
+      self.instruction_data.seed,
+      *self.accounts.maker.key(),
+      *self.accounts.mint_a.key(),
+      *self.accounts.mint_b.key(),
+      self.instruction_data.receive,
+      [self.bump],
+    );
+
+    // Transfer tokens to vault
+    Transfer {
+      from: self.accounts.maker_ata_a,
+      to: self.accounts.vault,
+      authority: self.accounts.maker,
+      amount: self.instruction_data.amount
+    }.invoke()?;
+
+    Ok(())
+  }
+}
+```
+</Codeblock>

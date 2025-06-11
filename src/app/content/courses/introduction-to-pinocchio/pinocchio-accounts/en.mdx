@@ -369,7 +369,7 @@ impl AccountInit for TokenAccount2022Account {
 ```
 </Codeblock>
 
-### Interface Accounts
+### Token Interface
 
 Since we want to make it easy to work with both Token2022 and Legacy Token Programs without having to discriminate between them, we created a helper that follows the same basic principle:
 
@@ -469,7 +469,7 @@ impl AssociatedTokenAccountInit for AssociatedTokenAccount {
 ```
 </Codeblock>
 
-### Program Account
+<ArticleSection name="Program Accounts" id="program-accounts" level="h2" />
 
 Finally, we implement checks and helpers for program accounts, including `init` and `close` functionality. 
 

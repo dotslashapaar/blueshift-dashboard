@@ -53,7 +53,7 @@ const allChallenges: ChallengeMetadata[] = [
     isFeatured: true,
     unitName: "Pinocchio Escrow",
     apiPath: "/v1/verify/pinocchio/escrow",
-    pages: [{ slug: "make" }, { slug: "take" }, { slug: "refund" }],
+    pages: [{ slug: "make" }, { slug: "take" }, { slug: "refund" }, { slug: "conclusion" }],
     requirements: [
       { instructionKey: "make" },
       { instructionKey: "take" },

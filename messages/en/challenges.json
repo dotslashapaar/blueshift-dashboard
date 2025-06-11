@@ -66,6 +66,9 @@
         },
         "refund": {
           "title": "Refund"
+        },
+        "conclusion": {
+          "title": "Conclusion"
         }
       },
       "requirements": {
