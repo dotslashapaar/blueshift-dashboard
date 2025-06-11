@@ -23,11 +23,7 @@ const allChallenges: ChallengeMetadata[] = [
     isFeatured: true,
     unitName: "Anchor Escrow",
     apiPath: "/v1/verify/anchor/escrow",
-    pages: [
-      { slug: "make" },
-      { slug: "take" },
-      { slug: "refund" },
-    ],
+    pages: [{ slug: "make" }, { slug: "take" }, { slug: "refund" }],
     requirements: [
       { instructionKey: "make" },
       { instructionKey: "take" },
@@ -52,16 +48,12 @@ const allChallenges: ChallengeMetadata[] = [
   {
     slug: "pinocchio-escrow",
     language: "Rust",
-    color: "221,234,224",
+    color: "255,173,102",
     difficulty: 2,
     isFeatured: true,
     unitName: "Pinocchio Escrow",
     apiPath: "/v1/verify/pinocchio/escrow",
-    pages: [
-      { slug: "make" },
-      { slug: "take" },
-      { slug: "refund" },
-    ],
+    pages: [{ slug: "make" }, { slug: "take" }, { slug: "refund" }],
     requirements: [
       { instructionKey: "make" },
       { instructionKey: "take" },
@@ -72,7 +64,7 @@ const allChallenges: ChallengeMetadata[] = [
   {
     slug: "pinocchio-secp256r1-vault",
     language: "Rust",
-    color: "221,234,224",
+    color: "255,173,102",
     difficulty: 2,
     isFeatured: true,
     unitName: "Pinocchio Secp256r1 Vault",
@@ -85,7 +77,8 @@ const allChallenges: ChallengeMetadata[] = [
   },
 ];
 
-const releasedChallengesSetting = process.env.NEXT_PUBLIC_RELEASED_CHALLENGES?.trim();
+const releasedChallengesSetting =
+  process.env.NEXT_PUBLIC_RELEASED_CHALLENGES?.trim();
 
 export const challenges = allChallenges.filter((challenge) => {
   // If the setting is undefined, null, or an empty string, release no challenges.
@@ -102,7 +95,7 @@ export const challenges = allChallenges.filter((challenge) => {
   const releasedSlugs = releasedChallengesSetting
     .split(",")
     .map((slug) => slug.trim())
-    .filter(slug => slug.length > 0); // Ensure empty strings from trailing/multiple commas are ignored
+    .filter((slug) => slug.length > 0); // Ensure empty strings from trailing/multiple commas are ignored
 
   return releasedSlugs.includes(challenge.slug);
 });
