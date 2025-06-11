@@ -80,8 +80,8 @@
         }
       }
     },
-    "pinocchio-passkey-vault": {
-      "title": "Pinocchio Passkey Vault",
+    "pinocchio-secp256r1-vault": {
+      "title": "Pinocchio secp256r1 Vault",
       "requirements": {
         "deposit": {
           "title": "Challenge 1: Taking deposits"
