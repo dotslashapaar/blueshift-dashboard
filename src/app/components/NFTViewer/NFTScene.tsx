@@ -16,6 +16,7 @@ import { courseColors, CourseDifficulty } from "@/app/utils/course";
 import { Text } from "@react-three/drei";
 import { useWindowSize } from "usehooks-ts";
 import { CourseLanguages } from "@/app/utils/course";
+import classNames from "classnames";
 
 // Custom shader material that combines all effects
 const NFTMaterial = shaderMaterial(
@@ -446,12 +447,14 @@ function Scene({
   challengeDifficulty,
   useAnimation = true,
   onScreenshot,
+  showBackground = true,
 }: {
   challengeName: string;
   challengeLanguage: string;
   challengeDifficulty: number;
   useAnimation: boolean;
   onScreenshot?: () => void;
+  showBackground?: boolean;
 }) {
   const orbitControlsRef = useRef<any>(null);
   const meshRef = useRef<any>(null);
@@ -465,124 +468,151 @@ function Scene({
     isAnimating: true,
     lastInteractionTime: 0,
     resumeDelay: 0, // 500ms delay before resuming
+    specialAnimation: {
+      isRunning: false,
+      startTime: 0,
+      duration: 8, // 8 seconds for the animation
+      startRotation: 0,
+      targetRotation: 0,
+    },
   });
 
   // Screenshot function
-  const takeScreenshot = useCallback(() => {
-    if (!gl || !scene || !camera) return;
+  const takeScreenshot = useCallback(
+    (useTransparentBackground = false) => {
+      if (!gl || !scene || !camera) return;
 
-    // Create a temporary high-quality renderer for screenshots
-    const screenshotRenderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      preserveDrawingBuffer: true,
-      powerPreference: "high-performance",
-      precision: "highp",
-      premultipliedAlpha: false,
-      stencil: false,
-      depth: true,
-    });
+      // Create a temporary high-quality renderer for screenshots
+      const screenshotRenderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+        powerPreference: "high-performance",
+        precision: "highp",
+        premultipliedAlpha: false,
+        stencil: false,
+        depth: true,
+      });
 
-    // Create a temporary canvas for high-quality downsampling
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d", {
-      alpha: true,
-      willReadFrequently: false,
-    });
-    if (!tempCtx) return;
+      // Create a temporary canvas for high-quality downsampling
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d", {
+        alpha: true,
+        willReadFrequently: false,
+      });
+      if (!tempCtx) return;
 
-    // More reasonable quality settings that work reliably
-    const targetSize = 1600;
-    const supersampleFactor = 3; // Good balance of quality vs performance
-    const renderSize = targetSize * supersampleFactor; // 9600x9600
+      // More reasonable quality settings that work reliably
+      const targetSize = 1600;
+      const supersampleFactor = 3; // Good balance of quality vs performance
+      const renderSize = targetSize * supersampleFactor; // 9600x9600
 
-    // Configure the screenshot renderer
-    screenshotRenderer.setPixelRatio(1);
-    screenshotRenderer.setSize(renderSize, renderSize);
-    screenshotRenderer.outputColorSpace = THREE.SRGBColorSpace;
-    screenshotRenderer.toneMapping = THREE.NoToneMapping;
-    screenshotRenderer.toneMappingExposure = 1.0;
+      // Configure the screenshot renderer
+      screenshotRenderer.setPixelRatio(1);
+      screenshotRenderer.setSize(renderSize, renderSize);
+      screenshotRenderer.outputColorSpace = THREE.SRGBColorSpace;
+      screenshotRenderer.toneMapping = THREE.NoToneMapping;
+      screenshotRenderer.toneMappingExposure = 1.0;
 
-    // Enable quality settings
-    screenshotRenderer.shadowMap.enabled = false;
-    screenshotRenderer.sortObjects = true;
-    screenshotRenderer.localClippingEnabled = false;
+      // Enable quality settings
+      screenshotRenderer.shadowMap.enabled = false;
+      screenshotRenderer.sortObjects = true;
+      screenshotRenderer.localClippingEnabled = false;
 
-    // Store original camera settings
-    const originalAspect = (camera as THREE.PerspectiveCamera).aspect;
-    const originalNear = (camera as THREE.PerspectiveCamera).near;
-    const originalFar = (camera as THREE.PerspectiveCamera).far;
+      // Store original camera settings
+      const originalAspect = (camera as THREE.PerspectiveCamera).aspect;
+      const originalNear = (camera as THREE.PerspectiveCamera).near;
+      const originalFar = (camera as THREE.PerspectiveCamera).far;
 
-    // Set optimal camera settings for screenshot
-    (camera as THREE.PerspectiveCamera).aspect = 1;
-    (camera as THREE.PerspectiveCamera).near = 0.1;
-    (camera as THREE.PerspectiveCamera).far = 1000;
-    (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+      // Set optimal camera settings for screenshot
+      (camera as THREE.PerspectiveCamera).aspect = 1;
+      (camera as THREE.PerspectiveCamera).near = 0.1;
+      (camera as THREE.PerspectiveCamera).far = 1000;
+      (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
 
-    try {
-      // Simple high-quality single-pass render
-      screenshotRenderer.render(scene, camera);
+      try {
+        // Simple high-quality single-pass render
+        screenshotRenderer.render(scene, camera);
 
-      // Set up final canvas
-      tempCanvas.width = targetSize;
-      tempCanvas.height = targetSize;
+        // Set up final canvas
+        tempCanvas.width = targetSize;
+        tempCanvas.height = targetSize;
 
-      // Enable high-quality downsampling
-      tempCtx.imageSmoothingEnabled = true;
-      tempCtx.imageSmoothingQuality = "high";
+        // Enable high-quality downsampling
+        tempCtx.imageSmoothingEnabled = true;
+        tempCtx.imageSmoothingQuality = "high";
 
-      // Fill with black background
-      tempCtx.fillStyle = "#000000";
-      tempCtx.fillRect(0, 0, targetSize, targetSize);
+        // Fill with background only if not using transparent background
+        if (!useTransparentBackground) {
+          tempCtx.fillStyle = "#000000";
+          tempCtx.fillRect(0, 0, targetSize, targetSize);
+        }
 
-      // Get the rendered canvas
-      const renderedCanvas = screenshotRenderer.domElement;
+        // Get the rendered canvas
+        const renderedCanvas = screenshotRenderer.domElement;
 
-      // Calculate center crop area
-      const sourceSize = Math.min(renderedCanvas.width, renderedCanvas.height);
-      const sourceX = (renderedCanvas.width - sourceSize) / 2;
-      const sourceY = (renderedCanvas.height - sourceSize) / 2;
+        // Calculate center crop area
+        const sourceSize = Math.min(
+          renderedCanvas.width,
+          renderedCanvas.height
+        );
+        const sourceX = (renderedCanvas.width - sourceSize) / 2;
+        const sourceY = (renderedCanvas.height - sourceSize) / 2;
 
-      // Two-step downsampling for better quality
-      if (supersampleFactor > 3) {
-        // First step: downsample to intermediate size
-        const intermediateSize = targetSize * 2;
-        const intermediateCanvas = document.createElement("canvas");
-        intermediateCanvas.width = intermediateSize;
-        intermediateCanvas.height = intermediateSize;
-        const intermediateCtx = intermediateCanvas.getContext("2d");
+        // Two-step downsampling for better quality
+        if (supersampleFactor > 3) {
+          // First step: downsample to intermediate size
+          const intermediateSize = targetSize * 2;
+          const intermediateCanvas = document.createElement("canvas");
+          intermediateCanvas.width = intermediateSize;
+          intermediateCanvas.height = intermediateSize;
+          const intermediateCtx = intermediateCanvas.getContext("2d");
 
-        if (intermediateCtx) {
-          intermediateCtx.imageSmoothingEnabled = true;
-          intermediateCtx.imageSmoothingQuality = "high";
+          if (intermediateCtx) {
+            intermediateCtx.imageSmoothingEnabled = true;
+            intermediateCtx.imageSmoothingQuality = "high";
 
-          // First downsampling pass
-          intermediateCtx.drawImage(
-            renderedCanvas,
-            sourceX,
-            sourceY,
-            sourceSize,
-            sourceSize,
-            0,
-            0,
-            intermediateSize,
-            intermediateSize
-          );
+            // First downsampling pass
+            intermediateCtx.drawImage(
+              renderedCanvas,
+              sourceX,
+              sourceY,
+              sourceSize,
+              sourceSize,
+              0,
+              0,
+              intermediateSize,
+              intermediateSize
+            );
 
-          // Final downsampling pass
-          tempCtx.drawImage(
-            intermediateCanvas,
-            0,
-            0,
-            intermediateSize,
-            intermediateSize,
-            0,
-            0,
-            targetSize,
-            targetSize
-          );
+            // Final downsampling pass
+            tempCtx.drawImage(
+              intermediateCanvas,
+              0,
+              0,
+              intermediateSize,
+              intermediateSize,
+              0,
+              0,
+              targetSize,
+              targetSize
+            );
+          } else {
+            // Fallback to direct downsampling
+            tempCtx.drawImage(
+              renderedCanvas,
+              sourceX,
+              sourceY,
+              sourceSize,
+              sourceSize,
+              0,
+              0,
+              targetSize,
+              targetSize
+            );
+          }
         } else {
-          // Fallback to direct downsampling
+          // Direct downsampling for smaller supersample factors
           tempCtx.drawImage(
             renderedCanvas,
             sourceX,
@@ -595,69 +625,73 @@ function Scene({
             targetSize
           );
         }
-      } else {
-        // Direct downsampling for smaller supersample factors
-        tempCtx.drawImage(
-          renderedCanvas,
-          sourceX,
-          sourceY,
-          sourceSize,
-          sourceSize,
-          0,
-          0,
-          targetSize,
-          targetSize
-        );
-      }
 
-      // Create download link
-      const dataUrl = tempCanvas.toDataURL("image/png", 1.0);
-      const link = document.createElement("a");
-      link.download = `nft-${challengeName.replace(/\s+/g, "-").toLowerCase()}-${challengeLanguage.toLowerCase()}-difficulty-${challengeDifficulty}.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Screenshot failed:", error);
-
-      // Fallback: simpler screenshot approach
-      try {
-        screenshotRenderer.setSize(targetSize * 2, targetSize * 2);
-        screenshotRenderer.render(scene, camera);
-
-        const dataUrl = screenshotRenderer.domElement.toDataURL(
-          "image/png",
-          1.0
-        );
+        // Create download link
+        const dataUrl = tempCanvas.toDataURL("image/png", 1.0);
         const link = document.createElement("a");
-        link.download = `nft-fallback-${challengeName.replace(/\s+/g, "-").toLowerCase()}.png`;
+        const backgroundSuffix = useTransparentBackground ? "-transparent" : "";
+        link.download = `nft-${challengeName.replace(/\s+/g, "-").toLowerCase()}-${challengeLanguage.toLowerCase()}-difficulty-${challengeDifficulty}${backgroundSuffix}.png`;
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      } catch (fallbackError) {
-        console.error("Fallback screenshot also failed:", fallbackError);
-        alert("Screenshot failed. Please try again.");
-      }
-    } finally {
-      // Clean up
-      screenshotRenderer.dispose();
+      } catch (error) {
+        console.error("Screenshot failed:", error);
 
-      // Restore original camera settings
-      (camera as THREE.PerspectiveCamera).aspect = originalAspect;
-      (camera as THREE.PerspectiveCamera).near = originalNear;
-      (camera as THREE.PerspectiveCamera).far = originalFar;
-      (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+        // Fallback: simpler screenshot approach
+        try {
+          screenshotRenderer.setSize(targetSize * 2, targetSize * 2);
+          screenshotRenderer.render(scene, camera);
+
+          const dataUrl = screenshotRenderer.domElement.toDataURL(
+            "image/png",
+            1.0
+          );
+          const link = document.createElement("a");
+          const backgroundSuffix = useTransparentBackground
+            ? "-transparent"
+            : "";
+          link.download = `nft-fallback-${challengeName.replace(/\s+/g, "-").toLowerCase()}${backgroundSuffix}.png`;
+          link.href = dataUrl;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (fallbackError) {
+          console.error("Fallback screenshot also failed:", fallbackError);
+          alert("Screenshot failed. Please try again.");
+        }
+      } finally {
+        // Clean up
+        screenshotRenderer.dispose();
+
+        // Restore original camera settings
+        (camera as THREE.PerspectiveCamera).aspect = originalAspect;
+        (camera as THREE.PerspectiveCamera).near = originalNear;
+        (camera as THREE.PerspectiveCamera).far = originalFar;
+        (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+      }
+    },
+    [gl, scene, camera, challengeName, challengeLanguage, challengeDifficulty]
+  );
+
+  // Start 1080-degree rotation animation
+  const startSpinAnimation = useCallback(() => {
+    if (meshRef.current) {
+      const currentRotationY = meshRef.current.rotation.y;
+      const targetRotation = currentRotationY + (1080 * Math.PI) / 180; // 1080 degrees in radians
+
+      animationStateRef.current.specialAnimation = {
+        isRunning: true,
+        startTime: Date.now(),
+        duration: 8, // 8 seconds
+        startRotation: currentRotationY,
+        targetRotation: targetRotation,
+      };
+
+      // Pause regular animation while special animation is running
+      animationStateRef.current.isAnimating = false;
     }
-  }, [
-    gl,
-    scene,
-    camera,
-    challengeName,
-    challengeLanguage,
-    challengeDifficulty,
-  ]);
+  }, []);
 
   // Reset rotation function
   const resetRotation = useCallback(() => {
@@ -675,6 +709,7 @@ function Scene({
       animationStateRef.current.time = 0;
       animationStateRef.current.isAnimating = useAnimation;
       animationStateRef.current.lastInteractionTime = 0;
+      animationStateRef.current.specialAnimation.isRunning = false;
 
       // Manually set camera position and target to exact initial values
       camera.position.set(0, 0, 17.5);
@@ -695,14 +730,22 @@ function Scene({
     }
   }, [camera, useAnimation]);
 
-  // Expose screenshot and reset functions
+  // Expose screenshot, reset, and spin animation functions
   useEffect(() => {
     if (onScreenshot) {
-      // Store the screenshot function reference
-      (window as any).__nftSceneScreenshot = takeScreenshot;
+      // Store the function references with background state
+      (window as any).__nftSceneScreenshot = () =>
+        takeScreenshot(!showBackground);
       (window as any).__nftSceneResetRotation = resetRotation;
+      (window as any).__nftSceneStartSpinAnimation = startSpinAnimation;
     }
-  }, [takeScreenshot, resetRotation, onScreenshot]);
+  }, [
+    takeScreenshot,
+    resetRotation,
+    startSpinAnimation,
+    onScreenshot,
+    showBackground,
+  ]);
 
   // Handle OrbitControls interaction events
   const handleControlsStart = useCallback(() => {
@@ -720,11 +763,52 @@ function Scene({
     return Math.sin(t * Math.PI);
   }, []);
 
+  // Ease-out cubic function for smooth deceleration
+  const easeOutCubic = useCallback((t: number) => {
+    return 1 - Math.pow(1 - t, 3);
+  }, []);
+
   // Animation loop for the entire group
   useFrame((state, delta) => {
-    if (!meshRef.current || !useAnimation) return;
+    if (!meshRef.current) return;
 
     const currentTime = Date.now();
+
+    // Handle special 1080-degree spin animation
+    if (animationStateRef.current.specialAnimation.isRunning) {
+      const elapsed =
+        currentTime - animationStateRef.current.specialAnimation.startTime;
+      const progress = Math.min(
+        elapsed / (animationStateRef.current.specialAnimation.duration * 1000),
+        1
+      );
+
+      // Use ease-out cubic for smooth deceleration
+      const easedProgress = easeOutCubic(progress);
+
+      // Interpolate rotation
+      const startRot = animationStateRef.current.specialAnimation.startRotation;
+      const targetRot =
+        animationStateRef.current.specialAnimation.targetRotation;
+      const currentRotation = startRot + (targetRot - startRot) * easedProgress;
+
+      meshRef.current.rotation.y = currentRotation;
+
+      // Check if animation is complete
+      if (progress >= 1) {
+        animationStateRef.current.specialAnimation.isRunning = false;
+        // Resume regular animation if it was enabled
+        if (useAnimation) {
+          animationStateRef.current.isAnimating = true;
+        }
+      }
+
+      return; // Exit early to not run regular animation
+    }
+
+    // Regular animation logic
+    if (!useAnimation) return;
+
     const timeSinceLastInteraction =
       currentTime - animationStateRef.current.lastInteractionTime;
 
@@ -893,6 +977,8 @@ function GUIControls({
   onChallengeLanguageChange,
   onChallengeDifficultyChange,
   onUseAnimationChange,
+  showBackground,
+  onShowBackgroundChange,
 }: {
   challengeName: string;
   challengeLanguage: string;
@@ -902,6 +988,8 @@ function GUIControls({
   onChallengeLanguageChange: (value: string) => void;
   onChallengeDifficultyChange: (value: number) => void;
   onUseAnimationChange: (value: boolean) => void;
+  showBackground: boolean;
+  onShowBackgroundChange: (value: boolean) => void;
 }) {
   const guiRef = useRef<any>(null);
   const controlsRef = useRef<any>(null);
@@ -937,6 +1025,13 @@ function GUIControls({
             (window as any).__nftSceneResetRotation();
           }
         },
+        startAnimation: () => {
+          // Call the spin animation function exposed on window
+          if ((window as any).__nftSceneStartSpinAnimation) {
+            (window as any).__nftSceneStartSpinAnimation();
+          }
+        },
+        showBackground: showBackground,
       };
 
       controlsRef.current = controls;
@@ -980,11 +1075,23 @@ function GUIControls({
           onUseAnimationChange(value);
         });
 
+      gui
+        .add(controls, "showBackground")
+        .name("Show Background")
+        .onChange((value: boolean) => {
+          onShowBackgroundChange(value);
+        });
+
       // Add screenshot button
-      gui.add(controls, "takeScreenshot").name("📸 Take Screenshot (800x800)");
+      gui
+        .add(controls, "takeScreenshot")
+        .name("📸 Take Screenshot (1600x1600)");
 
       // Add reset rotation button
       gui.add(controls, "resetRotation").name("🔄 Reset Rotation");
+
+      // Add start animation button
+      gui.add(controls, "startAnimation").name("🌀 Start Animation (1080°)");
     };
 
     initializeGUI().catch(console.error);
@@ -1005,6 +1112,7 @@ function GUIControls({
       controlsRef.current.challengeLanguage = challengeLanguage;
       controlsRef.current.challengeDifficulty = challengeDifficulty;
       controlsRef.current.useAnimation = useAnimation;
+      controlsRef.current.showBackground = showBackground;
 
       // Update GUI display to reflect the new values
       if (guiRef.current) {
@@ -1014,7 +1122,13 @@ function GUIControls({
         });
       }
     }
-  }, [challengeName, challengeLanguage, challengeDifficulty, useAnimation]);
+  }, [
+    challengeName,
+    challengeLanguage,
+    challengeDifficulty,
+    useAnimation,
+    showBackground,
+  ]);
 
   return null;
 }
@@ -1027,6 +1141,7 @@ export default function NFTScene({
   isAnimationComplete = false,
   useAnimation: initialUseAnimation = true,
   showControls = false,
+  showBackground = true,
 }: {
   challengeName: string;
   challengeLanguage: CourseLanguages;
@@ -1034,6 +1149,7 @@ export default function NFTScene({
   isAnimationComplete: boolean;
   useAnimation: boolean;
   showControls?: boolean;
+  showBackground?: boolean;
 }) {
   const { width } = useWindowSize();
 
@@ -1046,7 +1162,8 @@ export default function NFTScene({
     initialChallengeDifficulty
   );
   const [useAnimation, setUseAnimation] = useState(initialUseAnimation);
-
+  const [showBackgroundValue, setShowBackgroundValue] =
+    useState(showBackground);
   // Properly typed callback functions
   const handleChallengeNameChange = useCallback((value: string) => {
     setChallengeName(value);
@@ -1064,8 +1181,17 @@ export default function NFTScene({
     setUseAnimation(value);
   }, []);
 
+  const handleShowBackgroundChange = useCallback((value: boolean) => {
+    setShowBackgroundValue(value);
+  }, []);
+
   return (
-    <div className="h-full w-full overflow-hidden bg-gradient-to-b from-[#0D0E14] to-black">
+    <div
+      className={classNames(
+        "h-full w-full overflow-hidden",
+        showBackgroundValue && "bg-gradient-to-b from-[#0D0E14] to-black"
+      )}
+    >
       {showControls && (
         <GUIControls
           challengeName={challengeName}
@@ -1076,6 +1202,8 @@ export default function NFTScene({
           onChallengeLanguageChange={handleChallengeLanguageChange}
           onChallengeDifficultyChange={handleChallengeDifficultyChange}
           onUseAnimationChange={handleUseAnimationChange}
+          showBackground={showBackgroundValue}
+          onShowBackgroundChange={handleShowBackgroundChange}
         />
       )}
       {isAnimationComplete && (
@@ -1107,6 +1235,7 @@ export default function NFTScene({
               challengeDifficulty={challengeDifficulty}
               useAnimation={useAnimation}
               onScreenshot={showControls ? () => {} : undefined}
+              showBackground={showBackgroundValue}
             />
           </Suspense>
         </Canvas>

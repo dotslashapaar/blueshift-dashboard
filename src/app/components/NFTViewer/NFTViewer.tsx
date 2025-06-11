@@ -149,6 +149,7 @@ export default function NFTViewer({
                   challengeLanguage={challengeLanguage}
                   challengeDifficulty={challengeDifficulty}
                   useAnimation={true}
+                  showBackground={true}
                 />
                 {!isAnimationComplete && (
                   <div className="w-full h-full z-10 flex items-center justify-center bg-gradient-to-b from-[#0D0E14] to-black">
