@@ -128,7 +128,7 @@ Let's break down each account check:
    - Must be owned by the System Program
    - Must have zero lamports (ensures "fresh" deposit)
 
-For the `vault` we're going to then chech if:
+For the `vault` we're going to then check if:
 - It's derived from the correct seeds
 - Match the expected PDA address
 Since part of the seed is in the `instruction_data` that we don't have access at this time.

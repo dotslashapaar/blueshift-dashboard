@@ -146,7 +146,7 @@ impl AccountCheck for MintAccount {
 ```
 </Codeblock>
 
-For the `init` and `init_if_needed` functionality, we create another trait called `MintInit` that we use specifically for this purpose because of the unique fields required. We then use `CreateAccount` and `InitializeMint2` CPIs to initialize the `Mint` accoun:
+For the `init` and `init_if_needed` functionality, we create another trait called `MintInit` that we use specifically for this purpose because of the unique fields required. We then use `CreateAccount` and `InitializeMint2` CPIs to initialize the `Mint` account:
 
 <Codeblock lang="rust">
 ```rust
