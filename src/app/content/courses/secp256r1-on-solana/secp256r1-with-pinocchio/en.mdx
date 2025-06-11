@@ -1,9 +1,11 @@
 import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
 import { Codeblock } from "../../../../components/Codeblock/Codeblock";
 
-# Passkeys with Pinocchio
+# Secp256r1 with Pinocchio
 
-[Deanmlittle](https://x.com/deanmlittle) from the Blueshift team has released the first crate that enables Pinocchio compatibility for verifying instructions that execute the `Secp256r1` precompile.
+[Deanmlittle](https://x.com/deanmlittle) from the Blueshift team has released the first crate that enables Pinocchio compatibility for verifying instructions that execute the `Secp256r1` precompile. 
+
+This is particularly useful for implementing modern authentication methods like passkeys in Pinocchio programs.
 
 <ArticleSection name="Introduction" id="introduction" level="h2" />
 
@@ -44,7 +46,7 @@ let secp256r1_ix = Secp256r1Instruction::try_from(&ix)?;
 We then perform some security checks.
 
 It's crucial to implement several security checks:
-1. **Authority Check**: Ensures that only authorized recipients can receive funds from the PDA that wraps the passkey public key. This prevents MEV attacks where someone could intercept the transaction, capture the valid signature, and replace the intended recipient.
+1. **Authority Check**: Ensures that only authorized recipients can receive funds from the PDA that wraps the secp256r1 public key. This prevents MEV attacks where someone could intercept the transaction, capture the valid signature, and replace the intended recipient.
 2. **Expiry Check**: Enforces a time limit on signature validity. Since validated signatures remain valid indefinitely, implementing an expiry timestamp prevents replay attacks.
 
 We perform these checks by putting this data in the message of the signature.

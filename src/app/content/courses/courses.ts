@@ -28,15 +28,15 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     ],
   },
   {
-    slug: "passkeys-on-solana",
+    slug: "secp256r1-on-solana",
     language: "Rust",
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
     lessons: [
       { slug: "introduction" },
-      { slug: "passkeys-with-anchor" },
-      { slug: "passkeys-with-pinocchio" },
+      { slug: "secp256r1-with-anchor" },
+      { slug: "secp256r1-with-pinocchio" },
       { slug: "conclusions" },
     ],
   },

@@ -1,15 +1,15 @@
 import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
 import { Codeblock } from "../../../../components/Codeblock/Codeblock";
 
-# The Passkey Vault
+# The secp256r1 Vault
 
 A vault is a fundamental building block in DeFi that provides a secure way for users to store their assets. 
 
-In this challenge, we'll build a vault that uses Passkeys as a verification method for transactions. This is particularly interesting because Passkeys allow users to sign transactions using biometric authentication (like Face ID or Touch ID) instead of traditional wallet-based signatures.
+In this challenge, we'll build a vault that uses secp256r1 signatures for transaction verification. This is particularly interesting because secp256r1 is the same elliptic curve used by modern authentication methods like passkeys, which allow users to sign transactions using biometric authentication (like Face ID or Touch ID) instead of traditional wallet-based signatures.
 
-The key innovation here is that we're decoupling the payment of transaction fees from the actual user authentication. This means that while users can authenticate transactions using their biometrics, the actual transaction fees can be paid by a service provider (like a company implementing the passkey system). This creates a more seamless user experience while maintaining security.
+The key innovation here is that we're decoupling the payment of transaction fees from the actual user authentication. This means that while users can authenticate transactions using their secp256r1 signatures (which can be generated through modern authentication methods), the actual transaction fees can be paid by a service provider. This creates a more seamless user experience while maintaining security.
 
-In this challenge, we'll update the simple lamport vault that we built in the [Pinocchio Vault Challenge]() to allow Passkeys as verification method to sign transactions.
+In this challenge, we'll update the simple lamport vault that we built in the [Pinocchio Vault Challenge]() to allow secp256r1 signatures as a verification method for transactions.
 
 <ArticleSection name="Installation" id="installation" level="h2" />
 
@@ -83,7 +83,7 @@ The deposit instruction performs the following steps:
 
 The main difference between a normal vault and the secp256r1 vault is the way that we derive the PDA and who is considered an "owner".
 
-Since with passkeys the owner of the actual wallet doesn't need to pay for the transaction fees; we change the `owner` account to a more general naming convention like `payer` 
+Since with secp256r1 signatures the owner of the actual wallet doesn't need to pay for the transaction fees, we change the `owner` account to a more general naming convention like `payer`. 
 
 So the account struct for `deposit` will look like this:
 
@@ -209,7 +209,7 @@ impl<'a> Deposit<'a> {
 ```
 </Codeblock>
 
-As mentioned earlier, we need to verify that the vault PDA is derived from the correct seeds. In this passkey-based vault, we use the `Secp256r1Pubkey` as part of the seeds instead of the traditional owner's public key. This is a crucial security measure that ensures only the holder of the corresponding passkey can access the vault.
+As mentioned earlier, we need to verify that the vault PDA is derived from the correct seeds. In this secp256r1-based vault, we use the `Secp256r1Pubkey` as part of the seeds instead of the traditional owner's public key. This is a crucial security measure that ensures only the holder of the corresponding secp256r1 key can access the vault.
 
 The `Secp256r1Pubkey` is 33 bytes long because it uses compressed point representation for elliptic curve public keys. This format consists of:
 - 1 byte for the point's parity (indicating whether the y-coordinate is even or odd)
@@ -358,7 +358,7 @@ The withdrawal process involves several security checks to ensure the transactio
 
 1. **Instruction Introspection**
 - We use the instruction sysvar to inspect the next instruction in the transaction
-- This allows us to verify the Secp256r1 signature that proves ownership of the passkey
+- This allows us to verify the Secp256r1 signature that proves ownership of the signing key
 - The signature verification for Secp256r1 always happens in a separate instruction
 
 2. **Signature Verification**
@@ -406,7 +406,7 @@ let seeds = [
 ];
 ```
 - Finally, we use the verified public key to create the PDA seeds
-- This ensures only the legitimate passkey holder can sign the withdrawal transaction
+- This ensures only the legitimate secp256r1 key holder can sign the withdrawal transaction
 
 
 

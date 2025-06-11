@@ -69,13 +69,13 @@ const allChallenges: ChallengeMetadata[] = [
     ],
   },
   {
-    slug: "pinocchio-passkey-vault",
+    slug: "pinocchio-secp256r1-vault",
     language: "Rust",
     color: "221,234,224",
     difficulty: 2,
     isFeatured: true,
-    unitName: "Pinocchio Passkey Vault",
-    apiPath: "/v1/verify/pinocchio/passkey-vault",
+    unitName: "Pinocchio Secp256r1 Vault",
+    apiPath: "/v1/verify/pinocchio/secp256r1-vault",
     requirements: [
       { instructionKey: "deposit" },
       { instructionKey: "withdraw" },
