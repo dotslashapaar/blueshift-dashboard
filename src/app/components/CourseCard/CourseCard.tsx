@@ -1,24 +1,23 @@
 import { CourseDifficulty } from "@/app/utils/course";
-import { CourseLanguages, RewardsStatus } from "@/app/utils/course";
-import React from "react";
+import { CourseLanguages } from "@/app/utils/course";
+import React, { useRef } from "react";
 import classNames from "classnames";
 import { usePersistentStore } from "@/stores/store";
 import DifficultyBadge from "../DifficultyBadge/DifficultyBadge";
 import { motion } from "motion/react";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
 import { Link } from "@/i18n/navigation";
+import { useDirectionalHover } from "@/app/hooks/useDirectionalHover";
 
 type CourseCardProps = {
   name: string;
   color: string;
   points?: number;
-  status?: RewardsStatus;
   language: CourseLanguages;
   difficulty?: CourseDifficulty;
   footer?: React.ReactNode;
   className?: string;
-  currentLesson?: string;
-  currentCourse?: string;
+  link?: string;
 };
 
 export default function CourseCard({
@@ -28,34 +27,44 @@ export default function CourseCard({
   difficulty,
   footer,
   className,
-  currentLesson,
-  currentCourse,
+  link,
 }: CourseCardProps) {
-  const getCourseLink = () => {
-    if (currentLesson && currentCourse) {
-      return `/courses/${currentCourse}/${currentLesson}`;
-    } else if (currentCourse && !currentLesson) {
-      return `/courses/${currentCourse}`;
-    }
-    return "#";
-  };
-
   const { view } = usePersistentStore();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const {
+    transform,
+    isHovered,
+    direction,
+    swooshAngle,
+    handleMouseEnter,
+    handleMouseLeave,
+  } = useDirectionalHover(cardRef);
+
   return (
     <div
-      style={{ "--courseColor": color } as React.CSSProperties}
+      ref={cardRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={
+        {
+          "--courseColor": color,
+          "--swoosh-angle": `${swooshAngle}deg`,
+          transform: `translate(${transform.x}px, ${transform.y}px)`,
+          willChange: "opacity",
+        } as React.CSSProperties
+      }
       className={classNames(
-        "gradient-border rounded-2xl pb-8 px-5 relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.03),transparent_75%),linear-gradient(180deg,var(--color-background-card),var(--color-background-card))] before:[background:linear-gradient(180deg,rgba(var(--courseColor),0.1),rgba(var(--courseColor),0.05))]",
-        view === "grid" && "pt-5",
+        "gradient-border flex overflow-hidden rounded-2xl pb-8 px-5 relative [background:linear-gradient(180deg,rgb(var(--courseColor),0.03),transparent_75%),linear-gradient(180deg,var(--color-background-card),var(--color-background-card))] before:[background:linear-gradient(180deg,rgba(var(--courseColor),0.1),rgba(var(--courseColor),0.05))]",
+        view === "grid" && "pt-5 animate-card-swoosh",
         view === "list" && "pt-5 !pb-5",
-        "hover:-translate-y-1 transition-transform duration-300",
+        "transition-transform duration-300",
+        isHovered && `swoosh-${direction}`,
         className
       )}
     >
-      <Link
-        href={getCourseLink()}
-        className="absolute inset-0 z-1 w-full h-full"
-      ></Link>
+      {link && (
+        <Link href={link} className="absolute inset-0 z-1 w-full h-full"></Link>
+      )}
       {view === "grid" && difficulty && (
         <div className="absolute top-6 right-5">
           <DifficultyBadge difficulty={difficulty} />
@@ -64,8 +73,8 @@ export default function CourseCard({
       <div
         className={classNames(
           "flex",
-          view === "grid" && "flex-col gap-y-24",
-          view === "list" && "flex-row justify-between"
+          view === "grid" && "flex-col gap-y-24 flex-grow justify-between",
+          view === "list" && "flex-row justify-between w-full"
         )}
       >
         <div

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CourseMetadata } from "@/app/utils/course";
 import { usePersistentStore } from "@/stores/store";
 import { Certificate, TestResult } from "@/lib/challenges/types";
+import { ChallengeMetadata } from "@/app/utils/challenges";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -21,7 +21,7 @@ export interface ChallengeRequirement {
 // --- Hook Definition ---
 
 interface useChallengeVerifierOptions {
-  course: CourseMetadata;
+  challenge: ChallengeMetadata;
 }
 
 interface UseChallengeVerifierReturn {
@@ -41,7 +41,7 @@ interface UseChallengeVerifierReturn {
 }
 
 export function useChallengeVerifier({
-  course,
+  challenge,
 }: useChallengeVerifierOptions): UseChallengeVerifierReturn {
   const [verificationData, setVerificationData] =
     useState<VerificationApiResponse | null>(null);
@@ -49,20 +49,15 @@ export function useChallengeVerifier({
   const [error, setError] = useState<string | null>(null);
 
   const verificationEndpoint = useMemo(() => {
-    if (course.challenge) {
-      return `${apiBaseUrl}${course.challenge.apiPath}`;
-    }
-    return undefined;
-  }, [course.challenge]);
+    return `${apiBaseUrl}${challenge.apiPath}`;
+  }, [challenge.apiPath]);
 
   const initialRequirements: ChallengeRequirement[] = useMemo(() => {
-    return course.challenge
-      ? course.challenge.requirements.map((req) => ({
+    return challenge.requirements.map((req) => ({
           ...req,
           status: "incomplete" as const,
-        }))
-      : [];
-  }, [course.challenge]);
+        }));
+  }, [challenge]);
 
   const [requirements, setRequirements] =
     useState<ChallengeRequirement[]>(initialRequirements);
@@ -76,9 +71,9 @@ export function useChallengeVerifier({
   }, [initialRequirements]);
 
   useEffect(() => {
-    if (verificationData && course.challenge) {
+    if (verificationData) {
       setRequirements((prevRequirements) =>
-        course.challenge!.requirements.map((req): ChallengeRequirement => {
+        challenge.requirements.map((req): ChallengeRequirement => {
           const result = verificationData.results?.find(
             (res) => res.instruction === req.instructionKey,
           );
@@ -93,7 +88,7 @@ export function useChallengeVerifier({
         }),
       );
     }
-  }, [verificationData, course.challenge]);
+  }, [verificationData, challenge.requirements]);
 
   const handleVerificationRequest = useCallback(
     async (body: FormData | string, headers?: HeadersInit) => {
@@ -137,7 +132,7 @@ export function useChallengeVerifier({
             setError("No certificate received.");
             return;
           }
-          setCertificate(course.slug, result.certificate);
+          setCertificate(challenge.slug, result.certificate);
         } else {
           let errorMessage = `Verification failed: ${response.statusText}`;
 
@@ -180,11 +175,11 @@ export function useChallengeVerifier({
         setIsLoading(false);
       }
     },
-    [verificationEndpoint, authToken, course.slug, setCertificate],
+    [verificationEndpoint, authToken, challenge.slug, setCertificate],
   );
 
   const uploadProgram = useCallback(async () => {
-    if (!course.challenge || !verificationEndpoint) {
+    if (!verificationEndpoint) {
       setError(
         "Challenge or verification endpoint is not configured for this course.",
       );
@@ -232,7 +227,7 @@ export function useChallengeVerifier({
     document.body.appendChild(input);
     input.click();
   }, [
-    course.challenge,
+    challenge.slug,
     verificationEndpoint,
     handleVerificationRequest,
     setError,
@@ -240,7 +235,7 @@ export function useChallengeVerifier({
 
   const uploadTransaction = useCallback(
     async (base64EncodedTx: string) => {
-      if (!course.challenge || !verificationEndpoint) {
+      if (!verificationEndpoint) {
         console.error(
           "Transaction upload aborted: Challenge or verification endpoint is not configured.",
         );
@@ -259,7 +254,7 @@ export function useChallengeVerifier({
       );
     },
     [
-      course.challenge,
+      challenge,
       verificationEndpoint,
       handleVerificationRequest,
       setError,

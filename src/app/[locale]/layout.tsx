@@ -7,9 +7,10 @@ import "@/app/globals.css";
 import Header from "@/app/components/Header/Header";
 import Footer from "@/app/components/Footer/Footer";
 import GlobalModals from "@/app/components/Modals/GlobalModals";
-import WalletProvider from "@/app/contexts/WalletProvider";
+import WalletProvider from "@/contexts/WalletProvider";
 import { Geist_Mono, Funnel_Display } from "next/font/google";
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { headers } from "next/headers";
 
 const GeistMono = Geist_Mono({
   subsets: ["latin"],
@@ -98,6 +99,9 @@ export default async function RootLayout({
     notFound();
   }
 
+  const requestURL = await headers();
+  const pathname = requestURL.get("x-current-path");
+
   return (
     <html lang={locale}>
       <body
@@ -106,11 +110,17 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <WalletProvider>
             <GlobalModals />
-            <Header />
-            <div className="pt-[69px] min-h-[calc(100dvh-69px)]">
-              {children}
-            </div>
-            <Footer />
+            {!pathname?.includes("/nft-generator") ? (
+              <>
+                <Header />
+                <div className="pt-[69px] min-h-[calc(100dvh-69px)]">
+                  {children}
+                </div>
+                <Footer />
+              </>
+            ) : (
+              children
+            )}
           </WalletProvider>
         </NextIntlClientProvider>
       </body>

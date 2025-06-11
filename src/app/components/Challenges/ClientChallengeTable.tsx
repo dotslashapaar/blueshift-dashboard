@@ -18,7 +18,8 @@ import { usePersistentStore } from "@/stores/store";
 import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { Link } from "@/i18n/navigation";
 import { LogMessage } from "@/hooks/useEsbuildRunner";
-import { CourseMetadata } from "@/app/utils/course";
+import { ChallengeMetadata } from "@/app/utils/challenges";
+import { useSearchParams } from "next/navigation";
 
 interface ChallengeTableProps {
   onRunCodeClick: () => void;
@@ -28,7 +29,7 @@ interface ChallengeTableProps {
   isLoading: boolean;
   error: string | null;
   verificationData: VerificationApiResponse | null;
-  course: CourseMetadata;
+  challenge: ChallengeMetadata;
   isCodeRunning: boolean;
   runnerLogs: LogMessage[];
   isEsbuildReady: boolean;
@@ -40,19 +41,21 @@ export default function ChallengeTable({
   isLoading,
   error,
   verificationData,
-  course,
+  challenge,
   isCodeRunning,
   runnerLogs,
   isEsbuildReady,
   onRedoChallenge,
 }: ChallengeTableProps) {
   const t = useTranslations();
+  const searchParams = useSearchParams();
+  const fromCourse = searchParams.get("fromCourse");
   const [selectedRequirement, setSelectedRequirement] =
     useState<ChallengeRequirement | null>(null);
 
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
-  const { setCourseStatus, courseStatus } = usePersistentStore();
-  const courseSlug = course.slug;
+  const { setChallengeStatus, challengeStatuses } = usePersistentStore();
+  const courseSlug = challenge.slug;
 
   useEffect(() => {
     if (verificationData) {
@@ -68,28 +71,28 @@ export default function ChallengeTable({
       );
       if (allRequirementsPassed) {
         setTimeout(() => {
-          if (courseStatus[courseSlug] === "Locked") {
-            setCourseStatus(courseSlug, "Unlocked");
+          if (challengeStatuses[courseSlug] === "open") {
+            setChallengeStatus(courseSlug, "completed");
           }
           setIsCompletedModalOpen(true);
         }, 1000);
       }
     }
-  }, [verificationData, requirements, setCourseStatus, courseSlug]);
+  }, [verificationData, requirements, setChallengeStatus, courseSlug]);
 
   const overallIsLoading = isCodeRunning || !isEsbuildReady;
-  
+
 
   return (
     <div className="w-full flex">
       <ChallengeCompleted
         isOpen={isCompletedModalOpen}
         onClose={() => setIsCompletedModalOpen(false)}
-        course={course}
+        challenge={challenge}
       />
       <div className="bg-background-card/50 rounded-b-xl lg:rounded-none w-full min-w-full lg:min-w-[400px] px-4 lg:px-6 lg:right-4 lg:border-l border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden pb-6">
-        {(courseStatus[courseSlug] === "Unlocked" ||
-          courseStatus[courseSlug] === "Claimed") && (
+        {(challengeStatuses[courseSlug] === "completed" ||
+          challengeStatuses[courseSlug] === "claimed") && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -98,25 +101,28 @@ export default function ChallengeTable({
           >
             <div className="flex flex-col items-center justify-center gap-y-1">
               <span className="text-lg font-medium text-primary">
-                {t("challenge_page.challenge_completed.title")}
+                {t("ChallengePage.challenge_completed.title")}
               </span>
               <span className="text-tertiary">
-                {t("challenge_page.challenge_completed.body")}
+                {t("ChallengePage.challenge_completed.body")}
               </span>
             </div>
-            <Link href="/">
+
+            <Link href={`/${fromCourse ? "courses" : "challenges"}`}>
               <Button
                 variant="primary"
                 size="md"
                 icon="Lessons"
                 label={t(
-                  "challenge_page.challenge_completed.view_other_courses"
+                  fromCourse
+                    ? "ChallengePage.challenge_completed.view_other_courses"
+                    : "ChallengePage.challenge_completed.view_other_challenges"
                 )}
               />
             </Link>
             <div className="relative w-full">
               <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">
-                {t(`challenge_page.challenge_completed.divider_label`).toUpperCase()}
+                {t(`ChallengePage.challenge_completed.divider_label`).toUpperCase()}
               </div>
               <div className="w-full h-[1px] bg-border absolute"></div>
             </div>
@@ -124,7 +130,7 @@ export default function ChallengeTable({
               variant="secondary"
               size="md"
               icon="Refresh"
-              label={t("challenge_page.challenge_completed.redo")}
+              label={t("ChallengePage.challenge_completed.redo")}
               onClick={() => {
                 onRedoChallenge();
                 setIsCompletedModalOpen(false);
@@ -222,14 +228,14 @@ export default function ChallengeTable({
                 >
                   <span className="font-medium text-sm">
                     {t(
-                      `courses.${courseSlug}.challenge.requirements.${requirement.instructionKey}.title`
+                      `challenges.${courseSlug}.requirements.${requirement.instructionKey}.title`
                     )}
                   </span>
                   {!isLoading && !error ? (
                     <div className="flex items-center gap-x-4">
                       <ChallengeBadge
                         label={t(
-                          `challenge_page.test_results.${requirement.status}`
+                          `ChallengePage.test_results.${requirement.status}`
                         )}
                         variant={requirement.status}
                       />

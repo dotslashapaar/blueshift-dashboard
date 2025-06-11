@@ -2,11 +2,11 @@ import { CourseMetadata, LessonMetadata } from "./course";
 import { notFound } from "next/navigation";
 
 import { courses } from "@/app/content/courses/courses";
+import { challenges } from "@/app/content/challenges/challenges";
+import { ChallengeMetadata } from "./challenges";
 
 export async function getCourse(courseSlug: string): Promise<CourseMetadata> {
-  const course = courses.find(
-    (course) => course.slug === courseSlug
-  );
+  const course = courses.find((course) => course.slug === courseSlug);
 
   if (!course) {
     notFound();
@@ -16,18 +16,17 @@ export async function getCourse(courseSlug: string): Promise<CourseMetadata> {
     ...structuredClone(course),
     lessons: course.lessons.map((lesson, index) => ({
       ...structuredClone(lesson),
-      lessonNumber: index + 1
-    }))
-  }
+      lessonNumber: index + 1,
+    })),
+  };
 }
 
 export async function getAllCourses(): Promise<CourseMetadata[]> {
   return structuredClone(courses);
-
 }
 
 export async function getCourseLessons(
-  courseSlug: string
+  courseSlug: string,
 ): Promise<LessonMetadata[]> {
   const course = await getCourse(courseSlug);
 
@@ -35,5 +34,19 @@ export async function getCourseLessons(
     notFound();
   }
 
-  return structuredClone(course.lessons)
+  return structuredClone(course.lessons);
+}
+
+export async function getChallenge(
+  challengeSlug: string | undefined | null,
+): Promise<ChallengeMetadata | undefined> {
+  const challenge = challenges.find(
+    (challenge) => challenge.slug === challengeSlug,
+  );
+
+  return structuredClone(challenge);
+}
+
+export async function getAllChallenges(): Promise<ChallengeMetadata[]> {
+  return structuredClone(challenges);
 }

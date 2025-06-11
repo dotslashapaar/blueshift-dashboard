@@ -1,0 +1,159 @@
+![Anchor Escrow Challenge](/graphics/challenge-banners/anchor-escrow.png)
+
+# The Escrow
+
+An escrow is a powerful financial tool that enables secure token swaps between two parties. 
+
+Think of it as a digital safe deposit box where one user can lock up Token A, waiting for another user to deposit Token B before the swap is completed. 
+
+This creates a trustless environment where neither party needs to worry about the other backing out of the deal.
+
+In this challenge, we're going to implement this concept through three simple but powerful instructions:
+- **Make**: The maker (first user) defines the trade terms and deposits the agreed amount of Token A into a secure vault. This is like putting your item in the safe deposit box and setting the terms of the exchange.
+- **Take**: The taker (second user) accepts the offer by transferring the promised amount of Token B to the maker, and in return, receives the locked Token A. This is the moment when both parties complete their side of the deal.
+- **Refund**: If the maker changes their mind or no suitable taker is found, they can cancel the offer and retrieve their Token A. This is like getting your item back from the safe deposit box if the deal falls through.
+
+**Note**: If you're not familiar with Anchor, you should start by reading the [Introduction to Anchor](learn.blueshift.gg/en/courses/introduction-to-anchor) to familiarize with the core concept that we're going to use in this program.
+
+<ArticleSection name="Installation" id="installation" level="h2" />
+
+Let's start by creating a fresh Anchor workspace:
+
+```
+anchor init blueshift_anchor_escrow
+cd blueshift_anchor_escrow
+```
+
+We then continue by enabling `init-if-needed` on the `anchor-lang` crate and by adding the `anchor-spl` crate as well:
+
+```
+cargo add anchor-lang --features init-if-needed
+cargo add anchor-spl
+```
+
+Since we're using `anchor-spl`, we also need to update the `Cargo.toml` file to include `anchor-spl/idl-build` in the `idl-build` feature. 
+
+Open `Cargo.toml` and you'll see an existing `idl-build` line that looks like this:
+
+```toml
+idl-build = ["anchor-lang/idl-build"]
+```
+
+Modify it to add `anchor-spl/idl-build` as well:
+
+```toml
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+```
+
+You can now open  the newly generated folder, and you're ready to start coding! 
+
+<ArticleSection name="Template" id="template" level="h2" />
+
+This time, since the program is quite complex, we're going to split it into small, focused modules instead of cramming everything into the `lib.rs`. 
+
+The folder tree will look roughly like this:
+
+```
+src
+├── instructions
+│       ├── make.rs
+│       ├── mod.rs
+│       ├── refund.rs
+│       └── take.rs
+├── errors.rs
+├── lib.rs
+└── state.rs
+```
+
+Which the `lib.rs` will look roughly like this:
+
+<Codeblock lang="rust">
+```rust
+use anchor_lang::prelude::*;
+
+mod state;
+mod errors;
+mod instructions;
+use instructions::*;
+
+declare_id!("22222222222222222222222222222222222222222222");
+
+#[program]
+  pub mod blueshift_anchor_escrow {
+    use super::*;
+
+    #[instruction(discriminator = 0)]
+    pub fn make(ctx: Context<Make>, seed: u64, receive: u64, amount: u64) -> Result<()> {
+      //...
+    }
+
+    #[instruction(discriminator = 1)]
+    pub fn take(ctx: Context<Take>) -> Result<()> {
+      //...
+    }
+
+    #[instruction(discriminator = 2)]
+    pub fn refund(ctx: Context<Refund>) -> Result<()> {
+      //...
+    }
+}
+```
+</Codeblock>
+
+As you see, we implemented custom discriminator for the instructions. So make sure to use an anchor version 0.31.0 or older.
+
+<ArticleSection name="State" id="state" level="h2" />
+
+We're going to move into the `state.rs` where all the data for our `Escrow` lives. To do so we're going to give it a custom discriminator and wrap the struct into the `#[account]` macro like this:
+
+<Codeblock lang="rust">
+```rust
+use anchor_lang::prelude::*;
+
+#[derive(InitSpace)]
+#[account(discriminator = 1)]
+  pub struct Escrow {
+  pub seed: u64,
+  pub maker: Pubkey,
+  pub mint_a: Pubkey,
+  pub mint_b: Pubkey,
+  pub receive: u64,
+  pub bump: u8,
+}
+  ```
+</Codeblock>
+
+What each field does:
+- **seed**: Random number used during seed derivation so one maker can open multiple escrows with the same token pair; stored on-chain so we can always re-derive the PDA.
+- **maker**: The wallet that created the escrow; needed for refunds and to receive payment.
+- **mint_a** & **mint_b**: The SPL mints addresses for the "give" and "get" sides of the swap.
+- **receive**: How much of token B the maker wants. (The vault's balance itself shows how much token A was deposited, so we don't store that.)
+- **bump**: Cached bump byte; deriving it on the fly costs compute, so we save it once.
+
+We could pack in more info, but extra bytes mean extra rent. Storing only the essentials keeps deposits cheap while still letting the program enforce every rule it needs.
+
+We finish by adding the `#[derive(InitSpace)]` macro so we don't have to manually calculate the rent of this struct.
+
+<ArticleSection name="Errors" id="errors" level="h2" />
+
+We can now move to the `errors.rs` file where we're going to add some errors that we're going to use later like this: 
+
+<Codeblock lang="rust">
+```rust
+use anchor_lang::prelude::*;
+
+#[error_code]
+pub enum EscrowError {
+  #[msg("Invalid amount")]
+  InvalidAmount,
+  #[msg("Invalid maker")]
+  InvalidMaker,
+  #[msg("Invalid mint a")]
+  InvalidMintA,
+  #[msg("Invalid mint b")]
+  InvalidMintB,
+}
+```
+</Codeblock>
+
+Each enum maps to a clear, human-readable message that Anchor will surface whenever a constraint or `require!()` fails.

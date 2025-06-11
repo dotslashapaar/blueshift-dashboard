@@ -1,4 +1,5 @@
 import type { MDXComponents } from "mdx/types";
+import { AnchorDiscriminatorCalculator } from "@/app/components/AnchorDiscriminatorCalculator/AnchorDiscriminatorCalculator";
 import ArticleSection from "@/app/components/ArticleSection/ArticleSection";
 import Codeblock from "@/app/components/Codeblock/Codeblock";
 import Icon from "@/app/components/Icon/Icon";
@@ -15,6 +16,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     IDE,
     RequirementList,
     Requirement,
+    AnchorDiscriminatorCalculator,
     blockquote: ({ children }) => (
       <blockquote className="bg-background-primary rounded-xl !text-brand-secondary flex items-start gap-x-2 py-4 px-6">
         <Icon

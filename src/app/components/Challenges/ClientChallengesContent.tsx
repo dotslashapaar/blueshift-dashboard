@@ -1,14 +1,11 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import { usePersistentStore } from "@/stores/store";
 import Button from "../Button/Button";
 import Icon from "../Icon/Icon";
 import { useTranslations } from "next-intl";
-import { CourseMetadata } from "@/app/utils/course";
 import ClientChallengeTable from "./ClientChallengeTable";
-import { Link } from "@/i18n/navigation";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { anticipate } from "motion";
 import {
   useEsbuildRunner,
@@ -19,7 +16,6 @@ import {
   InterceptedWsReceiveData,
   WsReceiveDecision,
 } from "@/hooks/useEsbuildRunner";
-import { useCurrentLessonSlug } from "@/hooks/useCurrentLessonSlug";
 import { useChallengeVerifier } from "@/hooks/useChallengeVerifier";
 import { Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
@@ -27,26 +23,22 @@ import BlueshiftEditor from "@/app/components/TSChallengeEnv/BlueshiftEditor";
 import LogoGlyph from "../Logo/LogoGlyph";
 import { useAuth } from "@/hooks/useAuth";
 import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
+import { ChallengeMetadata } from "@/app/utils/challenges";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
 
 interface ChallengesContentProps {
-  currentCourse: CourseMetadata;
+  currentChallenge: ChallengeMetadata;
   content: ReactNode;
 }
 
 export default function ChallengesContent({
-  currentCourse,
+  currentChallenge,
 }: ChallengesContentProps) {
   const auth = useAuth();
   const isUserConnected = auth.status === "signed-in";
-  const { courseProgress } = usePersistentStore();
   const t = useTranslations();
-  const isCourseCompleted =
-    courseProgress[currentCourse.slug] === currentCourse.lessons.length;
-  const lastLessonSlug = useCurrentLessonSlug(currentCourse);
-  const challenge = currentCourse.challenge;
 
   const [editorCode, setEditorCode] = useState<string>("");
   const [wasSendTransactionIntercepted, setWasSendTransactionIntercepted] =
@@ -219,9 +211,12 @@ export default function ChallengesContent({
       try {
         // The dynamic import with ?raw needs to be handled correctly by the bundler.
         const codeModule = await import(
-          `@/app/content/courses/${currentCourse.slug}/challenge.ts.template?raw`
+          `@/app/content/challenges/${currentChallenge.slug}/challenge.ts.template?raw`
         );
         const template = codeModule.default;
+
+        // const template = "console.log('Hello, World!');"; // Placeholder for the actual template code
+
         setEditorCode(template);
       } catch (err) {
         console.error("Failed to load challenge template:", err);
@@ -231,10 +226,10 @@ export default function ChallengesContent({
       }
     };
 
-    if (currentCourse.slug) {
+    if (currentChallenge.slug) {
       fetchSolutionsTemplate();
     }
-  }, [currentCourse.slug]);
+  }, [currentChallenge.slug]);
 
   // Effect to check for missing sendTransaction after code execution
   useEffect(() => {
@@ -278,7 +273,7 @@ export default function ChallengesContent({
     setRequirements,
     initialRequirements,
     setVerificationData,
-  } = useChallengeVerifier({ course: currentCourse });
+  } = useChallengeVerifier({ challenge: currentChallenge });
 
   const handleRunCode = () => {
     if (esBuildInitializationState !== "initialized") {
@@ -304,17 +299,17 @@ export default function ChallengesContent({
   return (
     <div className="relative w-full h-full">
       {!isUserConnected ? (
-        <div className="absolute z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
-          <div className="flex flex-col gap-y-4 sm:!-mt-24 max-w-[90dvw]">
+        <div className="z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col gap-y-4 mt-24 max-w-[90dvw]">
             <img
               src="/graphics/connect-wallet.svg"
               className="sm:w-[360px] max-w-[80dvw] w-full mx-auto"
             />
             <div className="text-center text-lg sm:text-xl font-medium leading-none">
-              {t("challenges.connect_wallet")}
+              {t("ChallengePage.connect_wallet")}
             </div>
             <div className="text-center text-secondary mx-auto sm:w-2/3 w-full">
-              {t("challenges.connect_wallet_description")}
+              {t("ChallengePage.connect_wallet_description")}
             </div>
           </div>
           <WalletMultiButton
@@ -325,121 +320,86 @@ export default function ChallengesContent({
           />
         </div>
       ) : (
-        <>
-          <AnimatePresence>
-            {!isCourseCompleted && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm"
-              >
-                <div className="flex flex-col gap-y-4 sm:!-mt-24 max-w-[90dvw]">
-                  <div className="text-center justify-center text-lg sm:text-xl font-medium leading-none gap-x-2 items-center flex">
-                    <Icon name="Locked" className="text-secondary" />
-                    {t("challenges.locked")}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            transition: { duration: 0.4, ease: anticipate },
+          }}
+          exit={{ opacity: 0 }}
+          className="px-4 py-14 pb-20 max-w-app grid grid-cols-1 md:px-8 lg:px-14 mx-auto w-full gap-y-12 lg:gap-x-24"
+        >
+          <div className="flex flex-col relative w-full h-full">
+            <div className="flex flex-col w-full h-full min-h-[35dvh] lg:min-h-[65dvh]">
+              <div className="w-full h-full flex flex-col rounded-xl overflow-hidden border border-border">
+                <div className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-xl flex items-center border-b border-border">
+                  <div className="flex items-center gap-x-2">
+                    <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
+                    <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
+                    <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
                   </div>
-                  <div className="text-center text-secondary mx-auto w-full">
-                    {t("challenges.locked_description")}
+                  <div className="text-sm font-medium text-secondary absolute left-1/2 -translate-x-1/2 flex items-center gap-x-1.5">
+                    <Icon
+                      name="Challenge"
+                      size={12}
+                      className="hidden sm:block"
+                    />
+                    <span className="flex-shrink-0">
+                      {t(`challenges.${currentChallenge.slug}.title`)}
+                    </span>
                   </div>
                 </div>
-                <Link href={`/courses/${currentCourse.slug}/${lastLessonSlug}`}>
-                  <Button
-                    label="Back to Course"
-                    variant="primary"
-                    size="lg"
-                    className="!w-[2/3]"
-                    icon="ArrowLeft"
-                  />
-                </Link>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {challenge && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: 1,
-                transition: { duration: 0.4, ease: anticipate },
-              }}
-              exit={{ opacity: 0 }}
-              className="px-4 py-14 pb-20 max-w-app grid grid-cols-1 md:px-8 lg:px-14 mx-auto w-full gap-y-12 lg:gap-x-24"
-            >
-              <div className="flex flex-col relative w-full h-full">
-                <div className="flex flex-col w-full h-full min-h-[35dvh] lg:min-h-[65dvh]">
-                  <div className="w-full h-full flex flex-col rounded-xl overflow-hidden border border-border">
-                    <div className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-xl flex items-center border-b border-border">
-                      <div className="flex items-center gap-x-2">
-                        <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
-                        <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
-                        <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
-                      </div>
-                      <div className="text-sm font-medium text-secondary absolute left-1/2 -translate-x-1/2 flex items-center gap-x-1.5">
-                        <Icon
-                          name="Challenge"
-                          size={12}
-                          className="hidden sm:block"
-                        />
-                        <span className="flex-shrink-0">
-                          {t(`courses.${currentCourse.slug}.challenge.title`)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="left-[1px] w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
-                      <LogoGlyph width={16} />
-                      <div className="flex items-center gap-x-2.5">
-                        <>
-                          <Button
-                            variant="link"
-                            icon={"Play"}
-                            iconSize={12}
-                            size="sm"
-                            label={
-                              isCodeRunning
-                                ? t("challenge_page.running_program_btn")
-                                : t("challenge_page.run_program_btn")
-                            }
-                            className="w-max !text-brand-primary"
-                            onClick={() => {
-                              handleRunCode();
-                            }}
-                            disabled={isVerificationLoading}
-                          />
-                        </>
-                      </div>
-                    </div>
-                    <div className="flex flex-col lg:grid lg:grid-cols-3 w-full h-full">
-                      <BlueshiftEditor
-                        initialCode={editorCode}
-                        onCodeChange={setEditorCode}
-                        className="col-span-2"
-                        title={t(
-                          `courses.${currentCourse.slug}.challenge.title`
-                        )}
-                      />
-                      <ClientChallengeTable
-                        onRunCodeClick={handleRunCode}
-                        requirements={requirements}
-                        completedRequirementsCount={completedRequirementsCount}
-                        allIncomplete={allIncompleteVerification}
-                        isLoading={isVerificationLoading}
-                        error={verificationHookError}
-                        verificationData={verificationData}
-                        course={currentCourse}
-                        isCodeRunning={isCodeRunning}
-                        runnerLogs={runnerLogs}
-                        isEsbuildReady={
-                          esBuildInitializationState === "initialized"
+                <div className="left-[1px] w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
+                  <LogoGlyph width={16} />
+                  <div className="flex items-center gap-x-2.5">
+                    <>
+                      <Button
+                        variant="link"
+                        icon={"Play"}
+                        iconSize={12}
+                        size="sm"
+                        label={
+                          isCodeRunning
+                            ? t("ChallengePage.running_program_btn")
+                            : t("ChallengePage.run_program_btn")
                         }
-                        onRedoChallenge={handleRedoChallenge}
+                        className="w-max !text-brand-primary"
+                        onClick={() => {
+                          handleRunCode();
+                        }}
+                        disabled={isVerificationLoading}
                       />
-                    </div>
+                    </>
                   </div>
+                </div>
+                <div className="flex flex-col lg:grid lg:grid-cols-3 w-full h-full">
+                  <BlueshiftEditor
+                    initialCode={editorCode}
+                    onCodeChange={setEditorCode}
+                    className="col-span-2"
+                    title={t(`challenges.${currentChallenge.slug}.title`)}
+                  />
+                  <ClientChallengeTable
+                    onRunCodeClick={handleRunCode}
+                    requirements={requirements}
+                    completedRequirementsCount={completedRequirementsCount}
+                    allIncomplete={allIncompleteVerification}
+                    isLoading={isVerificationLoading}
+                    error={verificationHookError}
+                    verificationData={verificationData}
+                    challenge={currentChallenge}
+                    isCodeRunning={isCodeRunning}
+                    runnerLogs={runnerLogs}
+                    isEsbuildReady={
+                      esBuildInitializationState === "initialized"
+                    }
+                    onRedoChallenge={handleRedoChallenge}
+                  />
                 </div>
               </div>
-            </motion.div>
-          )}
-        </>
+            </div>
+          </div>
+        </motion.div>
       )}
     </div>
   );

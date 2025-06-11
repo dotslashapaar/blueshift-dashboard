@@ -1,11 +1,11 @@
 import { getTranslations } from "next-intl/server";
 import MdxLayout from "@/app/mdx-layout";
-import { getCourse } from "@/app/utils/mdx";
+import { getChallenge, getCourse } from "@/app/utils/mdx";
 import { courseColors } from "@/app/utils/course";
 import Icon from "@/app/components/Icon/Icon";
 import Divider from "@/app/components/Divider/Divider";
 import TableOfContents from "@/app/components/TableOfContents/TableOfContents";
-import CoursePagination from "@/app/components/CoursesContent/CoursePagination";
+import ContentPagination from "@/app/components/CoursesContent/ContentPagination";
 import { Link } from "@/i18n/navigation";
 import Button from "@/app/components/Button/Button";
 import LessonTitle from "@/app/components/LessonTitle/LessonTitle";
@@ -35,10 +35,10 @@ export async function generateMetadata({
   });
 
   const ogImage = {
-    src: `/graphics/banners/${courseName}.png`,
+    src: `/graphics/course-banners/${courseName}.png`,
     width: 1200,
     height: 630,
-  }
+  };
 
   return {
     title: t("title"),
@@ -84,7 +84,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
   }
 
   let collectionSize: number | null = null;
-  const collectionMintAddress = courseMetadata.collectionMintAddress;
+
+  const challenge = await getChallenge(courseMetadata.challenge);
+  const collectionMintAddress = challenge?.collectionMintAddress;
 
   if (collectionMintAddress) {
     try {
@@ -119,7 +121,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
   );
   const nextLesson = allLessons[currentLessonIndex + 1];
   const nextLessonSlug = nextLesson ? nextLesson.slug : "";
-  const challenge = courseMetadata.challenge;
 
   return (
     <div className="flex flex-col w-full border-b border-b-border">
@@ -168,12 +169,12 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 target="_blank"
               >
                 <p
-                  className="text-base text-secondary mt-1 text-sm"
+                  className="text-secondary mt-1 text-sm"
                   style={{
-                    color: `rgb(${courseColors[courseMetadata.language]},1)`,
+                    color: `rgb(${courseColors[courseMetadata.language]})`,
                   }}
                 >
-                  {(collectionSize as any).toString()} Graduates
+                  {collectionSize.toString()} Graduates
                 </p>
               </Link>
             )}
@@ -185,7 +186,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
       <div className="max-w-app flex flex-col gap-y-8 h-full relative px-4 md:px-8 lg:px-14 mx-auto w-full mt-[36px]">
         <div className="grid grid-cols-1 lg:grid-cols-10 xl:grid-cols-13 gap-y-24 lg:gap-y-0 gap-x-0 lg:gap-x-6">
-          <CoursePagination
+          <ContentPagination
+            type="course"
             course={courseMetadata}
             currentLesson={currentLessonIndex + 1}
           />
@@ -232,7 +234,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                     {t("lessons.take_challenge_cta")}
                   </span>
                   <Link
-                    href={`/courses/${courseMetadata.slug}/challenge`}
+                    href={`/challenges/${challenge.slug}?fromCourse=${courseMetadata.slug}`}
                     className="w-max"
                   >
                     <Button
@@ -251,10 +253,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                   <span className="text-primary w-auto flex-shrink-0 font-mono">
                     {t("lessons.lesson_completed")}
                   </span>
-                  <Link
-                    href={`/courses`}
-                    className="w-max"
-                  >
+                  <Link href={`/courses`} className="w-max">
                     <Button
                       variant="primary"
                       size="lg"
@@ -265,7 +264,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
                   </Link>
                 </div>
               )}
-
             </div>
           </div>
           <TableOfContents />

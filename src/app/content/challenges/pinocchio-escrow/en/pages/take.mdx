@@ -1,0 +1,108 @@
+<ArticleSection name="Take" id="take" level="h2" />
+
+The `take` instruction finalizes the swap:
+  - Close the escrow record, sending its rent lamports back to the maker.
+- Move Token A from the vault to the taker, then close the vault.
+- Move the agreed amount of Token B from the taker to the maker.
+
+### Required Accounts
+
+Similarly, these are all the accounts needed for the `Take` context:
+
+Below are the accounts the context needs:
+
+- taker: the person that wants to take the deal. Must be a signer and mutable.
+- maker: the creator of the escrow. Must be mutable.
+- escrow: the escrow account that we're initializing. Must be mutable.
+- mint_a: the token we're depositing in the escrow
+- mint_b: the token we want to receive
+- vault: the associated token account owned by the escrow. Must be mutable
+- taker_ata_a: the associated token account owned by the taker for mint_a. Must be mutable
+- maker_ata_b: the associated token account owned by the maker for mint_b. Must be mutable
+- taker_ata_b: the associated token account owned by the taker for mint_b. Must be mutable
+- associated_token_program: the associated token program. Must be executable
+- token_program: the token program. Must be executable
+- system_program: the system program. Must be executable
+
+And we perform these checks on it:
+
+<Codeblock lang="rust">
+  ```rust
+  pub struct TakeAccounts<'a> {
+  pub taker: &'a AccountInfo,
+  pub maker: &'a AccountInfo,
+  pub escrow: &'a AccountInfo,
+  pub mint_a: &'a AccountInfo,
+  pub mint_b: &'a AccountInfo,
+  pub vault: &'a AccountInfo,
+  pub taker_ata_a: &'a AccountInfo,
+  pub taker_ata_b: &'a AccountInfo,
+  pub maker_ata_b: &'a AccountInfo,
+  pub system_program: &'a AccountInfo,
+  pub token_program: &'a AccountInfo,
+}
+
+  impl<'a> TryFrom<&'a [AccountInfo]> for TakeAccounts<'a> {
+  type Error = ProgramError;
+
+  fn try_from(accounts: &'a [AccountInfo]) -> Result<Self, Self::Error> {
+  let [taker, maker, escrow, mint_a, mint_b, vault, taker_ata_a, taker_ata_b, maker_ata_b, system_program, token_program, _] = accounts else {
+  return Err(ProgramError::NotEnoughAccountKeys);
+};
+
+  // Basic Accounts Checks
+  SignerAccount::check(taker)?;
+  ProgramAccount::check(escrow)?;
+  MintInterface::check(mint_a)?;
+  MintInterface::check(mint_b)?;
+  AssociatedTokenAccount::check(taker_ata_b, taker, mint_b, token_program)?;
+  AssociatedTokenAccount::check(vault, escrow, mint_a, token_program)?;
+
+  // Return the accounts
+  Ok(Self {
+  taker,
+  maker,
+  escrow,
+  mint_a,
+  mint_b,
+  taker_ata_a,
+  taker_ata_b,
+  maker_ata_b,
+  vault,
+  system_program,
+  token_program,
+})
+}
+  }
+  ```
+</Codeblock>
+
+### Instruction Data
+
+All the data that we need to perform the logic already lives in the Escrow account or on the accounts that we're deserializing. For this reason we don't need any `instruction_data` for this instruction.
+
+### Logic
+
+1. **Escrow Validation**:
+- Verify the escrow's PDA derivation
+- Check that all terms are valid
+- Ensure the taker has enough tokens
+
+2. **Token A Transfer**:
+- Move tokens from vault to taker
+- Close the vault account
+- Return rent to maker
+
+3. **Token B Transfer**:
+- Move the agreed amount from taker to maker
+- This must succeed or the entire transaction fails
+
+4. **Clean Up**:
+- Close the escrow account
+- Return rent to the taker (as they initiated the transaction)
+
+This atomic sequence ensures that either:
+  - The entire swap completes successfully
+- Nothing happens at all
+
+There's no way for one party to get their tokens without fulfilling their side of the deal.

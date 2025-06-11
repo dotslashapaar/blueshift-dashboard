@@ -2,152 +2,64 @@ import { CourseMetadata, withCourseNumber } from "@/app/utils/course";
 
 const allCourses: CourseMetadata[] = withCourseNumber([
   {
-    slug: "anchor-vault",
+    slug: "introduction-to-anchor",
     language: "Anchor",
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
-    unitName: "Anchor Vault",
     lessons: [
-      { slug: "introduction" },
-      { slug: "code" },
+      { slug: "anchor-101" },
+      { slug: "anchor-accounts" },
+      { slug: "anchor-instructions" },
+      { slug: "conclusions" },
     ],
-    challenge: {
-      apiPath: "/v1/verify/anchor/vault",
-      requirements: [
-        { instructionKey: "deposit" },
-        { instructionKey: "withdraw" },
-      ],
-    },
-    collectionMintAddress: "53tiK9zY67DuyA1tgQ6rfNgixMB1LiCP9D67RgfbCrpz",
   },
   {
-    slug: "anchor-escrow",
-    language: "Anchor",
+    slug: "introduction-to-pinocchio",
+    language: "Rust",
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
-    unitName: "Anchor Escrow",
     lessons: [
-      { slug: "introduction" },
-      { slug: "code" },
+      { slug: "pinocchio-101" },
+      { slug: "pinocchio-accounts" },
+      { slug: "pinocchio-instructions" },
+      { slug: "conclusions" },
     ],
-    challenge: {
-      apiPath: "/v1/verify/anchor/escrow",
-      requirements: [
-        { instructionKey: "make" },
-        { instructionKey: "take" },
-        { instructionKey: "refund" },
-      ],
-    },
-    collectionMintAddress: "2E5K7FxDWGXkbRpFEAkhR8yQwiUBGggVyng2vaAhah5L",
   },
   {
-    slug: "anchor-memo",
-    language: "Anchor",
+    slug: "secp256r1-on-solana",
+    language: "Rust",
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,
-    unitName: "Anchor Memo",
-    lessons: [{ slug: "lesson" }],
-    challenge: {
-      apiPath: "/v1/verify/anchor/memo",
-      requirements: [{ instructionKey: "log" }],
-    },
-  },
-  {
-    slug: "pinocchio-vault",
-    language: "Rust",
-    color: "255,173,102",
-    difficulty: 2,
-    isFeatured: true,
-    unitName: "Pinocchio Vault",
     lessons: [
       { slug: "introduction" },
-      { slug: "code" },
+      { slug: "secp256r1-with-anchor" },
+      { slug: "secp256r1-with-pinocchio" },
+      { slug: "conclusions" },
     ],
-    challenge: {
-      apiPath: "/v1/verify/pinocchio/vault",
-      requirements: [
-        { instructionKey: "deposit" },
-        { instructionKey: "withdraw" },
-      ],
-    },
-    collectionMintAddress: "AL38QM96SDu4Jpx7UGcTcaLtwvWPVgRUzg9PqC787djK",
   },
-  {
-    slug: "pinocchio-memo",
-    language: "Rust",
-    color: "255,173,102",
-    difficulty: 2,
-    isFeatured: true,
-    unitName: "Pinocchio Memo",
-    lessons: [{ slug: "lesson" }],
-    challenge: {
-      apiPath: "/v1/verify/pinocchio/memo",
-      requirements: [{ instructionKey: "log" }],
-    },
-  },
-  {
-    slug: "assembly-memo",
-    language: "Assembly",
-    color: "140,255,102",
-    difficulty: 2,
-    isFeatured: true,
-    unitName: "Assembly Memo",
-    lessons: [{ slug: "lesson" }],
-    challenge: {
-      apiPath: "/v1/verify/assembly/memo",
-      requirements: [{ instructionKey: "log" }],
-    },
-  },
-  {
-    slug: "quantum-vault",
-    language: "Rust",
-    color: "255,173,102",
-    difficulty: 4,
-    isFeatured: true,
-    unitName: "Quantum Vault",
-    lessons: [{ slug: "introduction-to-quantum-vault" }],
-  },
-  {
-    slug: "your-first-spl-token",
-    language: "Typescript",
-    color: "105,162,241",
-    difficulty: 2,
-    isFeatured: true,
-    unitName: "SPL Token Mint",
-    lessons: [{ slug: "understanding-spl-tokens" }],
-    challenge: {
-      apiPath: "/v1/verify/spf-token/create-mint",
-      requirements: [{ instructionKey: "create_mint" }],
-    },
-  },
-  {
-    slug: "research-crateless-program",
-    language: "Research",
-    color: "105,162,241",
-    difficulty: 2,
-    isFeatured: true,
-    unitName: "Byte by Byte",
-    lessons: [{ slug: "lesson" }],
-    challenge: {
-      apiPath: "/v1/verify/research/crateless-program",
-      requirements: [
-        { instructionKey: "deposit" },
-        { instructionKey: "withdraw" },
-      ],
-    },
-  }
 ]);
 
-const releasedCourses = (
-  process.env.NEXT_PUBLIC_RELEASED_COURSES?.split(",") ?? []
-).map((course) => course.trim());
+const releasedCoursesSetting = process.env.NEXT_PUBLIC_RELEASED_COURSES?.trim();
 
 export const courses = allCourses.filter((course) => {
-  return (
-    process.env.NEXT_PUBLIC_RELEASE_ALL_COURSES?.trim() === "true" ||
-    releasedCourses.includes(course.slug)
-  );
+  // If the setting is undefined, null, or an empty string, release no courses.
+  if (!releasedCoursesSetting) {
+    return false;
+  }
+
+  // If the setting is "*", release all courses.
+  if (releasedCoursesSetting === "*") {
+    return true;
+  }
+
+  // Otherwise, treat the setting as a comma-separated list of course slugs.
+  const releasedSlugs = releasedCoursesSetting
+    .split(",")
+    .map((slug) => slug.trim())
+    .filter(slug => slug.length > 0); // Ensure empty strings from trailing/multiple commas are ignored
+
+  return releasedSlugs.includes(course.slug);
 });

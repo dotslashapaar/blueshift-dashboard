@@ -7,27 +7,30 @@ import DecryptedText from "../HeadingReveal/DecryptText";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { anticipate } from "motion";
-import { CourseMetadata } from "@/app/utils/course";
 import useMintNFT from "@/hooks/useMintNFT";
 import { usePersistentStore } from "@/stores/store";
 import { Link } from "@/i18n/navigation";
+import { ChallengeMetadata } from "@/app/utils/challenges";
 
 interface ChallengeCompletedProps {
   isOpen: boolean;
   onClose: () => void;
-  course: CourseMetadata;
+  challenge: ChallengeMetadata;
+  locale?: string;
 }
 
 export default function ChallengeCompleted({
   isOpen,
   onClose,
-  course,
+  challenge,
+  locale = "en",
 }: ChallengeCompletedProps) {
   const t = useTranslations();
   const [isAnimating, setIsAnimating] = useState(false);
   const { mint, isLoading } = useMintNFT();
-  const { courseStatus } = usePersistentStore();
-  const currentCourseStatus = courseStatus[course.slug];
+  const { challengeStatuses } = usePersistentStore();
+  const currentCourseStatus = challengeStatuses[challenge.slug];
+  const challengeTitle = t(`challenges.${challenge.slug}.title`);
 
   useEffect(() => {
     setTimeout(() => {
@@ -41,10 +44,9 @@ export default function ChallengeCompleted({
   };
 
   const handleMint = async () => {
-    mint(course)
-      .catch((error) => {
-        console.error("Error minting NFT:", error);
-      });
+    mint(challenge).catch((error) => {
+      console.error("Error minting NFT:", error);
+    });
   };
 
   return (
@@ -63,7 +65,10 @@ export default function ChallengeCompleted({
         transition={{ duration: 0.75, delay: 0.5 }}
         className="w-[175px] relative z-10 mt-6"
       >
-        <img src={`/graphics/nft-${course.slug}.png`} className="w-full animate-nft"></img>
+        <img
+          src={`/graphics/nft-${challenge.slug}.png`}
+          className="w-full animate-nft"
+        ></img>
       </motion.div>
       <motion.div
         initial={{ opacity: 0 }}
@@ -76,18 +81,22 @@ export default function ChallengeCompleted({
       <div className="flex flex-col gap-y-8 px-6 pt-16 relative z-10">
         <div className="flex flex-col gap-y-2 text-center">
           <div className="text-xl font-medium">
-            {t("challenges.challenge_completed")}
+            {t("ChallengePage.mint_modal_title")}
           </div>
           <span className="text-secondary text-balance">
-            {t("challenges.challenge_completed_description")}
+            {t("ChallengePage.mint_modal_description")}
           </span>
         </div>
 
         <div className="flex flex-col gap-y-4">
-          {currentCourseStatus === "Unlocked" ? (
+          {currentCourseStatus === "completed" ? (
             <>
               <Button
-                label={t("challenges.challenge_completed_button")}
+                label={
+                  isLoading
+                    ? t("ChallengePage.minting")
+                    : t("ChallengePage.mint_modal_button")
+                }
                 variant="primary"
                 size="lg"
                 icon="Claimed"
@@ -102,16 +111,19 @@ export default function ChallengeCompleted({
                 className="hover:text-primary text-mute transition w-2/3 text-center text-sm font-medium mx-auto cursor-pointer"
               >
                 <DecryptedText
-                  text={t("challenges.challenge_completed_skip")}
+                  text={t("ChallengePage.mint_modal_skip")}
                   isHovering={isHovering}
                 />
               </div>
             </>
           ) : (
             <>
-              <Link href={`https://x.com/intent/tweet?text=${encodeURIComponent(`I just completed the Anchor Vault challenge from @blueshift_gg.\n\nTry it out here: https://learn.blueshift.gg/en/courses/${course.slug}/lesson\n\nMake the shift. Build on @solana.`)}`} target="_blank">
+              <Link
+                href={`https://x.com/intent/tweet?text=${encodeURIComponent(`I just completed the ${challengeTitle} challenge from @blueshift_gg.\n\nTry it out here: https://learn.blueshift.gg/${locale}/challenges/${challenge.slug}\n\nMake the shift. Build on @solana.`)}`}
+                target="_blank"
+              >
                 <Button
-                  label={t("challenges.challenge_completed_tweet")}
+                  label={t("ChallengePage.mint_modal_tweet")}
                   variant="primary"
                   size="lg"
                   icon="X"
@@ -125,7 +137,7 @@ export default function ChallengeCompleted({
                 className="hover:text-primary text-mute transition w-2/3 text-center text-sm font-medium mx-auto cursor-pointer"
               >
                 <DecryptedText
-                  text={t("challenges.challenge_completed_skip")}
+                  text={t("ChallengePage.mint_modal_skip")}
                   isHovering={isHovering}
                 />
               </div>

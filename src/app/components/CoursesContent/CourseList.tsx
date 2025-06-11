@@ -37,7 +37,7 @@ const courseSections = {
   Research: {
     icon: "Research",
     title: "languages.research",
-  }
+  },
 } as const;
 
 type CoursesContentProps = {
@@ -55,11 +55,18 @@ export default function CourseList({
   courseLessons,
 }: CoursesContentProps) {
   const t = useTranslations();
-  const { view, setView, selectedLanguages, courseProgress, courseStatus } =
-    usePersistentStore();
+  const {
+    view,
+    setView,
+    selectedLanguages,
+    courseProgress,
+    challengeStatuses,
+  } = usePersistentStore();
   const { searchValue } = useStore();
   const isProgressEmpty = Object.keys(courseProgress).length === 0;
 
+  // Filter courses based on search value and selected languages
+  // Sort by difficulty (lower number means easier)
   const filteredCourses = initialCourses
     .filter((course) => {
       const matchesSearch = t(`courses.${course.slug}.title`)
@@ -71,6 +78,28 @@ export default function CourseList({
       return matchesSearch && matchesLanguage;
     })
     .sort((a, b) => a.difficulty - b.difficulty);
+
+  // In-progress courses are those where the user has started but not completed
+  // or has completed but has an associated challenge that is not yet completed.
+  const inProgressCourses = filteredCourses.filter(
+    (course) =>
+      (courseProgress[course.slug] > 0 &&
+        courseProgress[course.slug] < course.lessons.length) ||
+      (courseProgress[course.slug] === course.lessons.length &&
+        !!course.challenge),
+  );
+
+  // Completed courses are those where the user has finished all lessons
+  // and either has no challenge or the challenge is completed/claimed.
+  const completedCourses = filteredCourses.filter((course) => {
+    const hasFinishedLessons =
+      courseProgress[course.slug] === course.lessons.length;
+
+    return course.challenge
+      ? hasFinishedLessons &&
+          ["completed", "claimed"].includes(challengeStatuses[course.challenge])
+      : hasFinishedLessons;
+  });
 
   const hasNoResults = filteredCourses.length === 0;
   const hasNoFilters = !searchValue && selectedLanguages.length === 0;
@@ -92,7 +121,7 @@ export default function CourseList({
 
     // Find the lesson with matching number
     const currentLesson = courseLessonData.lessons.find(
-      (lesson) => lesson.number === progress
+      (lesson) => lesson.number === progress,
     );
 
     return currentLesson?.slug || "";
@@ -135,7 +164,7 @@ export default function CourseList({
                   view === "grid"
                     ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                     : "grid-cols-1",
-                  "gap-5"
+                  "gap-5",
                 )}
               >
                 {filteredCourses
@@ -144,6 +173,13 @@ export default function CourseList({
                     const totalLessons =
                       courseLessons.find((c) => c.slug === course.slug)
                         ?.totalLessons || 0;
+                    const currentLessonSlug = getCurrentLessonSlug(course.slug);
+                    let link;
+                    if (currentLessonSlug && course.slug) {
+                      link = `/courses/${course.slug}/${currentLessonSlug}`;
+                    } else if (course.slug && !currentLessonSlug) {
+                      link = `/courses/${course.slug}`;
+                    }
                     return (
                       <CourseCard
                         key={course.slug}
@@ -151,8 +187,7 @@ export default function CourseList({
                         language={course.language}
                         color={course.color}
                         difficulty={course.difficulty}
-                        currentCourse={course.slug}
-                        currentLesson={getCurrentLessonSlug(course.slug)}
+                        link={link}
                         footer={
                           <NewCourseFooter
                             courseSlug={course.slug}
@@ -169,12 +204,8 @@ export default function CourseList({
             </div>
           ) : (
             <div className="flex flex-col gap-y-8">
-              {/* Returning Users */}
-              {filteredCourses.some(
-                (course) =>
-                  courseProgress[course.slug] !== undefined &&
-                  courseStatus[course.slug] === "Locked"
-              ) && (
+              {/* In-progress courses */}
+              {inProgressCourses.length > 0 && (
                 <>
                   <div className="flex items-center gap-x-3">
                     <span className="text-lg leading-none font-medium text-secondary">
@@ -187,48 +218,50 @@ export default function CourseList({
                       view === "grid"
                         ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                         : "grid-cols-1",
-                      "gap-5"
+                      "gap-5",
                     )}
                   >
-                    {filteredCourses
-                      .filter(
-                        (course) =>
-                          courseProgress[course.slug] !== undefined &&
-                          courseStatus[course.slug] === "Locked"
-                      )
-                      .map((course) => {
-                        const totalLessons =
-                          courseLessons.find((c) => c.slug === course.slug)
-                            ?.totalLessons || 0;
-                        const currentLessonSlug = getCurrentLessonSlug(
-                          course.slug
-                        );
-                        return (
-                          <CourseCard
-                            currentLesson={currentLessonSlug}
-                            currentCourse={course.slug}
-                            key={course.slug}
-                            name={t(`courses.${course.slug}.title`)}
-                            language={course.language}
-                            color={course.color}
-                            difficulty={course.difficulty}
-                            footer={
-                              <ReturningCourseFooter
-                                courseName={course.slug}
-                                completedLessonsCount={
-                                  courseProgress[course.slug]
-                                }
-                                totalLessonCount={totalLessons}
-                                currentLessonSlug={currentLessonSlug}
-                                isChallengeCompleted={
-                                  courseStatus[course.slug] !== "Locked"
-                                }
-                                hasChallenge={!!course.challenge}
-                              />
-                            }
-                          />
-                        );
-                      })}
+                    {inProgressCourses.map((course) => {
+                      const totalLessons =
+                        courseLessons.find((c) => c.slug === course.slug)
+                          ?.totalLessons || 0;
+                      const currentLessonSlug = getCurrentLessonSlug(
+                        course.slug,
+                      );
+                      let link = "#";
+                      if (currentLessonSlug && course.slug) {
+                        link = `/courses/${course.slug}/${currentLessonSlug}`;
+                      } else if (course.slug && !currentLessonSlug) {
+                        link = `/courses/${course.slug}`;
+                      }
+                      return (
+                        <CourseCard
+                          key={course.slug}
+                          name={t(`courses.${course.slug}.title`)}
+                          language={course.language}
+                          color={course.color}
+                          difficulty={course.difficulty}
+                          link={link}
+                          footer={
+                            <ReturningCourseFooter
+                              courseName={course.slug}
+                              completedLessonsCount={
+                                courseProgress[course.slug]
+                              }
+                              totalLessonCount={totalLessons}
+                              currentLessonSlug={currentLessonSlug}
+                              isChallengeCompleted={
+                                !!course.challenge &&
+                                ["completed", "claimed"].includes(
+                                  challengeStatuses[course.challenge],
+                                )
+                              }
+                              challengeSlug={course.challenge}
+                            />
+                          }
+                        />
+                      );
+                    })}
                   </div>
                   <div className="pt-4 pb-12 relative w-full">
                     <Divider />
@@ -236,12 +269,12 @@ export default function CourseList({
                 </>
               )}
 
-              {/* Course Sections */}
+              {/* Open Courses Sections */}
               {Object.entries(courseSections).map(([language, section]) => {
                 const languageCourses = filteredCourses.filter(
                   (course) =>
                     course.language === language &&
-                    courseProgress[course.slug] === undefined
+                    courseProgress[course.slug] === undefined,
                 );
 
                 if (languageCourses.length === 0) return null;
@@ -268,26 +301,29 @@ export default function CourseList({
                           view === "grid"
                             ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                             : "grid-cols-1",
-                          "gap-5"
+                          "gap-5",
                         )}
                       >
                         {languageCourses.map((course) => {
-                          const totalLessons =
-                            courseLessons.find((c) => c.slug === course.slug)
-                              ?.totalLessons || 0;
+                          const currentLessonSlug = getCurrentLessonSlug(course.slug);
+                          let link = "#";
+                          if (currentLessonSlug && course.slug) {
+                            link = `/courses/${course.slug}/${currentLessonSlug}`;
+                          } else if (course.slug && !currentLessonSlug) {
+                            link = `/courses/${course.slug}`;
+                          }
                           return (
                             <CourseCard
-                              currentLesson={getCurrentLessonSlug(course.slug)}
-                              currentCourse={course.slug}
                               key={course.slug}
                               name={t(`courses.${course.slug}.title`)}
                               language={course.language}
                               color={course.color}
                               difficulty={course.difficulty}
+                              link={link}
                               footer={
                                 <NewCourseFooter
                                   courseSlug={course.slug}
-                                  lessonCount={totalLessons}
+                                  lessonCount={course.lessons.length}
                                 />
                               }
                             />
@@ -313,11 +349,7 @@ export default function CourseList({
               })}
 
               {/* Completed Courses */}
-              {filteredCourses.some(
-                (course) =>
-                  courseProgress[course.slug] !== undefined &&
-                  courseStatus[course.slug] !== "Locked"
-              ) && (
+              {completedCourses.length > 0 && (
                 <>
                   <div className="flex items-center gap-x-3">
                     <Icon
@@ -334,46 +366,42 @@ export default function CourseList({
                       view === "grid"
                         ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                         : "grid-cols-1",
-                      "gap-5"
+                      "gap-5",
                     )}
                   >
-                    {filteredCourses
-                      .filter(
-                        (course) =>
-                          courseProgress[course.slug] !== undefined &&
-                          courseStatus[course.slug] !== "Locked"
-                      )
-                      .map((course) => {
-                        const totalLessons =
-                          courseLessons.find((c) => c.slug === course.slug)
-                            ?.totalLessons || 0;
-                        const currentLessonSlug = getCurrentLessonSlug(
-                          course.slug
-                        );
-                        return (
-                          <CourseCard
-                            currentLesson={currentLessonSlug}
-                            currentCourse={course.slug}
-                            key={course.slug}
-                            name={t(`courses.${course.slug}.title`)}
-                            language={course.language}
-                            color={course.color}
-                            difficulty={course.difficulty}
-                            footer={
-                              <ReturningCourseFooter
-                                courseName={course.slug}
-                                completedLessonsCount={
-                                  courseProgress[course.slug]
-                                }
-                                totalLessonCount={totalLessons}
-                                currentLessonSlug={currentLessonSlug}
-                                isChallengeCompleted={true}
-                                hasChallenge={!!course.challenge}
-                              />
-                            }
-                          />
-                        );
-                      })}
+                    {completedCourses.map((course) => {
+                      const currentLessonSlug = getCurrentLessonSlug(
+                        course.slug,
+                      );
+                      let link;
+                      if (currentLessonSlug && course.slug) {
+                        link = `/courses/${course.slug}/${currentLessonSlug}`;
+                      } else if (course.slug && !currentLessonSlug) {
+                        link = `/courses/${course.slug}`;
+                      }
+                      return (
+                        <CourseCard
+                          key={course.slug}
+                          name={t(`courses.${course.slug}.title`)}
+                          language={course.language}
+                          color={course.color}
+                          difficulty={course.difficulty}
+                          link={link}
+                          footer={
+                            <ReturningCourseFooter
+                              courseName={course.slug}
+                              completedLessonsCount={
+                                courseProgress[course.slug]
+                              }
+                              totalLessonCount={course.lessons.length}
+                              currentLessonSlug={currentLessonSlug}
+                              isChallengeCompleted={true}
+                              challengeSlug={course.challenge}
+                            />
+                          }
+                        />
+                      );
+                    })}
                   </div>
                 </>
               )}

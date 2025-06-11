@@ -1,0 +1,139 @@
+<ArticleSection name="Make" id="make" level="h2" />
+
+We can now move to the `make` instruction, that lives in the `make.rs` and will perform this actions:
+- Initialises the Escrow record and stores all the terms.
+- Creates the Vault (an ATA for `mint_a` owned by the `escrow`).
+- Moves the maker's Token A into that vault with a CPI to the SPL-Token program.
+
+### Accounts 
+
+The accounts needed in this context are:
+- `maker`: the user that decide the terms and deposit the `mint_a` into the `Escrow`
+- `escrow`: the account where all the terms of this exchange lives
+- `mint_a`: the token that the `maker` is depositing
+- `mint_b`: the token that the `maker` wants in exchange
+- `maker_ata_a`: the token account associated with the `maker` and `mint_a` used to the deposit tokens in the `vault`
+- `vault`: the token account associated with the `escrow` and `mint_a` where the tokens deposits gets parked
+- `associated_token_program`: the associated token program used to create the associated token accounts
+- `token_program`: the token program used to CPI the transfer
+- `system_program`: the system program used to create the `Escrow`
+
+And with all the constraint it will look something like this:
+
+<Codeblock lang="rust">
+```rust
+#[instruction(seed: u64)]
+pub struct Make<'info> {
+  #[account(mut)]
+  pub maker: Signer<'info>,
+  #[account(
+    init,
+    payer = maker,
+    space = Escrow::INIT_SPACE + Escrow::DISCRIMINATOR.len(),
+    seeds = [b"escrow", maker.key().as_ref(), seed.to_le_bytes().as_ref()],
+    bump,
+  )]
+  pub escrow: Account<'info, Escrow>,
+
+  /// Token Accounts
+  #[account(
+    mint::token_program = token_program
+  )]
+  pub mint_a: InterfaceAccount<'info, Mint>,
+  #[account(
+    mint::token_program = token_program
+  )]
+  pub mint_b: InterfaceAccount<'info, Mint>,
+  #[account(
+    mut,
+    associated_token::mint = mint_a,
+    associated_token::authority = maker,
+    associated_token::token_program = token_program
+  )]
+  pub maker_ata_a: InterfaceAccount<'info, TokenAccount>,
+  #[account(
+    init,
+    payer = maker,
+    associated_token::mint = mint_a,
+    associated_token::authority = escrow,
+    associated_token::token_program = token_program
+  )]
+  pub vault: InterfaceAccount<'info, TokenAccount>,
+
+  /// Programs
+  pub associated_token_program: Program<'info, AssociatedToken>,
+  pub token_program: Interface<'info, TokenInterface>,
+  pub system_program: Program<'info, System>,
+}
+```
+</Codeblock>
+
+**Note**: Since we supply only one `token_program` to make sure that the CPI doesn't fail in the `take` instruction, where we perform transfer with both mint, we need to check that the two mint are owned by the same program.
+
+### Logic 
+
+After initializing the Accounts, we can finally handle the logic by creating smaller helper function as an implementation of the account struct.
+
+We start by populating the `Escrow` using the `set_inner()` helper, and we then move onto depositing the tokens through the `transfer` CPI like this:
+
+<Codeblock lang="rust">
+```rust
+impl<'info> Make<'info> {
+  /// # Create the Escrow
+  fn populate_escrow(&mut self, seed: u64, amount: u64, bump: u8) -> Result<()> {
+    self.escrow.set_inner(Escrow {
+      seed,
+      maker: self.maker.key(),
+      mint_a: self.mint_a.key(),
+      mint_b: self.mint_b.key(),
+      receive: amount,
+      bump,
+    });
+
+    Ok(())
+  }
+
+  /// # Deposit the tokens
+  fn deposit_tokens(&self, amount: u64) -> Result<()> {
+    transfer_checked(
+      CpiContext::new(
+        self.token_program.to_account_info(),
+        TransferChecked {
+          from: self.maker_ata_a.to_account_info(),
+          mint: self.mint_a.to_account_info(),
+          to: self.vault.to_account_info(),
+          authority: self.maker.to_account_info(),
+      }), amount, self.mint_a.decimals
+    )?;
+
+    Ok(())
+  }
+}
+```
+</Codeblock>
+
+We can see that Anchor helps us in multiple ways:
+- `set_inner()`: guarantees every field is populated.
+- `transfer_checked`: wraps the Token CPI just like the System helpers we used earlier.
+
+And now we can move onto creating an `handler` function where we perform some checks before using the helpers, like this:
+
+<Codeblock lang="rust">
+```rust
+pub fn handler(ctx: Context<Make>, seed: u64, receive: u64, amount: u64) -> Result<()> {
+  // Validate the amount
+  require_gte!(receive, 0, EscrowError::InvalidAmount);
+  require_gte!(amount, 0, EscrowError::InvalidAmount);
+
+  // Save the Escrow Data
+  ctx.accounts.populate_escrow(seed, receive, ctx.bumps.escrow)?;
+
+  // Deposit Tokens
+  ctx.accounts.deposit_tokens(amount)?;
+
+  Ok(())
+}
+  ```
+</Codeblock>
+
+Here we add two validation checks; one on the `amount` and one on the `receive` arguments to ensure we're not passing a zero value for either.

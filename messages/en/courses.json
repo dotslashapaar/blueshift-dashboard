@@ -1,0 +1,31 @@
+{
+  "courses": {
+    "introduction-to-anchor": {
+      "title": "Introduction to Anchor",
+      "lessons": {
+        "anchor-101": "Anchor 101",
+        "anchor-accounts": "Anchor Accounts",
+        "anchor-instructions": "Anchor Instructions",
+        "conclusions": "Conclusions"
+      }
+    },
+    "introduction-to-pinocchio": {
+      "title": "Introduction to Pinocchio",
+      "lessons": {
+        "pinocchio-101": "Pinocchio 101",
+        "pinocchio-accounts": "Pinocchio Accounts",
+        "pinocchio-instructions": "Pinocchio Instructions",
+        "conclusions": "Conclusions"
+      }
+    },
+    "secp256r1-on-solana": {
+      "title": "Secp256r1 on Solana",
+      "lessons": {
+        "introduction": "Secp256r1 on Solana",
+        "secp256r1-with-anchor": "Secp256r1 with Anchor",
+        "secp256r1-with-pinocchio": "Secp256r1 with Pinocchio",
+        "conclusions": "Conclusions"
+      }
+    }
+  }
+}

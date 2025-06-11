@@ -34,14 +34,7 @@ export const courseStatus = {
   Challenge_Completed: "Challenge_Completed",
 } as const;
 
-export const rewardsStatus = ["Locked", "Unlocked", "Claimed"] as const;
-
-export type challengeMetadata = {
-  apiPath: string;
-  requirements: {
-    instructionKey: string;
-  }[];
-};
+type ChallengeSlug = string;
 
 export type CourseMetadata = {
   slug: string;
@@ -49,10 +42,8 @@ export type CourseMetadata = {
   color: string;
   difficulty: CourseDifficulty;
   isFeatured: boolean;
-  unitName: string;
   lessons: LessonMetadata[];
-  challenge?: challengeMetadata;
-  collectionMintAddress?: string;
+  challenge?: ChallengeSlug;
 };
 
 export type LessonMetadata = {
@@ -60,7 +51,6 @@ export type LessonMetadata = {
   slug: string;
 };
 
-export type RewardsStatus = (typeof rewardsStatus)[number];
 export type CourseLanguages = keyof typeof courseLanguages;
 export type CourseDifficulty = keyof typeof courseDifficulty;
 

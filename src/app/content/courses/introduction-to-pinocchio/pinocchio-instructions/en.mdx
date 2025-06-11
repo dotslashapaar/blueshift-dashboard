@@ -1,0 +1,100 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+import { Codeblock } from "../../../../components/Codeblock/Codeblock";
+
+# Instructions
+
+As we saw earlier, using the `TryFrom` trait allows us to cleanly separate validation from business logic, improving both maintainability and security.
+
+<ArticleSection name="Instruction Structure" id="instruction-structure" level="h2" />
+
+When it's time to process the logic, we can create a structure like this: 
+
+```rust
+pub struct Deposit<'a> {
+    pub accounts: DepositAccounts<'a>,
+    pub instruction_datas: DepositInstructionData,
+}
+```
+
+This structure defines what data will be accessible during the logic processing. We then deserialize this using the `try_from` function that you can find in the `lib.rs` file:
+
+```rust
+impl<'a> TryFrom<(&'a [u8], &'a [AccountInfo])> for Deposit<'a> {
+    type Error = ProgramError;
+
+    fn try_from((data, accounts): (&'a [u8], &'a [AccountInfo])) -> Result<Self, Self::Error> {
+        let accounts = DepositAccounts::try_from(accounts)?;
+        let instruction_datas = DepositInstructionData::try_from(data)?;
+
+        Ok(Self {
+            accounts,
+            instruction_datas,
+        })
+    }
+}
+```
+
+This wrapper provides three key benefits:
+1. It accepts both raw inputs (bytes and accounts)
+2. It delegates validation to the individual `TryFrom` implementations
+3. It returns a fully-typed, fully-validated Deposit struct
+
+We can then implement the processing logic like this:
+
+```rust
+impl<'a> Deposit<'a> {
+    pub const DISCRIMINATOR: &'a u8 = &0;
+
+    pub fn process(&self) -> ProgramResult {
+        // deposit logic
+        Ok(())
+    }
+}
+```
+
+- The `DISCRIMINATOR` is the byte we use for pattern matching in the entrypoint
+- The `process()` method contains only business logic, as all validation checks are already complete
+
+The result? We get Anchor-style ergonomics with all the benefits of being fully native: explicit, predictable, and fast.
+
+<ArticleSection name="Cross Program Invocation" id="cross-program-invocation" level="h2" />
+
+As mentioned earlier, Pinocchio provides helper crates like `pinocchio-system` and `pinocchio-token` that simplify Cross-Program Invocations (CPIs) to native programs. 
+
+These helper structs and methods replace Anchor's `CpiContext` approach we used previously:
+
+```rust
+Transfer {
+    from: self.accounts.owner,
+    to: self.accounts.vault,
+    lamports: self.instruction_datas.amount,
+}
+.invoke()?;
+```
+
+The `Transfer` struct (from `pinocchio-system`) encapsulates all the fields required by the System Program, and `.invoke()` executes the CPI. No context builder or extra boilerplate needed.
+
+When the caller must be a Program-Derived Address (PDA), Pinocchio maintains the same concise API:
+
+```rust
+let seeds = [
+    Seed::from(b"vault"),
+    Seed::from(self.accounts.owner.key().as_ref()),
+    Seed::from(&[bump]),
+];
+let signers = [Signer::from(&seeds)];
+
+Transfer {
+    from: self.accounts.vault,
+    to: self.accounts.owner,
+    lamports: self.accounts.vault.lamports(),
+}
+.invoke_signed(&signers)?;
+```
+
+**Here's how it works:**
+1. `Seeds` creates an array of Seed objects that match the PDA derivation
+2. `Signer` wraps these seeds in a Signer helper
+3. `invoke_signed` executes the CPI, passing the signer array to authorize the transfer
+
+The result? A clean, first-class interface for both regular and signed CPIs - no macros required, and no hidden magic.

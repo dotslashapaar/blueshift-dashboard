@@ -26,6 +26,11 @@
   --font-content: var(--font-switzer);
   --text-3xl: 32px;
   --container-app: 1500px;
+  --breakpoint-xs: 472px;
+}
+
+:root {
+  --swoosh-easing: cubic-bezier(0, 0.61, 0.355, 1);
 }
 
 body {
@@ -156,25 +161,181 @@ h2 code {
   }
 }
 
-.pixelBackground {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  position: absolute;
-  z-index: 50;
-  pointer-events: none;
-  top: 0;
+.animate-card-swoosh::after {
+  @apply content-[''] absolute pointer-events-none opacity-0 origin-center overflow-hidden rounded-[18px];
+  left: -30%;
+  top: -30%;
+  width: 150%;
+  height: 150%;
+  -webkit-backface-visibility: visible;
+  backface-visibility: visible;
+  background: linear-gradient(
+    var(--swoosh-angle, 135deg),
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.025) 45%,
+    rgba(255, 255, 255, 0.035) 47.5%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.035) 52.5%,
+    rgba(255, 255, 255, 0.025) 55%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
-.pixelBackground-row {
-  display: flex;
-  width: 100%;
-  height: 100px;
+.animate-card-swoosh.swoosh-active::after {
+  opacity: 1;
 }
 
-.pixelBackground-block {
-  width: 100px;
-  height: 100%;
-  background-color: #020303;
+/* Directional swoosh animations */
+.animate-card-swoosh.swoosh-top::after {
+  transform: translateY(-100%) translateX(-50%);
+  animation: swoosh-top 2.2s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-right::after {
+  transform: translateX(100%) translateY(-50%);
+  animation: swoosh-right 2.2s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-bottom::after {
+  transform: translateY(100%) translateX(-50%);
+  animation: swoosh-bottom 2.2s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-left::after {
+  transform: translateX(-100%) translateY(-50%);
+  animation: swoosh-left 2.2s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-top-left::after {
+  transform: translate(-100%, -100%);
+  animation: swoosh-top-left 2.2s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-top-right::after {
+  transform: translate(100%, -100%);
+  animation: swoosh-top-right 2.2s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-bottom-left::after {
+  transform: translate(-100%, 100%);
+  animation: swoosh-bottom-left 2.2s var(--swoosh-easing);
+}
+
+.animate-card-swoosh.swoosh-bottom-right::after {
+  transform: translate(100%, 100%);
+  animation: swoosh-bottom-right 2.2s var(--swoosh-easing);
+}
+
+@keyframes swoosh-top {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-right {
+  0% {
+    transform: translateX(100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-bottom {
+  0% {
+    transform: translateY(100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-left {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-top-left {
+  0% {
+    transform: translate(-100%, -100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 100%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-top-right {
+  0% {
+    transform: translate(100%, -100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 100%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-bottom-left {
+  0% {
+    transform: translate(-100%, 100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, -100%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes swoosh-bottom-right {
+  0% {
+    transform: translate(100%, 100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, -100%);
+    opacity: 0.5;
+  }
 }

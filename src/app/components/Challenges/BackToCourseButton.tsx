@@ -19,7 +19,7 @@ export default function BackToCourseButton({
   return (
     <Link href={`/courses/${course.slug}/${lastLessonSlug}`} className="!mt-4">
       <Button
-        label={t("challenges.back_to_lessons")}
+        label={t("ChallengePage.back_to_lessons")}
         icon="ArrowLeft"
         variant="tertiary"
       />
