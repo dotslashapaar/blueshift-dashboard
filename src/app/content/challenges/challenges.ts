@@ -67,6 +67,7 @@ const allChallenges: ChallengeMetadata[] = [
       { instructionKey: "take" },
       { instructionKey: "refund" },
     ],
+    collectionMintAddress: "HTXVJ8DD6eSxkVyDwgddxGw8cC8j6kXda3BUipA43Wvs",
   },
   {
     slug: "pinocchio-secp256r1-vault",
@@ -80,6 +81,7 @@ const allChallenges: ChallengeMetadata[] = [
       { instructionKey: "deposit" },
       { instructionKey: "withdraw" },
     ],
+    collectionMintAddress: "4NKZ2B5zeG9TGZifzfnG7Zw28P3ZetjaS6xPVKW5MHrp",
   },
 ];
 
