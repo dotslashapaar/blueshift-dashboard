@@ -129,64 +129,59 @@ Now, let's look at the implementation with all its helper methods:
 <Codeblock lang="rust">
 ```rust
 impl Escrow {
-    /// The length of the `Escrow` account data.
-    /// This is calculated by summing the size of each field:
-    /// - seed: 8 bytes (u64)
-    /// - maker: 32 bytes (Pubkey)
-    /// - mint_a: 32 bytes (Pubkey)
-    /// - mint_b: 32 bytes (Pubkey)
-    /// - receive: 8 bytes (u64)
-    /// - bump: 1 byte ([u8;1])
-    pub const LEN: usize = size_of::<u64>()
-        + size_of::<Pubkey>()
-        + size_of::<Pubkey>()
-        + size_of::<Pubkey>()
-        + size_of::<u64>()
-        + size_of::<[u8;1]>();
+    pub const LEN: usize = size_of::<u64>() 
+    + size_of::<Pubkey>() 
+    + size_of::<Pubkey>() 
+    + size_of::<Pubkey>() 
+    + size_of::<u64>()
+    + size_of::<[u8;1]>();
 
-    /// Safely loads an Escrow from an AccountInfo.
-    /// Performs validation checks:
-    /// 1. Verifies the account data length matches our struct
-    /// 2. Confirms the account is owned by our program
-    /// 3. Safely borrows the data
-    #[inline]
-    pub fn from_account_info(account_info: &AccountInfo) -> Result<Ref<Escrow>, ProgramError> {
-        if account_info.data_len() != Self::LEN {
-            return Err(ProgramError::InvalidAccountData);
-        }
-        if account_info.owner() != &crate::ID {
-            return Err(ProgramError::InvalidAccountOwner);
-        }
-        Ok(Ref::map(account_info.try_borrow_data()?, |data| unsafe {
-            Self::from_bytes(data)
-        }))
-    }
-
-    /// Unsafe version of from_account_info.
-    /// Use this when you're certain there are no mutable borrows of the account data.
-    /// Still performs length and owner validation.
-    #[inline]
-    pub unsafe fn from_account_info_unchecked(
-        account_info: &AccountInfo,
-    ) -> Result<&Self, ProgramError> {
-        if account_info.data_len() != Self::LEN {
-            return Err(ProgramError::InvalidAccountData);
-        }
-        if account_info.owner() != &crate::ID {
-            return Err(ProgramError::InvalidAccountOwner);
-        }
-        Ok(Self::from_bytes(account_info.borrow_data_unchecked()))
-    }
-
-    /// Converts raw bytes into an Escrow reference.
-    /// This is unsafe because it assumes the bytes are properly formatted.
     #[inline(always)]
-    pub unsafe fn from_bytes(bytes: &[u8]) -> &Self {
-        &*(bytes.as_ptr() as *const Escrow)
+    pub fn load_mut(bytes: &mut [u8]) -> Result<&mut Self, ProgramError> {
+        if bytes.len() != Escrow::LEN {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        Ok(unsafe { &mut *core::mem::transmute::<*mut u8, *mut Self>(bytes.as_mut_ptr()) })
     }
 
-    /// Sets all fields of the Escrow at once.
-    /// This is more efficient than setting fields individually.
+    #[inline(always)]
+    pub fn load(bytes: &[u8]) -> Result<&Self, ProgramError> {
+        if bytes.len() != Escrow::LEN {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        Ok(unsafe { &*core::mem::transmute::<*const u8, *const Self>(bytes.as_ptr()) })
+    }
+
+    #[inline(always)]
+    pub fn set_seed(&mut self, seed: u64) {
+        self.seed = seed;
+    }
+
+    #[inline(always)]
+    pub fn set_maker(&mut self, maker: Pubkey) {
+        self.maker = maker;
+    }
+
+    #[inline(always)]
+    pub fn set_mint_a(&mut self, mint_a: Pubkey) {
+        self.mint_a = mint_a;
+    }
+
+    #[inline(always)]
+    pub fn set_mint_b(&mut self, mint_b: Pubkey) {
+        self.mint_b = mint_b;
+    }
+
+    #[inline(always)]
+    pub fn set_receive(&mut self, receive: u64) {
+        self.receive = receive;
+    }
+
+    #[inline(always)]
+    pub fn set_bump(&mut self, bump: [u8;1]) {
+        self.bump = bump;
+    }
+
     #[inline(always)]
     pub fn set_inner(&mut self, seed: u64, maker: Pubkey, mint_a: Pubkey, mint_b: Pubkey, receive: u64, bump: [u8;1]) {
         self.seed = seed;
@@ -195,40 +190,6 @@ impl Escrow {
         self.mint_b = mint_b;
         self.receive = receive;
         self.bump = bump;
-    }
-
-    // Getters for all fields
-    // These are marked #[inline(always)] for maximum performance
-    // since they're called frequently in our program
-
-    #[inline(always)]
-    pub fn seed(&self) -> &u64 {
-        &self.seed
-    }
-
-    #[inline(always)]
-    pub fn maker(&self) -> &Pubkey {
-        &self.maker
-    }
-
-    #[inline(always)]
-    pub fn mint_a(&self) -> &Pubkey {
-        &self.mint_a
-    }
-
-    #[inline(always)]
-    pub fn mint_b(&self) -> &Pubkey {
-        &self.mint_b
-    }
-
-    #[inline(always)]
-    pub fn receive(&self) -> &u64 {
-        &self.receive
-    }
-
-    #[inline(always)]
-    pub fn bump(&self) -> &[u8;1] {
-        &self.bump
     }
 }
 ```
