@@ -19,7 +19,7 @@ Below are the accounts the context needs:
 - token_program: the token program. Must be executable
 - system_program: the system program. Must be executable
 
-**Note**: We're going to use the types that introduced in the [Introduction to Pinocchio](https://learn.blueshift.gg/en/courses/introduction-to-pinocchio/pinocchio-accounts).
+**Note**: We're going to use the types that introduced in the [Introduction to Pinocchio](/en/courses/introduction-to-pinocchio/pinocchio-accounts).
 
 In code, this looks like:
 
@@ -116,7 +116,7 @@ impl<'a> TryFrom<&'a [u8]> for MakeInstructionData {
 
 We begin by initializing the required accounts in the `TryFrom` implementation, after we've deserialized both the `instruction_data` and the `accounts`.
 
-For this step, we create the `Escrow` account using the `ProgramAccount::init::<Escrow>` trait from the helper functions introduced in the [Introduction to Pinocchio](https://learn.blueshift.gg/en/courses/introduction-to-pinocchio/pinocchio-accounts). Similarly, we initialize the Vault account since it needs to be created fresh:
+For this step, we create the `Escrow` account using the `ProgramAccount::init::<Escrow>` trait from the helper functions introduced in the [Introduction to Pinocchio](/en/courses/introduction-to-pinocchio/pinocchio-accounts). Similarly, we initialize the Vault account since it needs to be created fresh:
 
 <Codeblock lang="rust">
 ```rust
