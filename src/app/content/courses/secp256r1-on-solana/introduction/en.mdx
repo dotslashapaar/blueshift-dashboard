@@ -7,7 +7,61 @@ import { Codeblock } from "../../../../components/Codeblock/Codeblock";
 
 <ArticleSection name="What is Secp256r1" id="what-is-secp256r1" level="h2" />
 
-Secp256r1 (also known as NIST P-256) is an elliptic curve that serves as the cryptographic foundation for modern authentication systems, including passkeys. This curve is widely used in WebAuthn and major tech platforms for secure authentication.
+Secp256r1, also known as P-256 or prime256v1, is an elliptic curve defined by the Standards for Efficient Cryptography Group (SECG) and adopted by NIST as part of their recommended elliptic curves. 
+
+It's the most widely deployed elliptic curve in modern cryptographic applications, powering everything from TLS connections to hardware security keys.
+
+The curve provides approximately 128 bits of security strength with a 256-bit key size, making it significantly more efficient than RSA while offering equivalent security. 
+
+Its mathematical properties, combined with extensive hardware optimization, have made it the de facto standard for elliptic curve cryptography.
+
+### Why is it so dominant?
+
+Secp256r1 achieved dominance through a combination of early standardization, universal hardware support, and regulatory approval. 
+
+Unlike newer curves that may be mathematically superior, secp256r1 represents the optimal balance between cryptographic strength, implementation efficiency, and ecosystem compatibility that real-world systems require.
+
+Additionally, its specific mathematical structure allows for highly optimized implementations that work efficiently across everything from smartphone secure elements to high-performance servers.
+
+<ArticleSection name="How does it work?" id="how-does-it-work" level="h2" />
+
+Secp256r1 defines a mathematical curve that looks like `y² = x³ - 3x + b`. This creates an oval-like shape with special mathematical properties. There are exactly `2²⁵⁶` valid points on this curve; an astronomically large number.
+
+Each point on this curve is defined by two coordinates (x, y), and the curve's mathematical structure ensures that certain operations can be performed efficiently while others remain computationally intractable.
+
+### Generating Keys
+
+The process begins by selecting a cryptographically secure random number between 1 and 2²⁵⁶, which becomes your private key. 
+
+The system then takes a predetermined starting point on the curve called the generator point, which serves as a universal reference that everyone agrees upon.
+
+Using a special mathematical operation called scalar multiplication, your private key number is used to "navigate" from this generator point to a new, unique location on the curve.
+
+This destination point becomes your public key, which can be safely shared with anyone who needs to verify your digital signatures.
+
+> This is safe because of the asymmetric nature of the operation. While it's computationally straightforward to travel from the generator point to your public key using your private key as a guide, the reverse journey is practically impossible.
+
+### Signing
+
+When you want to create a digital signature, the process begins by taking your message and passing it through a cryptographic hash function, typically SHA-256, which produces a fixed-size numerical representation of your message content. This hash serves as a unique fingerprint of your message. 
+
+The signing algorithm then combines this message hash with your private key and a randomly generated number called a nonce to produce two mathematical values, traditionally labeled `r` and `s`. These values are intrinsically linked to both your private key and the specific message content, creating a cryptographic proof that only you could have generated.
+
+> The random nonce plays a critical security role in this process. It ensures that even signing the same message twice will produce different signature values, preventing various cryptographic attacks. However, this randomness must be truly unpredictable and never reused, as any compromise of the nonce can lead to private key recovery by attackers.
+
+### Verification
+
+The verification process demonstrates the elegant asymmetry of elliptic curve cryptography. Anyone can take your public key, the original message, and the signature values (r, s) and perform a series of mathematical operations that will only produce a valid result if the signature was created by someone possessing the corresponding private key.
+
+The verifier computes several intermediate values and performs additional scalar multiplication operations on the curve, ultimately arriving at a point that should match specific properties of the signature if it's authentic.
+
+This verification process never requires knowledge of the private key, yet it provides mathematical certainty about the signature's authenticity.
+
+<ArticleSection name="Secp256r1 on Solana" id="secp256r1-on-solana" level="h2" />
+
+Solana offers native support for Secp256r1 signature verification through its built-in precompile introduced with [SIMD-0075](https://github.com/solana-foundation/solana-improvement-documents/pull/75) by [Orion](https://x.com/BasedOrion_).
+
+This is a crucial step toward enabling modern authentication methods like passkeys on Solana, as Secp256r1 is the same elliptic curve used by WebAuthn and passkey implementations. With this support, we can finally use a mix of modern authentication methods and PDAs to manage user actions.
 
 ### The Web3 Authentication Challenge
 
@@ -16,81 +70,3 @@ Web3's reliance on seed phrases creates a fundamental barrier to adoption. Tradi
 The Problem is that Seed phrases demand perfect security from imperfect humans. Users must memorize 12-24 random words, store them safely forever, and never fall victim to phishing; an impossible standard for mainstream adoption.
 
 The Solution could be modern authentication methods like passkeys, which eliminate human error by moving private keys into dedicated security hardware. However, to support these on Solana, we need the right cryptographic primitives.
-
-<ArticleSection name="Secp256r1 on Solana" id="secp256r1-on-solana" level="h2" />
-
-Solana offers native support for Secp256r1 signature verification through its built-in precompile introduced with [SIMD-0075](https://github.com/solana-foundation/solana-improvement-documents/pull/75) by [Orion](https://x.com/BasedOrion_).
-
-This is a crucial step toward enabling modern authentication methods like passkeys on Solana, as Secp256r1 is the same elliptic curve used by WebAuthn and passkey implementations. With this support, we can finally use a mix of modern authentication methods and PDAs to manage user actions.
-
-### Technical Implementation 
-
-The Secp256r1 elliptic curve (NIST P-256) is the same standard employed by WebAuthn and major tech platforms. The SDK provides clean abstractions through core data structures:
-
-```rust
-// 33-byte compressed public key (1 byte parity + 32 byte x-coordinate)
-pub type Secp256r1Pubkey = [u8; 33];
-// 64-byte signature (r,s values)
-pub type Secp256r1Signature = [u8; 64];
-
-// Main instruction parser
-pub struct Secp256r1Instruction<'a> {
-    header: Secp256r1InstructionHeader,    // Number of signatures
-    offsets: &'a [Secp256r1SignatureOffsets], // Data location pointers
-    data: &'a [u8],                        // Raw instruction data
-}
-```
-
-The `Secp256r1SignatureOffsets` struct acts as a memory map, containing byte offsets that point to where each component lives within the instruction payload:
-
-```rust
-pub struct Secp256r1SignatureOffsets {
-    pub signature_offset: u16,
-    pub signature_instruction_index: u16,
-    pub public_key_offset: u16,
-    pub public_key_instruction_index: u16,
-    pub message_data_offset: u16,
-    pub message_data_size: u16,
-    pub message_instruction_index: u16,
-}
-```
-
-In the data, we find the three critical components referenced by the offset structure:
-- Publickey: The 33-byte compressed `Secp256r1` public key. When used with modern authentication methods like passkeys, this represents the cryptographic identity of the authenticating device/user.
-- Signature: The 64-byte `ECDSA` signature (r,s values) generated by the private key. This proves that the holder of the corresponding private key authorized the specific message.
-- Message Data: The arbitrary bytes that were cryptographically signed. In practice, this contains application-specific data like transaction details, timestamps, or user identifiers that prevent replay attacks and ensure signatures are contextually bound.
-
-As you can see, the publickey is 33 byte long because it uses a compressed point representation; a space-efficient encoding of elliptic curve points. 
-
-On Secp256r1, a public key is mathematically a point (x,y) where both coordinates are 32 bytes (64 bytes total).
-
-However, given any x-coordinate, only two possible y-coordinates satisfy the curve equation. 
-
-The compressed format stores the 32-byte x-coordinate plus a single parity byte (0x02 for even y, 0x03 for odd y), allowing full point reconstruction with 48% less storage.
-
-### PDAs as wallets
-
-The Secp256r1 support enables a revolutionary architecture where users can authenticate using modern methods like passkeys.
-
-Applications can derive Program Derived Addresses (PDAs) directly from Secp256r1 public keys, creating deterministic account addresses that users can control through modern authentication methods:
-
-```rust
-// Derive a unique account for each Secp256r1 public key
-let (pda, bump) = find_program_address(
-    &[
-        &pubkey[0..1],              // Parity byte (0x02 or 0x03)
-        &pubkey[1..33]              // X-coordinate (32 bytes)
-    ], 
-    &program_id
-);
-```
-
-We need to split the pubkey in 2 different parts because seeds accept 32 bytes as maximum length.
-
-This approach transforms the user experience fundamentally. Instead of managing traditional wallet software, users can authenticate using modern methods like passkeys to control on-chain accounts. 
-
-The Secp256r1 public key becomes the foundation for their "wallet"; a cryptographic identity that works across any application supporting the standard.
-
-Programs verify ownership by checking that Secp256r1 signatures in the transaction match the pubkey used to derive the PDA, enabling secure account operations without traditional private key management.
-
-The only drawback of this approach is that the protocol needs to pay for all fees for the user.
