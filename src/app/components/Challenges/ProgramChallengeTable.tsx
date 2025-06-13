@@ -6,7 +6,7 @@ import Button from "../Button/Button";
 import { motion } from "motion/react";
 import classNames from "classnames";
 import ChallengeBadge from "../ChallengeBadge/ChallengeBadge";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ChallengeRequirement,
   VerificationApiResponse,
@@ -34,7 +34,7 @@ interface ChallengeTableProps {
   /** 
    * Number of failed attempts before showing Discord prompt.
    * Includes upload errors, verification failures, and test failures.
-   * @default 3
+   * @default 2
    */
   failedAttemptsThreshold?: number;
 }
@@ -64,8 +64,6 @@ export default function ChallengeTable({
   const auth = useAuth();
 
   const challengeSlug = challenge.slug;
-
-  const errorRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (verificationData) {
@@ -98,9 +96,8 @@ export default function ChallengeTable({
    * Track failed attempts for upload/network errors
    */
   useEffect(() => {
-    if (error && error !== errorRef.current) {
+    if (error) {
       setFailedAttempts(prev => prev + 1);
-      errorRef.current = error;
     }
   }, [error]);
 
@@ -108,18 +105,9 @@ export default function ChallengeTable({
    * Track failed attempts for verification/test failures
    */
   useEffect(() => {
-    if (verificationData) {
-      // Count as failure if the overall verification failed
-      if (!verificationData.success) {
-        setFailedAttempts(prev => prev + 1);
-        return;
-      }
-      
-      // Count as failure if any individual test failed
-      const hasFailedTests = verificationData.results?.some(result => !result.success);
-      if (hasFailedTests) {
-        setFailedAttempts(prev => prev + 1);
-      }
+    if (verificationData && !verificationData.success) {
+      setFailedAttempts(prev => prev + 1);
+      return;
     }
   }, [verificationData]);
 
@@ -134,37 +122,9 @@ export default function ChallengeTable({
   /**
    * Renders the assistance prompt when failed attempts threshold is reached
    */
-  const renderAssistancePrompt = (variant: 'within-error' | 'standalone') => {
-    if (!(failedAttempts >= failedAttemptsThreshold && process.env.NEXT_PUBLIC_DISCORD_LINK)) {
+  const renderAssistancePrompt = () => {
+    if (failedAttempts < failedAttemptsThreshold || !process.env.NEXT_PUBLIC_DISCORD_LINK) {
       return null;
-    }
-
-    const content = (
-      <div className="flex items-start gap-x-2">
-        <Icon name="Flag" size={18} className="text-brand-primary mt-0.5 flex-shrink-0" />
-        <div className="flex-1">
-          {variant === 'standalone' && (
-            <h4 className="text-base font-medium text-primary mb-1">
-              {t("ChallengePage.assistance_prompt.title")}
-            </h4>
-          )}
-          <p className="text-sm text-secondary leading-relaxed">
-            {t("ChallengePage.assistance_prompt.body")}
-          </p>
-          <Link href={process.env.NEXT_PUBLIC_DISCORD_LINK} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-x-1 mt-2 text-sm font-medium text-brand-secondary hover:text-brand-primary">
-            {t("ChallengePage.assistance_prompt.link_text")}
-            <Icon name="Link" size={14} />
-          </Link>
-        </div>
-      </div>
-    );
-
-    if (variant === 'within-error') {
-      return (
-        <div className="mt-3 p-3 bg-gradient-to-r from-brand-primary/5 to-brand-secondary/5 border border-brand-primary/20 rounded-lg">
-          {content}
-        </div>
-      );
     }
 
     return (
@@ -175,7 +135,21 @@ export default function ChallengeTable({
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className="mx-4 p-4 bg-gradient-to-r from-brand-primary/5 to-brand-secondary/5 border border-brand-primary/20 rounded-xl"
       >
-        {content}
+        <div className="flex items-start gap-x-2">
+          <Icon name="Flag" size={18} className="text-brand-primary mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <h4 className="text-base font-medium text-primary mb-1">
+              {t("ChallengePage.assistance_prompt.title")}
+            </h4>
+            <p className="text-sm text-secondary leading-relaxed">
+              {t("ChallengePage.assistance_prompt.body")}
+            </p>
+            <Link href={process.env.NEXT_PUBLIC_DISCORD_LINK} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-x-1 mt-2 text-sm font-medium text-brand-secondary hover:text-brand-primary">
+              {t("ChallengePage.assistance_prompt.link_text")}
+              <Icon name="Link" size={14} />
+            </Link>
+          </div>
+        </div>
       </motion.div>
     );
   };
@@ -322,13 +296,12 @@ export default function ChallengeTable({
                 <p className="text-sm text-red-700 leading-relaxed">
                   {error}
                 </p>
-                {renderAssistancePrompt('within-error')}
               </div>
             </div>
           </motion.div>
         )}
 
-        {!error && renderAssistancePrompt('standalone')}
+        {renderAssistancePrompt()}
 
         <div className="flex flex-col gap-y-2 px-2">
           {requirements.map((requirement) => (
