@@ -7,7 +7,7 @@ Instructions are the building blocks of Solana programs, defining the actions th
 
 <ArticleSection name="Instruction Structure" id="instruction-structure" level="h2" />
 
-In Anchor, instructions are defined using the `#[program]` module and individual instruction functions. Each instruction function must be marked with the `#[instruction]` attribute. Here's the basic structure:
+In Anchor, instructions are defined using the `#[program]` module and individual instruction functions. Here's the basic structure:
 
 ```rust
 use anchor_lang::prelude::*;
@@ -16,7 +16,6 @@ use anchor_lang::prelude::*;
 pub mod my_program {
     use super::*;
 
-    #[instruction]
     pub fn initialize(ctx: Context<Initialize>, data: u64) -> Result<()> {
         // Instruction logic here
         Ok(())
@@ -24,7 +23,7 @@ pub mod my_program {
 }
 ```
 
-### Instruction Context
+<ArticleSection name="Instruction Context" id="instruction-context" level="h3" />
 
 Every instruction function receives a `Context` struct as its first parameter. This context contains:
 - `accounts`: The accounts passed to the instruction
@@ -51,7 +50,7 @@ for remaining_account in ctx.remaining_accounts {
 let bump = ctx.bumps.pda_account;
 ```
 
-### Instruction Discriminator
+<ArticleSection name="Instruction Discriminator" id="instruction-discriminator" level="h3" />
 
 Like accounts, instructions in Anchor use discriminators to identify different instruction types. The default discriminator is an 8-byte prefix generated using `sha256("global:<instruction_name>")[0..8]`. The instruction name should be in snake_case.
 
@@ -71,7 +70,7 @@ pub fn custom_discriminator(ctx: Context<Custom>) -> Result<()> {
 
 You can write your instruction in different way, in this section we're going to teach some of the style and way you can actually set them up
 
-### Instruction logic
+<ArticleSection name="Instruction Logic" id="instruction-logic" level="h3" />
 
 Instruction logic can be organized in different ways, depending on your program's complexity and your preferred coding style. Here are the main approaches:
 
@@ -80,7 +79,6 @@ Instruction logic can be organized in different ways, depending on your program'
 For simple instructions, you can write the logic directly in the instruction function:
 
 ```rust
-#[instruction]
 pub fn initialize(ctx: Context<Transfer>, amount: u64) -> Result<()> {
     // Transfer tokens logic
 
@@ -104,7 +102,6 @@ pub fn execute(ctx: Context<Transfer>, amount: u64) -> Result<()> {
 }
 
 // In your lib.rs
-#[instruction]
 pub fn transfer(ctx: Context<Transfer>, amount: u64) -> Result<()> {
     transfer::execute(ctx, amount)
 }
@@ -139,13 +136,12 @@ impl<'info> Transfer<'info> {
 }
 
 // In your lib.rs
-#[instruction]
 pub fn transfer(ctx: Context<Transfer>, amount: u64) -> Result<()> {
     transfer::execute(ctx, amount)
 }
 ```
 
-### Instruction Parameters
+<ArticleSection name="Instruction Parameters" id="instruction-parameters" level="h3" />
 
 Instructions can accept parameters beyond the context. These parameters are serialized and deserialized automatically by Anchor. Here are the key points about instruction parameters:
 
@@ -154,7 +150,6 @@ Instructions can accept parameters beyond the context. These parameters are seri
 Anchor supports all Rust primitive types and common Solana types:
 
 ```rust
-#[instruction]
 pub fn complex_instruction(
     ctx: Context<Complex>,
     amount: u64,
@@ -177,7 +172,6 @@ pub struct InstructionData {
     pub field2: String,
 }
 
-#[instruction]
 pub fn custom_type_instruction(
     ctx: Context<Custom>,
     data: InstructionData,
@@ -187,7 +181,7 @@ pub fn custom_type_instruction(
 }
 ```
 
-### Best Practices
+<ArticleSection name="Best Practices" id="instruction-discriminator" level="h3" />
 
 1. **Keep Instructions Focused**: Each instruction should do one thing well. If an instruction is doing too much, consider splitting it into multiple instructions.
 
@@ -240,7 +234,7 @@ Cross Program Invocations (CPI) refer to the process of one program invoking ins
 
 **Note**: You can find all the System Program CPI by using the main anchor crate and doing: `use anchor_lang::system_program::*`; and for the one relative to the SPL token program we'll need to import the anchor_spl crate and do: `use anchor_spl::token::*`
 
-### Basic CPI Structure
+<ArticleSection name="Basic CPI Structure" id="basic-cpi-structure" level="h3" />
 
 Here's how to make a basic CPI:
 
@@ -248,7 +242,6 @@ Here's how to make a basic CPI:
 use anchor_lang::solana_program::program::invoke_signed;
 use anchor_lang::system_program::{transfer, Transfer};
 
-#[instruction]
 pub fn transfer_lamport(ctx: Context<TransferLamport>, amount: u64) -> Result<()> {
     let cpi_accounts = Transfer {
         from: ctx.accounts.from.to_account_info(),
@@ -265,7 +258,7 @@ pub fn transfer_lamport(ctx: Context<TransferLamport>, amount: u64) -> Result<()
 }
 ```
 
-### CPI with PDA Signers
+<ArticleSection name="CPI with PDA Signers" id="cpi-with-pda-signers" level="h3" />
 
 When making CPIs that require PDA signatures, use `CpiContext::new_with_signer`:
 
@@ -273,7 +266,6 @@ When making CPIs that require PDA signatures, use `CpiContext::new_with_signer`:
 use anchor_lang::solana_program::program::invoke_signed;
 use anchor_lang::system_program::{transfer, Transfer};
 
-#[instruction]
 pub fn transfer_lamport_with_pda(ctx: Context<TransferLamportWithPda>) -> Result<()> {
     let seeds = &[
         b"vault".as_ref(),
@@ -309,7 +301,6 @@ pub enum MyError {
     ValueError(u64),
 }
 
-#[instruction]
 pub fn handle_errors(ctx: Context<HandleErrors>, value: u64) -> Result<()> {
     require!(value > 0, MyError::CustomError);
     require!(value < 100, MyError::ValueError(value));
