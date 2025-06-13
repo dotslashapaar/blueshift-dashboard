@@ -135,6 +135,11 @@
     "minting": "Minting NFT...",
     "mint_modal_skip": "Skip for now",
     "mint_modal_skip_description": "You can see your unlocks on the Challenges page.",
-    "mint_modal_tweet": "Share on X"
+    "mint_modal_tweet": "Share on X",
+    "assistance_prompt": {
+      "title": "Getting stuck?",
+      "body": "Don't give up just yet! Join our Discord community for help and support.",
+      "link_text": "Get support"
+    }
   }
 }
