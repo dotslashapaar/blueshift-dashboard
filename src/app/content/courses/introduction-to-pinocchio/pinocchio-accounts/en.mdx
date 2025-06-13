@@ -18,7 +18,7 @@ Or for an owner check:
 
 ```rust
 // SystemAccount type
-if account.owner().ne(&pinocchio_system::ID) {
+if !account.is_owned_by(&pinocchio_system::ID) {
     return Err(PinocchioError::InvalidOwner.into());
 }
 ```
@@ -70,7 +70,7 @@ pub struct SystemAccount;
 
 impl SystemAccount {
     pub fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if account.owner().ne(&pinocchio_system::ID) {
+        if !account.is_owned_by(&pinocchio_system::ID) {
             return Err(PinocchioError::InvalidOwner.into());
         }
 
@@ -110,7 +110,7 @@ pub struct SystemAccount;
 
 impl SystemAccount {
     pub fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if account.owner().ne(&pinocchio_system::ID) {
+        if !account.is_owned_by(&pinocchio_system::ID) {
             return Err(PinocchioError::InvalidOwner.into());
         }
 
@@ -132,7 +132,7 @@ pub struct MintAccount;
 
 impl AccountCheck for MintAccount {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if account.owner().ne(&pinocchio_token::ID) {
+        if !account.is_owned_by(&pinocchio_token::ID) {
             return Err(PinocchioError::InvalidOwner.into());
         }
 
@@ -196,7 +196,7 @@ pub struct TokenAccount;
 
 impl AccountCheck for TokenAccount {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if account.owner().ne(&pinocchio_token::ID) {
+        if !account.is_owned_by(&pinocchio_token::ID) {
             return Err(PinocchioError::InvalidOwner.into());
         }
 
@@ -273,7 +273,7 @@ pub struct Mint2022Account;
 
 impl AccountCheck for Mint2022Account {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if account.owner().ne(&TOKEN_2022_PROGRAM_ID) {
+        if !account.is_owned_by(&TOKEN_2022_PROGRAM_ID) {
             return Err(PinocchioError::InvalidOwner.into());
         }
 
@@ -322,7 +322,7 @@ pub struct TokenAccount2022Account;
 
 impl AccountCheck for TokenAccount2022Account {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if account.owner().ne(&TOKEN_2022_PROGRAM_ID) {
+        if !account.is_owned_by(&TOKEN_2022_PROGRAM_ID) {
             return Err(PinocchioError::InvalidOwner.into());
         }
 
@@ -379,8 +379,8 @@ pub struct MintInterface;
 
 impl AccountCheck for MintInterface {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if account.owner().ne(&TOKEN_2022_PROGRAM_ID) {
-            if account.owner().ne(&pinocchio_token::ID) {
+        if !account.is_owned_by(&TOKEN_2022_PROGRAM_ID) {
+            if !account.is_owned_by(&pinocchio_token::ID) {
                 return Err(PinocchioError::InvalidOwner.into());
             } else {
                 if account.data_len().ne(&pinocchio_token::state::Mint::LEN) {
@@ -405,8 +405,8 @@ pub struct TokenAccountInterface;
 
 impl AccountCheck for TokenAccountInterface {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if account.owner().ne(&TOKEN_2022_PROGRAM_ID) {
-            if account.owner().ne(&pinocchio_token::ID) {
+        if !account.is_owned_by(&TOKEN_2022_PROGRAM_ID) {
+            if !account.is_owned_by(&pinocchio_token::ID) {
                 return Err(PinocchioError::InvalidOwner.into());
             } else {
                 if account.data_len().ne(&pinocchio_token::state::TokenAccount::LEN) {
@@ -483,7 +483,7 @@ A reinitialization attack occurs when an attacker attempts to reuse a closed acc
 
   impl AccountCheck for ProgramAccount {
       fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-          if account.owner().ne(&crate::ID) {
+          if !account.is_owned_by(&crate::ID) {
               return Err(PinocchioError::InvalidOwner.into());
           }
 
@@ -537,8 +537,10 @@ A reinitialization attack occurs when an attacker attempts to reuse a closed acc
 
   impl AccountClose for ProgramAccount {
       fn close(account: &AccountInfo, destination: &AccountInfo) -> ProgramResult {
-          let mut data = account.try_borrow_mut_data()?;
-          data[0] = 0xff;
+          {
+              let mut data = account.try_borrow_mut_data()?;
+              data[0] = 0xff;
+          }
 
           *destination.try_borrow_mut_lamports()? += *account.try_borrow_lamports()?;
           account.realloc(1, true)?;
