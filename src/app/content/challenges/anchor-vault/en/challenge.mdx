@@ -137,7 +137,7 @@ require_eq!(ctx.accounts.vault.lamports(), 0, VaultError::VaultAlreadyExists);
 
 // Ensure amount exceeds rent-exempt minimum
 require_gt!(amount, Rent::get()?.minimum_balance(0), VaultError::InvalidAmount);
-```rust
+```
 </Codeblock>
 
 The two `require` macros act like custom guard clauses:

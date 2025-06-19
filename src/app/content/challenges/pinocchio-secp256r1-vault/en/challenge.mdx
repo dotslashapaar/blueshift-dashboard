@@ -139,6 +139,7 @@ Now let's implement the instruction data struct:
 
 <Codeblock lang="rust">
 ```rust
+#[repr(C, packed)]
 pub struct DepositInstructionData {
     pub pubkey: Secp256r1Pubkey,
     pub amount: u64,
@@ -148,11 +149,14 @@ impl<'a> TryFrom<&'a [u8]> for DepositInstructionData {
     type Error = ProgramError;
 
     fn try_from(data: &'a [u8]) -> Result<Self, Self::Error> {
-        let ix_data: Self = unsafe { transmute(
-            TryInto::<[u8; size_of::<DepositInstructionData>()]>::try_into(data).map_err(|_| ProgramError::InvalidInstructionData)?
-        )};
+        if data.len() != size_of::<DepositInstructionData>() {
+            return Err(ProgramError::InvalidInstructionData);
+        }
+        Ok(Self {
+            pubkey: unsafe { ptr::read(data.as_ptr() as *const [u8;size_of::<Secp256r1Pubkey>()]) },
+            amount: unsafe { ptr::read(data.as_ptr().add(size_of::<Secp256r1Pubkey>()) as *const u64) },
+        })
 
-        Ok(ix)
     }
 }
 ```
