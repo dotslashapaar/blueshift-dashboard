@@ -11,7 +11,7 @@ In this challenge, we'll build a vault that uses Secp256r1 signatures for transa
 
 The key innovation here is that we're decoupling the payment of transaction fees from the actual user authentication. This means that while users can authenticate transactions using their Secp256r1 signatures (which can be generated through modern authentication methods), the actual transaction fees can be paid by a service provider. This creates a more seamless user experience while maintaining security.
 
-In this challenge, we'll update the simple lamport vault that we built in the [Pinocchio Vault Challenge]() to allow Secp256r1 signatures as a verification method for transactions.
+In this challenge, we'll update the simple lamport vault that we built in the [Pinocchio Vault Challenge](/en/challenges/pinocchio-vault) to allow Secp256r1 signatures as a verification method for transactions.
 
 <ArticleSection name="Installation" id="installation" level="h2" />
 
@@ -19,15 +19,14 @@ Before you begin, be sure Rust and Pinocchio are installed. Then in your termina
 
 ```
 # create workspace
-cargo new blueshift_vault --lib --edition 2021
-cd blueshift_vault
+cargo new blueshift_secp256r1_vault --lib --edition 2021
+cd blueshift_secp256r1_vault
 ```
 
 Add Pinocchio and the Pinocchio-compatible `Secp256r1` crate
 
 ```
-cargo add pinocchio pinocchio-system
-cargo add pinocchio-secp256r1-instruction
+cargo add pinocchio pinocchio-system pinocchio-secp256r1-instruction
 ```
 
 Declare the crate types in `Cargo.toml` to generate deployment artifacts in `target/deploy`:
@@ -109,11 +108,11 @@ impl<'a> TryFrom<&'a [AccountInfo]> for DepositAccounts<'a> {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
-        if !payer.is_owned_by(&pinocchio_system::ID) {
+        if !vault.is_owned_by(&pinocchio_system::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
-        if payer.lamports().ne(&0) {
+        if vault.lamports().ne(&0) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -149,25 +148,26 @@ impl<'a> TryFrom<&'a [u8]> for DepositInstructionData {
     type Error = ProgramError;
 
     fn try_from(data: &'a [u8]) -> Result<Self, Self::Error> {
-        if data.len() != size_of::<DepositInstructionData>() {
+        if data.len() != size_of::<Self>() {
             return Err(ProgramError::InvalidInstructionData);
         }
-        Ok(Self {
-            pubkey: unsafe { ptr::read(data.as_ptr() as *const [u8;size_of::<Secp256r1Pubkey>()]) },
-            amount: unsafe { ptr::read(data.as_ptr().add(size_of::<Secp256r1Pubkey>()) as *const u64) },
-        })
 
+        let (pubkey_bytes, amount_bytes) = data.split_at(size_of::<Secp256r1Pubkey>());
+
+        Ok(Self {
+            pubkey: pubkey_bytes.try_into().unwrap(),
+            amount: u64::from_le_bytes(amount_bytes.try_into().unwrap()),
+      })
     }
 }
 ```
 </Codeblock>
 
-We use a clever optimization for deserializing the instruction data using `transmute`. This is a zero-cost abstraction that allows us to directly cast the byte array into our `DepositInstructionData` struct. 
+We deserialize the instruction data into a `DepositInstructionData` struct that contains:
+- `pubkey`: The Secp256r1 public key of the user making the deposit
+- `amount`: The amount of lamports to deposit
 
-While `transmute` is generally unsafe in Rust, in this specific case it's safe because:
-- We know the exact size and layout of our data structure
-- The data comes from a trusted source (our program)
-- We validate the data length before transmutation
+While unwrap is generally discouraged in production code, in this case, it is used safely because we already validated the length of the data in the `try_from` method. If the data length doesn't match, it will return an error before reaching this point.
 
 Finally, let's implement the deposit instruction:
 
@@ -197,19 +197,24 @@ impl<'a> Deposit<'a> {
 
     pub fn process(&mut self) -> ProgramResult {
         // Check vault address
-        let (vault_key, _) = find_program_address(&[b"vault", &self.instruction_data.pubkey[..1], &self.instruction_data.pubkey[1..33]], &crate::ID);
+        let (vault_key, _) = find_program_address(
+            &[
+                b"vault",
+                &self.instruction_data.pubkey[..1],
+                &self.instruction_data.pubkey[1..33]
+            ],
+            &crate::ID
+        );
         if vault_key.ne(self.accounts.vault.key()) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
         Transfer {
-            from: self.accounts.owner,
+            from: self.accounts.payer,
             to: self.accounts.vault,
             lamports: self.instruction_data.amount,
         }
-        .invoke()?;
-
-        Ok(())
+        .invoke()
     }
 }
 ```
@@ -250,11 +255,15 @@ impl<'a> TryFrom<&'a [AccountInfo]> for WithdrawAccounts<'a> {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
 
+        if !payer.is_signer() {
+            return Err(ProgramError::InvalidAccountOwner);
+        }
+
         if !vault.is_owned_by(&pinocchio_system::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
-        if self.accounts.vault.lamports().eq(&0) {
+        if vault.lamports().eq(&0) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -276,9 +285,9 @@ impl<'a> TryFrom<&'a [u8]> for WithdrawInstructionData {
     type Error = ProgramError;
 
     fn try_from(data: &'a [u8]) -> Result<Self, Self::Error> {
-        Ok(unsafe{ transmute(
-            TryInto::<[u8; size_of::<WithdrawInstructionData>()]>::try_into(data).map_err(|_| ProgramError::InvalidInstructionData)?
-        )})
+        Ok(Self {
+            bump: [*data.first().ok_or(ProgramError::InvalidInstructionData)?],
+        })
     }
 }
 ```
@@ -327,7 +336,11 @@ impl<'a> Withdraw<'a> {
         let signer: Secp256r1Pubkey = *secp256r1_ix.get_signer(0)?;
 
         // Check that our fee payer is the correct 
-        let (payer, expiry) = secp256r1_ix.get_message_data(0)?.split_at_checked(32).ok_or(ProgramError::InvalidInstructionData)?;
+        let (payer, expiry) = secp256r1_ix
+            .get_message_data(0)?
+            .split_at_checked(32)
+            .ok_or(ProgramError::InvalidInstructionData)?;
+
         if self.accounts.payer.key().ne(payer) {
             return Err(ProgramError::InvalidAccountOwner);
         }
@@ -335,7 +348,11 @@ impl<'a> Withdraw<'a> {
         // Get current timestamp
         let now = Clock::get()?.unix_timestamp;
         // Get signature expiry timestamp
-        let expiry = i64::from_le_bytes(expiry.try_into().map_err(|_| ProgramError::InvalidInstructionData)?);
+        let expiry = i64::from_le_bytes(
+            expiry
+                .try_into()
+                .map_err(|_| ProgramError::InvalidInstructionData)?
+        );
         if now > expiry {
             return Err(ProgramError::InvalidInstructionData);
         }
