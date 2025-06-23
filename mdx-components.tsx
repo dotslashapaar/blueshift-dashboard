@@ -18,7 +18,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Requirement,
     AnchorDiscriminatorCalculator,
     blockquote: ({ children }) => (
-      <blockquote className="bg-background-primary rounded-xl !text-brand-secondary flex items-start gap-x-2 py-4 px-6">
+      <blockquote className="bg-background-primary rounded-xl flex items-start gap-x-2 py-4 px-6">
         <Icon
           name="Warning"
           className="text-brand-secondary flex-shrink-0 top-1.5 relative"

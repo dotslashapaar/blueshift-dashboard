@@ -100,7 +100,7 @@ blockquote {
 }
 
 blockquote p {
-  @apply text-brand-secondary my-0;
+  @apply my-0;
 }
 
 blockquote p::before {
