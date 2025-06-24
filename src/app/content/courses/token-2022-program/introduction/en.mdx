@@ -1,0 +1,123 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# The Token2022 Program
+
+The Token2022 Program, also known as Token Extensions, is a superset of the functionality provided by the Token Program.
+
+The Legacy Token Program serves most needs for fungible and non-fungible tokens through a simple set of agnostic interfaces and structures. However, it lacks more opinionated features and implementations that would help developers create custom behavior with a common interface, making development faster and safer.
+
+For this exact reason, a new Token Program called `Token2022` was created with a new set of features called `Token Extensions`. These extensions provide specific, customizable behaviors that can be attached to either the `Token Account` or the `Mint Account`.
+
+> The `SPL-Token Program` (commonly referred to by developers as `Tokenkeg`, because of the program address: `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`) and the `Token2022 Program` are two completely different programs that share the same "starting point". This means that `Tokenkeg` tokens are deserializable with `Token2022` but they can't be used inside of that program to add extensions to them for example.
+
+<ArticleSection name="Mint and Token Accounts" id="mint-and-token-accounts" level="h2" />
+
+In the previous section we talked about the fact that the main difference between the `Tokenkeg` and `Token2022` programs are **Token Extensions**.
+
+To be enforceable, these extensions need to live directly inside the `Mint` and `Token` accounts, since this is the only way to ensure that the ruleset is enforced while operating directly on the token program.
+
+In the previous section we talked about the fact that the main difference between the `Tokenkeg` and `Token2022` program are `Token Extension`. 
+
+For this reason, let's look at the main differences between the legacy and new token programs on these accounts.`
+
+**Legacy Token Accounts**
+
+```rust
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Mint {
+    /// Optional authority used to mint new tokens. The mint authority may only
+    /// be provided during mint creation. If no mint authority is present
+    /// then the mint has a fixed supply and no further tokens may be
+    /// minted.
+    pub mint_authority: COption<Pubkey>,
+    /// Total supply of tokens.
+    pub supply: u64,
+    /// Number of base 10 digits to the right of the decimal place.
+    pub decimals: u8,
+    /// Is `true` if this structure has been initialized
+    pub is_initialized: bool,
+    /// Optional authority to freeze token accounts.
+    pub freeze_authority: COption<Pubkey>,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Account {
+    /// The mint associated with this account
+    pub mint: Pubkey,
+    /// The owner of this account.
+    pub owner: Pubkey,
+    /// The amount of tokens this account holds.
+    pub amount: u64,
+    /// If `delegate` is `Some` then `delegated_amount` represents
+    /// the amount authorized by the delegate
+    pub delegate: COption<Pubkey>,
+    /// The account's state
+    pub state: AccountState,
+    /// If `is_native.is_some`, this is a native token, and the value logs the
+    /// rent-exempt reserve. An Account is required to be rent-exempt, so
+    /// the value is used by the Processor to ensure that wrapped SOL
+    /// accounts do not drop below this threshold.
+    pub is_native: COption<u64>,
+    /// The amount delegated
+    pub delegated_amount: u64,
+    /// Optional authority to close the account.
+    pub close_authority: COption<Pubkey>,
+}
+```
+
+As you can see, for these accounts there is no written discriminator. This is because the fields are all of fixed length and the difference in space is great enough to discriminate between these different types of accounts by just comparing their different lengths.
+
+The problem with the Token Extension Program is that any extra data needed for the extension is tagged at the end of the `Mint` and `Token` accounts that we're familiar with.
+
+This means that discrimination by length would fall short because we could have a `Mint` with 3-4 extensions attached to it that surpasses the length of the `Token` Account. For this reason, when `Mint` and `Token` accounts have extensions, a discriminator gets added to them like this:
+
+```rust
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Mint {
+    /// Legacy Token Program data
+    /// ...
+    /// Padding (83 empty bytes)
+    pub padding: [u8; 83]
+    /// Discriminator (0)
+    pub discriminator: u8
+    /// Extensions data
+    /// ...
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Account {
+    /// Legacy Token Program data
+    /// ...
+    /// Discriminator (1)
+    pub discriminator: u8
+    /// Extensions data
+    /// ...
+}
+```
+
+To maintain the legacy struct, the discriminator doesn't live in the first byte like usual, but lives at byte `165`.
+
+This is because the `Token` account length is 164 bytes, meaning that the discriminator gets added after the base length. For the `Mint` account, this means we had to add 83 bytes of padding to ensure that the two accounts have the same base length.
+
+So to discriminate between the two accounts, we just need to check the 165th byte and move accordingly.
+
+<ArticleSection name="Token Extensions" id="token-extensions" level="h2" />
+
+In the next section we're going to talk about the merits and the different Token Extensions that are currently present on Solana, but in this introductory paragraph we're just going to talk about how they get serialized and added to the two state accounts that we talked about before.
+
+Each extension has a discriminator that gets saved with the size of that extension directly on the account. We'll call this the "header" of the extension and it looks like this:
+
+```rust
+pub struct ExtensionHeader {
+    /// Extension Discriminator
+    pub discriminator: u16
+    /// Lenght of the Disriminator 
+    pub lenght: u16
+}
+```
+
+This makes it extremely easy to know what extensions are on the token and deserialize the data only of the ones that we need, because we can grab the discriminator and then jump to the next extension to check what is there or not.

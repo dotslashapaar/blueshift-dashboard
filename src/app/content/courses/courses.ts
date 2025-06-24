@@ -40,6 +40,22 @@ const allCourses: CourseMetadata[] = withCourseNumber([
       { slug: "conclusions" },
     ],
   },
+  {
+    slug: "token-2022-program",
+    language: "Rust",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    lessons: [
+      { slug: "introduction" },
+      { slug: "token-extensions" },
+      { slug: "token-2022-with-web3js" },
+      { slug: "token-2022-with-kit" },
+      { slug: "token-2022-with-anchor" },
+      { slug: "token-2022-with-pinocchio" },
+      { slug: "conclusions" },
+    ],
+  },
 ]);
 
 const releasedCoursesSetting = process.env.NEXT_PUBLIC_RELEASED_COURSES?.trim();

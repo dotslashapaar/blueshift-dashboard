@@ -26,6 +26,18 @@
         "secp256r1-with-pinocchio": "Secp256r1 with Pinocchio",
         "conclusions": "Conclusions"
       }
+    },
+    "token-2022-program": {
+      "title": "Token2022 Program",
+      "lessons": {
+        "introduction": "Introduction",
+        "token-extensions": "Token Extensions",
+        "token-2022-with-web3js": "Token2022 with Web3.js",
+        "token-2022-with-kit": "Token2022 with Kit",
+        "token-2022-with-anchor": "Token2022 with Anchor",
+        "token-2022-with-pinocchio": "Token2022 with Pinocchio",
+        "conclusions": "Conclusions"
+      }
     }
   }
 }
