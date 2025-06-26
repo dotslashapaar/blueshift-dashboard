@@ -2,6 +2,20 @@ import { ArticleSection } from "../../../../components/ArticleSection/ArticleSec
 
 # Token Extensions
 
+While the original Token program provided essential functionality like minting, transferring, and freezing tokens, Token Extensions unlock a new paradigm of programmable tokens. 
+
+This enhanced program maintains full compatibility with existing SPL Token operations while adding sophisticated features such as transfer hooks for custom logic execution, built-in fee mechanisms, enhanced metadata support, interest-bearing calculations, and advanced security controls.
+
+### Extension Compatibility
+
+Token Extensions are designed to be composable, allowing you to combine multiple extensions to create tokens that perfectly match your project's requirements. 
+
+However, certain combinations are incompatible due to conflicting functionality or logical contradictions like:
+- Non-transferable + transfer hooks / transfer fees / confidential transfer
+- Confidential transfer + transfer fees (until 1.18)
+- Confidential transfer + transfer hooks (these transfers can only see source / destination accounts, therefore cannot act on the amount transferred)
+- Confidential transfer + permanent delegate
+
 <ArticleSection name="Transfer Fee Extension" id="transfer-fee-config" level="h2" />
 
 The `TransferFee` extension is a `Mint` extension that lets the creator set a "tax" on the token that is collected every time somebody performs a swap.
