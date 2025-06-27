@@ -383,6 +383,7 @@ export default function ChallengesContent({
                     className="col-span-2"
                     title={t(`challenges.${currentChallenge.slug}.title`)}
                     fileName="mint-an-spl-token.ts"
+                    onRefresh={() => setEditorCode(initialEditorCode)}
                   />
                   <ClientChallengeTable
                     onRunCodeClick={handleRunCode}

@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import "./style.css";
 import Editor, { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
+import { useTranslations } from "next-intl";
+import { motion, AnimatePresence } from "motion/react";
+import { anticipate } from "motion";
 
 interface BlueshiftTSEditorProps {
   initialCode: string;
@@ -13,6 +16,7 @@ interface BlueshiftTSEditorProps {
   title?: string;
   className?: string;
   fileName?: string;
+  onRefresh?: () => void;
 }
 
 const processEnvTypes = `
@@ -32,8 +36,11 @@ export default function BlueshiftEditor({
   onCodeChange,
   className,
   fileName = "main.ts",
+  onRefresh,
 }: BlueshiftTSEditorProps) {
   const editorRefInternal = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const [showRefreshDialog, setShowRefreshDialog] = useState(false);
+  const t = useTranslations();
   // const handleEditorWillMount = (monaco: Monaco) => {
   //   monaco.languages.typescript.typescriptDefaults.setCompilerOptions({isolatedModules: false});
   // }
@@ -316,16 +323,87 @@ export default function BlueshiftEditor({
     monaco.editor.setTheme("dracula");
   };
 
+  const handleRefreshClick = () => {
+    setShowRefreshDialog(true);
+  };
+
+  const handleConfirmRefresh = () => {
+    setShowRefreshDialog(false);
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
+  const handleCancelRefresh = () => {
+    setShowRefreshDialog(false);
+  };
+
   return (
     <div className={classNames("w-full h-full relative", className)}>
-      <button className="absolute group/refresh bottom-4 z-10 right-8 font-medium flex items-center gap-x-2 text-sm text-tertiary cursor-pointer">
+      <button 
+        className="absolute group/refresh bottom-4 z-10 right-8 font-medium flex items-center gap-x-2 text-sm text-tertiary cursor-pointer hover:text-secondary transition-colors"
+        onClick={handleRefreshClick}
+      >
         <Icon
           name="Refresh"
           size={12}
           className="group-hover/refresh:rotate-360 transition-transform"
         />
-        <span>Refresh</span>
+        <span>{t("ChallengePage.reset_button")}</span>
       </button>
+
+            {/* Refresh Confirmation Dialog */}
+      <AnimatePresence>
+        {showRefreshDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ 
+                opacity: 1, 
+                scale: 1, 
+                y: 0,
+                transition: { duration: 0.3, ease: anticipate }
+              }}
+              exit={{ 
+                opacity: 0, 
+                scale: 0.95, 
+                y: 20,
+                transition: { duration: 0.2 }
+              }}
+              className="bg-background-card border border-border rounded-xl p-6 max-w-md mx-4 shadow-xl"
+            >
+              <div className="flex items-center gap-x-3 mb-4">
+                <Icon name="Warning" size={18} className="text-yellow-500" />
+                <h3 className="text-lg font-semibold">{t("ChallengePage.reset_code_modal.title")}</h3>
+              </div>
+              <p className="text-secondary mb-6">
+                {t("ChallengePage.reset_code_modal.description")}
+              </p>
+              <div className="flex gap-x-3 justify-end">
+                <button
+                  className="px-4 py-2 text-sm font-medium text-secondary hover:text-primary border border-border rounded-lg hover:bg-background-card-hover transition-colors cursor-pointer"
+                  onClick={handleCancelRefresh}
+                >
+                  {t("ChallengePage.reset_code_modal.cancel")}
+                </button>
+                <button
+                  className="px-4 py-2 text-sm font-medium bg-[#ff285a] hover:bg-[#e6234f] text-white rounded-lg transition-colors cursor-pointer"
+                  onClick={handleConfirmRefresh}
+                >
+                  {t("ChallengePage.reset_code_modal.confirm")}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Editor
         height="100%"
         width="100%"
