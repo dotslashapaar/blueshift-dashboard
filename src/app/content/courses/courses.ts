@@ -61,10 +61,14 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     lessons: [
       { slug: "introduction" },
       { slug: "transfer-fee-extension" },
-      { slug: "mint-close-authority" },
+      { slug: "mint-close-authority-extension" },
       { slug: "default-account-state-extension" },
       { slug: "immutable-owner-extension" },
       { slug: "memo-transfer-extension" },
+      { slug: "non-transferable-extension" },
+      { slug: "interest-bearing-extension" },
+      { slug: "cpi-guard-extension" },
+      { slug: "permanent-delegate-extension" },
     ],
   },
 ]);

@@ -239,7 +239,7 @@ This is how the `TransferHook` and `TransferHookAccount` extension data looks:
 
 ```rust
 /// TransferHook Extension
-pub const permanent_delegate_extension_header: [u8; 4] = [14, 0, 64, 0];
+pub const transfer_hook_extension_header: [u8; 4] = [14, 0, 64, 0];
 
 pub struct TransferHook {
     // The transfer hook update authority
@@ -249,7 +249,7 @@ pub struct TransferHook {
 }
 
 /// TransferHookAccount Extension
-pub const permanent_delegate_extension_header: [u8; 4] = [15, 0, 1, 0];
+pub const transfer_hook_account_extension_header: [u8; 4] = [15, 0, 1, 0];
 
 pub struct TransferHookAccount {
     // Whether or not this account is currently transferring tokens

@@ -40,10 +40,14 @@
       "lessons": {
         "introduction": "Introduction",
         "transfer-fee-extension": "Transfer Fee Extension",
-        "mint-close-authority": "Mint Close Authority",
+        "mint-close-authority-extension": "Mint Close Authority Extension",
         "default-account-state-extension": "Default Account State Extension",
         "immutable-owner-extension": "Immutable Owner Extension",
-        "memo-transfer-extension": "Memo Transfer Extension"
+        "memo-transfer-extension": "Memo Transfer Extension",
+        "non-transferable-extension": "Non Transferable Extension",
+        "interest-bearing-extension": "Interest Bearing Extension",
+        "cpi-guard-extension": "CPI Guard Extension",
+        "permanent-delegate-extension": "Permanent Delegate Extension"
       }
     }
   }
