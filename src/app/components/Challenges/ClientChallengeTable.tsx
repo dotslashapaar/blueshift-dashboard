@@ -54,6 +54,7 @@ export default function ChallengeTable({
     useState<ChallengeRequirement | null>(null);
 
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
+  const [allowRedo, setAllowRedo] = useState(false);
   const { setChallengeStatus, challengeStatuses } = usePersistentStore();
   const courseSlug = challenge.slug;
 
@@ -75,6 +76,7 @@ export default function ChallengeTable({
             setChallengeStatus(courseSlug, "completed");
           }
           setIsCompletedModalOpen(true);
+          setAllowRedo(false);
         }, 1000);
       }
     }
@@ -86,13 +88,13 @@ export default function ChallengeTable({
   return (
     <div className="w-full flex">
       <ChallengeCompleted
-        isOpen={isCompletedModalOpen}
+        isOpen={isCompletedModalOpen && !allowRedo}
         onClose={() => setIsCompletedModalOpen(false)}
         challenge={challenge}
       />
       <div className="bg-background-card/50 rounded-b-xl lg:rounded-none w-full min-w-full lg:min-w-[400px] px-4 lg:px-6 lg:right-4 lg:border-l border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden pb-6">
         {(challengeStatuses[courseSlug] === "completed" ||
-          challengeStatuses[courseSlug] === "claimed") && (
+          challengeStatuses[courseSlug] === "claimed") && !allowRedo && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -133,6 +135,7 @@ export default function ChallengeTable({
               label={t("ChallengePage.challenge_completed.redo")}
               onClick={() => {
                 onRedoChallenge();
+                setAllowRedo(true);
                 setIsCompletedModalOpen(false);
               }}
             />

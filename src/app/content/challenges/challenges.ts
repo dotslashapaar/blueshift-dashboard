@@ -75,6 +75,20 @@ const allChallenges: ChallengeMetadata[] = [
     ],
     collectionMintAddress: "4NKZ2B5zeG9TGZifzfnG7Zw28P3ZetjaS6xPVKW5MHrp",
   },
+  {
+    slug: "minting-an-spl-token",
+    language: "Typescript",
+    color: "105,162,241",
+    difficulty: 1,
+    isFeatured: true,
+    unitName: "SPL Token",
+    apiPath: "/v1/verify/spl-token/mint",
+    requirements: [
+      { instructionKey: "create_mint" },
+      { instructionKey: "create_token_account" },
+      { instructionKey: "mint_to" },
+    ],
+  },
 ];
 
 const releasedChallengesSetting =

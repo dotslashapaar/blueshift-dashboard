@@ -31,12 +31,12 @@ export default function BlueshiftEditor({
   initialCode,
   onCodeChange,
   className,
-  fileName
+  fileName = "main.ts",
 }: BlueshiftTSEditorProps) {
   const editorRefInternal = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const handleEditorWillMount = (monaco: Monaco) => {
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({isolatedModules: true});
-  }
+  // const handleEditorWillMount = (monaco: Monaco) => {
+  //   monaco.languages.typescript.typescriptDefaults.setCompilerOptions({isolatedModules: false});
+  // }
 
   const handleEditorDidMount = (
     editorInstance: editor.IStandaloneCodeEditor,
@@ -314,9 +314,6 @@ export default function BlueshiftEditor({
     });
 
     monaco.editor.setTheme("dracula");
-
-    console.log(editorInstance.getValue())
-    console.log(fileName)
   };
 
   return (
@@ -346,8 +343,8 @@ export default function BlueshiftEditor({
           wordWrap: "on", // Optional: for better readability of long lines
           renderLineHighlight: "all", // Highlight the current line
         }}
-        path={fileName ? `file:///${fileName}` : undefined}
-        beforeMount={handleEditorWillMount}
+        path={`file:///${fileName}`}
+        // beforeMount={handleEditorWillMount}
         onMount={handleEditorDidMount}
       />
     </div>

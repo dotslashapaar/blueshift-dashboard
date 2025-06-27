@@ -1,0 +1,115 @@
+// Challenge: Creating an SPL Mint
+
+// Your code should create an SPL mint with 6 decimal places.
+
+import {
+  Keypair,
+  Connection,
+  sendAndConfirmTransaction,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
+
+import {
+  createAssociatedTokenAccountInstruction,
+  createInitializeMint2Instruction,
+  createMintToInstruction,
+  createMintToCheckedInstruction,
+  MINT_SIZE,
+  getMinimumBalanceForRentExemptMint,
+  TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddressSync,
+
+  ASSOCIATED_TOKEN_PROGRAM_ID
+} from "@solana/spl-token";
+
+import bs58 from "bs58";
+
+// Import our keypair from the wallet file
+const feePayer = Keypair.fromSecretKey(
+  // ⚠️ INSECURE KEY. DO NOT USE OUTSIDE OF THIS CHALLENGE
+  bs58.decode(process.env.SECRET)
+);
+
+//Create a Solana devnet connection
+const connection = new Connection(
+  process.env.RPC_ENDPOINT,
+  "confirmed"
+);
+
+// Entry point of your TypeScript code (we will call this)
+async function main() {
+  try {
+    // Start here
+    // const mint = ???
+
+    const mint = Keypair.generate();
+
+    const mintRent = await getMinimumBalanceForRentExemptMint(connection);
+
+    const createAccountInstruction = SystemProgram.createAccount({
+      fromPubkey: feePayer.publicKey,
+      newAccountPubkey: mint.publicKey,
+      space: MINT_SIZE,
+      lamports: mintRent,
+      programId: TOKEN_PROGRAM_ID
+    });
+
+    const initializeMintInstruction = createInitializeMint2Instruction(
+      mint.publicKey, // mint pubkey
+      6, // decimals
+      feePayer.publicKey, // mint authority
+      null, // freeze authority
+      TOKEN_PROGRAM_ID
+    );
+
+    const associatedTokenAccount = getAssociatedTokenAddressSync(
+      mint.publicKey,
+      feePayer.publicKey,
+      false, // allowOwnerOffCurve
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+
+    console.log("Associated Token Account:", associatedTokenAccount.toBase58());
+
+    const createAssociatedTokenAccountIx = createAssociatedTokenAccountInstruction(
+      feePayer.publicKey,
+      associatedTokenAccount,
+      feePayer.publicKey, // owner
+      mint.publicKey, // mint
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+
+    const mintAmount = 100;
+    const mintToCheckedIx = createMintToCheckedInstruction(
+      mint.publicKey, // mint
+      associatedTokenAccount, // destination
+      feePayer.publicKey, // authority
+      mintAmount, // amount
+      6, // decimals
+      [], // multiSigners
+      TOKEN_PROGRAM_ID // programId
+    );
+
+    const recentBlockhash = await connection.getLatestBlockhash();
+
+    let transaction = new Transaction({
+      feePayer: feePayer.publicKey,
+      blockhash: recentBlockhash.blockhash,
+      lastValidBlockHeight: recentBlockhash.lastValidBlockHeight
+    }).add(createAccountInstruction, initializeMintInstruction, createAssociatedTokenAccountIx, mintToCheckedIx);
+
+    const transactionSignature = await sendAndConfirmTransaction(
+      connection,
+      transaction,
+      [feePayer, mint]
+    );
+
+    console.log("Mint Address:", mint.publicKey.toBase58());
+    console.log("Transaction Signature:", transactionSignature);
+  } catch (error) {
+    console.error(`Oops, something went wrong: ${error}`);
+  }
+}

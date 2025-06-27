@@ -289,6 +289,7 @@ export default function ChallengesContent({
   };
 
   const handleRedoChallenge = () => {
+    console.log("[ClientChallengesContent] Redoing challenge...");
     setVerificationData(null);
     setRequirements(initialRequirements);
     clearLogs();
@@ -376,6 +377,7 @@ export default function ChallengesContent({
                     onCodeChange={setEditorCode}
                     className="col-span-2"
                     title={t(`challenges.${currentChallenge.slug}.title`)}
+                    fileName="mint-an-spl-token.ts"
                   />
                   <ClientChallengeTable
                     onRunCodeClick={handleRunCode}
