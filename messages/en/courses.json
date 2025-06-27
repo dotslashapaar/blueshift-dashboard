@@ -47,7 +47,10 @@
         "non-transferable-extension": "Non Transferable Extension",
         "interest-bearing-extension": "Interest Bearing Extension",
         "cpi-guard-extension": "CPI Guard Extension",
-        "permanent-delegate-extension": "Permanent Delegate Extension"
+        "permanent-delegate-extension": "Permanent Delegate Extension",
+        "metadata-extension": "Metadata Extension",
+        "group-and-member-extension": "Group and Member Extension",
+        "conclusions": "Conclusions"
       }
     }
   }

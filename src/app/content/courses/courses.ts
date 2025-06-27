@@ -69,6 +69,9 @@ const allCourses: CourseMetadata[] = withCourseNumber([
       { slug: "interest-bearing-extension" },
       { slug: "cpi-guard-extension" },
       { slug: "permanent-delegate-extension" },
+      { slug: "metadata-extension" },
+      { slug: "group-and-member-extension" },
+      { slug: "conclusions" },
     ],
   },
 ]);
