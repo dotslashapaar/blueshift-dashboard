@@ -41,6 +41,7 @@ export default function ChallengesContent({
   const t = useTranslations();
 
   const [editorCode, setEditorCode] = useState<string>("");
+  const [initialEditorCode, setInitialEditorCode] = useState<string>("");
   const [wasSendTransactionIntercepted, setWasSendTransactionIntercepted] =
     useState(false);
   const [
@@ -216,11 +217,12 @@ export default function ChallengesContent({
         // const template = "console.log('Hello, World!');"; // Placeholder for the actual template code
 
         setEditorCode(template);
+        setInitialEditorCode(template);
       } catch (err) {
         console.error("Failed to load challenge template:", err);
-        setEditorCode(
-          "// Failed to load challenge template. Please check console."
-        );
+        const errorTemplate = "// Failed to load challenge template. Please check console.";
+        setEditorCode(errorTemplate);
+        setInitialEditorCode(errorTemplate);
       }
     };
 
@@ -293,6 +295,9 @@ export default function ChallengesContent({
     setVerificationData(null);
     setRequirements(initialRequirements);
     clearLogs();
+    setWasSendTransactionIntercepted(false);
+    setVerificationFailureMessageLogged(false);
+    setEditorCode(initialEditorCode);
   };
 
   return (
