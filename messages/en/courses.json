@@ -35,6 +35,15 @@
         "conclusions": "Conclusions"
       }
     },
+    "tokens-on-solana": {
+      "title": "Tokens on Solana",
+      "lessons": {
+        "introduction": "Introduction",
+        "mint-and-token-accounts": "Mint and Token Accounts",
+        "functionalities": "Functionalities",
+        "conclusions": "Conclusions"
+      }
+    },
     "token-2022-with-web3js": {
       "title": "Token2022 with Web3.js",
       "lessons": {
