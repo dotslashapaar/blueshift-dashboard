@@ -8,21 +8,21 @@ The `DefaultAccountState` extension is a Mint extension that allows all newly cr
 
 To initialie the `DefaultAccountState` extension on a `Mint` account we're going to need the `initializeDefaultAccountState()` function. 
 
-Here's how to create a mint with the Transfer Fee extension:
+Here's how to create a mint with the Default Account State extension:
 
 ```ts
 import {
-  Keypair,
-  SystemProgram,
-  Transaction,
-  sendAndConfirmTransaction,
+    Keypair,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
 } from '@solana/web3.js';
 import {
-  createInitializeMintInstruction,
-  createInitializeDefaultAccountStateInstruction,
-  getMintLen,
-  ExtensionType,
-  TOKEN_2022_PROGRAM_ID,
+    createInitializeMintInstruction,
+    createInitializeDefaultAccountStateInstruction,
+    getMintLen,
+    ExtensionType,
+    TOKEN_2022_PROGRAM_ID,
 } from '@solana/spl-token';
 
 const mint = Keypair.generate();

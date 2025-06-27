@@ -1,30 +1,28 @@
 import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
 
-# The Mint Close Authority Extension
+# The Permanent Delegate Extension
 
-The `MintCloseAuthority` extension is a `Mint` extension that allows the authority to close and retrieve the rent from a `Mint` account that has a current supply of 0.
+The `PermanentDelegate` extension is a Mint account extension that allows a permanent delegate for all tokens of the mint that is capable of transferring or burning any token of that mint, from any token account.
 
-This extension is useful for cleaning up unused mints and reclaiming the SOL that was used to pay for the account's rent exemption. The mint can only be closed when no tokens are in circulation.
+<ArticleSection name="Initializing the Mint Account" id="initializing-the-mint-account" level="h2" />
 
-<ArticleSection name="Initializing the Mint Account" id="initializing-the-mint-acc`ount" level="h2" />
+To initialie the `PermanentDelegate` extension on a `Mint` account we're going to need the `initializePermanentDelegate()` function. 
 
-To initialie the `MintCloseAuthority` extension on a `Mint` account we're going to need the `initializeMintCloseAuthority()` function. 
-
-Here's how to create a mint with the Transfer Fee extension:
+Here's how to create a mint with the Mint Close extension:
 
 ```ts
 import {
-  Keypair,
-  SystemProgram,
-  Transaction,
-  sendAndConfirmTransaction,
+    Keypair,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
 } from '@solana/web3.js';
 import {
-  createInitializeMintInstruction,
-  createInitializeMintCloseAuthorityInstruction,
-  getMintLen,
-  ExtensionType,
-  TOKEN_2022_PROGRAM_ID,
+    createInitializeMintInstruction,
+    createInitializePermanentDelegateInstruction,
+    getMintLen,
+    ExtensionType,
+    TOKEN_2022_PROGRAM_ID,
 } from '@solana/spl-token';
 
 const mint = Keypair.generate();
@@ -44,8 +42,8 @@ const createAccountInstruction = SystemProgram.createAccount({
     programId: TOKEN_2022_PROGRAM_ID,
 });
 
-// Initialize the Mint Close Authority extension
-const initializeMintCloseAuthority = createInitializeMintCloseAuthorityInstruction(
+// Initialize the Permanent Delegate extension
+const initializePermanentDelegate = createInitializePermanentDelegateInstruction(
     mint.publicKey,
     keypair.publicKey,
     TOKEN_2022_PROGRAM_ID,
@@ -63,7 +61,7 @@ const initializeMintInstruction = createInitializeMintInstruction(
 // Combine all instructions in the correct order
 const transaction = new Transaction().add(
     createAccountInstruction,
-    initializeMintCloseAuthority,
+    initializePermanentDelegate,
     initializeMintInstruction,
 );
 
@@ -91,3 +89,11 @@ const signature = await sendAndConfirmTransaction(connection, transaction, [keyp
 
 console.log(`Mint closed! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
 ```
+
+<ArticleSection name="Permissioned Actions" id="permissioned-actions" level="h2" />
+
+Unlike regular delegates which can be revoked, this delegate authority is permanent and immutable. 
+
+This means that every normal action like `transfer()`, `burn()`, `approve()` and `freeze()` can be executed whenever needed directly by the authority without needing the signature of the actual owner.
+
+This means that we can just use the normal `transferChecked()`, `burnChecked()`, ... instructions and pass in the `PermanetDelegate` authority in the `authority` field.
