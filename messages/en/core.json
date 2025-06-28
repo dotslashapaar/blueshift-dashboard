@@ -147,6 +147,10 @@
       "cancel": "Cancel",
       "confirm": "Reset Code"
     },
-    "reset_button": "Reset"
+    "reset_button": "Reset",
+    "auto_saved": "Auto-saved",
+    "unsaved_changes": "Unsaved changes",
+    "saving": "Saving...",
+    "loaded_from_auto_save": "Code loaded from previous session"
   }
 }
