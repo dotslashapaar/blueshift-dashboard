@@ -27,20 +27,34 @@
         "conclusions": "Conclusions"
       }
     },
-    "token-2022-program": {
-      "title": "Token2022 Program",
-      "lessons": {
-        "introduction": "Introduction",
-        "token-extensions": "Token Extensions",
-        "conclusions": "Conclusions"
-      }
-    },
     "tokens-on-solana": {
       "title": "Tokens on Solana",
       "lessons": {
         "introduction": "Introduction",
         "mint-and-token-accounts": "Mint and Token Accounts",
         "functionalities": "Functionalities",
+        "conclusions": "Conclusions"
+      }
+    },
+    "spl-token-with-web3js": { 
+      "title": "SPL Token with Web3.js",
+      "lessons": {
+        "introduction": "Introduction",
+        "mint-to": "Mint To",
+        "transfer": "Transfer",
+        "burn": "Burn",
+        "close-account": "Close Account",
+        "approve-and-revoke": "Approve and Revoke",
+        "freeze-and-thaw": "Freeze and Thaw",
+        "set-authority": "Set Authority",
+        "conclusions": "Conclusions"
+      }
+    },
+    "token-2022-program": {
+      "title": "Token2022 Program",
+      "lessons": {
+        "introduction": "Introduction",
+        "token-extensions": "Token Extensions",
         "conclusions": "Conclusions"
       }
     },
