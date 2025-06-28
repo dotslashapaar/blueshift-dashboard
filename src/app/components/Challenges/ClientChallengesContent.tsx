@@ -24,15 +24,25 @@ import LogoGlyph from "../Logo/LogoGlyph";
 import { useAuth } from "@/hooks/useAuth";
 import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
 import { ChallengeMetadata } from "@/app/utils/challenges";
+import { useAutoSave } from "@/hooks/useAutoSave";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
 
+/**
+ * Props for the ChallengesContent component
+ */
 interface ChallengesContentProps {
+  /** Current challenge metadata */
   currentChallenge: ChallengeMetadata;
+  /** Challenge content (currently unused) */
   content: ReactNode;
 }
 
+/**
+ * Main component for displaying and interacting with coding challenges
+ * Includes code editor, auto-save functionality, and challenge verification
+ */
 export default function ChallengesContent({
   currentChallenge,
 }: ChallengesContentProps) {
@@ -42,6 +52,7 @@ export default function ChallengesContent({
 
   const [editorCode, setEditorCode] = useState<string>("");
   const [initialEditorCode, setInitialEditorCode] = useState<string>("");
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const [wasSendTransactionIntercepted, setWasSendTransactionIntercepted] =
     useState(false);
   const [
@@ -49,49 +60,45 @@ export default function ChallengesContent({
     setVerificationFailureMessageLogged,
   ] = useState(false);
 
+  // Auto-save functionality
+  const { 
+    getAutoSavedCode, 
+    clearSavedCode, 
+    saveState, 
+    justSaved, 
+    loadedFromAutoSave,
+    markAsLoadedFromAutoSave,
+    clearLoadedFromAutoSave 
+  } = useAutoSave({
+    challengeSlug: currentChallenge.slug,
+    code: editorCode,
+    delay: 2000, // Auto-save after 2 seconds of inactivity
+  });
+
   const handleRpcCallForDecision = async (
     rpcData: InterceptedRpcCallData
   ): Promise<FetchDecision> => {
-    console.log(
-      "[ClientChallengesContent] Intercepted RPC Call, Awaiting Decision:",
-      rpcData
-    );
-
     if (rpcData.rpcMethod === "sendTransaction") {
-      setWasSendTransactionIntercepted(true); // Keep this if useful for UI feedback
+      setWasSendTransactionIntercepted(true);
       const base64EncodedTx = rpcData.body?.params?.[0];
 
       if (uploadTransaction && base64EncodedTx) {
-        // We can still call uploadTransaction for verification purposes,
-        // even if we are about to mock the client-side response.
-        // The verifier might operate independently of the client's view of the transaction result.
-        console.log(
-          "[ClientChallengesContent] Uploading transaction for verification before mocking response."
-        );
-        // Not awaiting this intentionally, as we want to return the decision quickly.
-        // The verification can happen in the background.
+        // Upload transaction for verification in background
         uploadTransaction(base64EncodedTx).catch((err) => {
-          console.error(
-            "[ClientChallengesContent] Error uploading transaction during mock decision:",
-            err
-          );
+          console.error("Error uploading transaction:", err);
         });
       }
 
       const tx = Transaction.from(Buffer.from(base64EncodedTx, "base64"));
       const mockSignature = bs58.encode(tx?.signature ?? []);
 
-      console.debug(
-        `[ClientChallengesContent] Mocking successful response for sendTransaction. Signature: ${mockSignature}`
-      );
-
       return {
         decision: "MOCK_SUCCESS",
         responseData: {
           body: {
             jsonrpc: "2.0",
-            result: mockSignature, // The fake transaction signature
-            id: rpcData.body?.id || "mocked-id", // Try to use original id or a placeholder
+            result: mockSignature,
+            id: rpcData.body?.id || "mocked-id",
           },
           status: 200,
           statusText: "OK",
@@ -100,22 +107,12 @@ export default function ChallengesContent({
       };
     }
 
-    console.debug(
-      `RPC call (${rpcData.rpcMethod}) to ${rpcData.url} will proceed.`
-    );
-
-    // For all other calls, or if rpcMethod is null, proceed as normal
     return { decision: "PROCEED" };
   };
 
   const handleWsSendForDecision = async (
     wsSendData: InterceptedWsSendData
   ): Promise<WsSendDecision> => {
-    console.log(
-      "[ClientChallengesContent] Intercepted WebSocket Send, Awaiting Decision:",
-      wsSendData
-    );
-
     const targetHost = new URL(rpcEndpoint!).host;
 
     if (wsSendData.url.includes(targetHost)) {
@@ -123,15 +120,10 @@ export default function ChallengesContent({
         typeof wsSendData.data === "string" &&
         wsSendData.data.includes("signatureSubscribe")
       ) {
-        console.log(
-          "[ClientChallengesContent] Intercepted WebSocket send for signatureSubscribe"
-        );
-
         const data = JSON.parse(wsSendData.data);
 
-        // random subscription id as integer
+        // Generate random subscription id and slot
         const subscriptionId = Math.floor(Math.random() * 1000000);
-        // random slot number as integer
         const slot = Math.floor(Math.random() * 1000000);
 
         const subscriptionConfirmation = {
@@ -145,12 +137,8 @@ export default function ChallengesContent({
           method: "signatureNotification",
           params: {
             result: {
-              context: {
-                slot: slot,
-              },
-              value: {
-                err: null,
-              },
+              context: { slot },
+              value: { err: null },
             },
             subscription: subscriptionId,
           },
@@ -166,21 +154,12 @@ export default function ChallengesContent({
       }
     }
 
-    console.log(
-      "[ClientChallengesContent] WebSocket send allowed to PROCEED:",
-      wsSendData
-    );
     return { decision: "PROCEED" };
   };
 
   const handleWsReceiveForDecision = async (
-    wsReceiveData: InterceptedWsReceiveData
+    _wsReceiveData: InterceptedWsReceiveData
   ): Promise<WsReceiveDecision> => {
-    console.log(
-      "[ClientChallengesContent] Intercepted WebSocket Receive, Awaiting Decision:",
-      wsReceiveData
-    );
-
     return { decision: "PROCEED" };
   };
 
@@ -214,22 +193,40 @@ export default function ChallengesContent({
         );
         const template = codeModule.default;
 
-        // const template = "console.log('Hello, World!');"; // Placeholder for the actual template code
-
-        setEditorCode(template);
         setInitialEditorCode(template);
+
+        // Only check for auto-saved code on initial load, not on subsequent auto-save updates
+        if (!hasInitiallyLoaded) {
+          const autoSaved = getAutoSavedCode();
+          if (autoSaved && autoSaved.trim() !== "" && autoSaved !== template) {
+            setEditorCode(autoSaved);
+            markAsLoadedFromAutoSave();
+          } else {
+            setEditorCode(template);
+          }
+          setHasInitiallyLoaded(true);
+        }
       } catch (err) {
         console.error("Failed to load challenge template:", err);
         const errorTemplate = "// Failed to load challenge template. Please check console.";
         setEditorCode(errorTemplate);
         setInitialEditorCode(errorTemplate);
+        if (!hasInitiallyLoaded) {
+          setHasInitiallyLoaded(true);
+        }
       }
     };
 
     if (currentChallenge.slug) {
       fetchSolutionsTemplate();
     }
-  }, [currentChallenge.slug]);
+  }, [currentChallenge.slug, hasInitiallyLoaded, getAutoSavedCode, markAsLoadedFromAutoSave]);
+
+  // Reset initial load flag when challenge changes
+  useEffect(() => {
+    setHasInitiallyLoaded(false);
+    clearLoadedFromAutoSave();
+  }, [currentChallenge.slug, clearLoadedFromAutoSave]);
 
   // Effect to check for missing sendTransaction after code execution
   useEffect(() => {
@@ -277,26 +274,29 @@ export default function ChallengesContent({
 
   const handleRunCode = () => {
     if (esBuildInitializationState !== "initialized") {
-      // TODO Consider using a toast notification or inline message instead of alert
-      alert("Code runner is not ready yet. Please wait a moment.");
+      // Show user-friendly error without blocking alert
+      addLog("SYSTEM", "Code runner is still initializing. Please wait a moment and try again.");
       return;
     }
     clearLogs();
     setWasSendTransactionIntercepted(false);
     setVerificationFailureMessageLogged(false);
 
-    // The verifier might be called after execution or based on editorCode directly
-    // For now, just run the code. Verification logic will use `verificationData`
-    runCode(editorCode).catch(console.error);
+    runCode(editorCode).catch((error) => {
+      console.error("Error running code:", error);
+      addLog("SYSTEM", "An error occurred while running your code. Please try again.");
+    });
   };
 
   const handleRedoChallenge = () => {
-    console.log("[ClientChallengesContent] Redoing challenge...");
     setVerificationData(null);
     setRequirements(initialRequirements);
     clearLogs();
     setWasSendTransactionIntercepted(false);
     setVerificationFailureMessageLogged(false);
+    clearSavedCode();
+    clearLoadedFromAutoSave();
+    setHasInitiallyLoaded(false);
     setEditorCode(initialEditorCode);
   };
 
@@ -383,6 +383,10 @@ export default function ChallengesContent({
                     className="col-span-2"
                     title={t(`challenges.${currentChallenge.slug}.title`)}
                     fileName="mint-an-spl-token.ts"
+                    onRefresh={() => setEditorCode(initialEditorCode)}
+                    saveState={saveState}
+                    justSaved={justSaved}
+                    loadedFromAutoSave={loadedFromAutoSave}
                   />
                   <ClientChallengeTable
                     onRunCodeClick={handleRunCode}

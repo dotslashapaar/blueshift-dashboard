@@ -65,6 +65,11 @@ interface PersistentStore {
   // Challenge Statuses
   challengeStatuses: Record<string, ChallengeStatuses>;
   setChallengeStatus: (slug: string, status: ChallengeStatuses) => void;
+
+  // Auto-saved challenge code
+  autoSavedCode: Record<string, string>;
+  setAutoSavedCode: (challengeSlug: string, code: string) => void;
+  clearAutoSavedCode: (challengeSlug: string) => void;
 }
 
 type V0PersistentStore = Omit<PersistentStore, 'challengeStatuses' | 'setNewChallengeStatus'> & {
@@ -156,6 +161,22 @@ export const usePersistentStore = create<PersistentStore>()(
       setChallengeStatus: (slug, status) =>
         set((state) => ({
           challengeStatuses: { ...state.challengeStatuses, [slug]: status },
+        })),
+
+      // Auto-saved challenge code
+      autoSavedCode: {},
+      setAutoSavedCode: (challengeSlug: string, code: string) =>
+        set((state) => ({
+          autoSavedCode: { ...state.autoSavedCode, [challengeSlug]: code },
+        })),
+      clearAutoSavedCode: (challengeSlug: string) =>
+        set((state) => ({
+          autoSavedCode: Object.keys(state.autoSavedCode).reduce((acc, key) => {
+            if (key !== challengeSlug) {
+              acc[key] = state.autoSavedCode[key];
+            }
+            return acc;
+          }, {} as Record<string, string>),
         })),
     }),
     {
