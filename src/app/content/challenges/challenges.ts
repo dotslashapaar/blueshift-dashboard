@@ -76,7 +76,7 @@ const allChallenges: ChallengeMetadata[] = [
     collectionMintAddress: "4NKZ2B5zeG9TGZifzfnG7Zw28P3ZetjaS6xPVKW5MHrp",
   },
   {
-    slug: "minting-an-spl-token",
+    slug: "intro-to-spl-token",
     language: "Typescript",
     color: "105,162,241",
     difficulty: 1,

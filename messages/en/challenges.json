@@ -110,8 +110,8 @@
         }
       }
     },
-    "minting-an-spl-token": {
-      "title": "Minting an SPL Token",
+    "intro-to-spl-token": {
+      "title": "Intro to SPL Token",
       "requirements": {
         "create_mint_account": {
           "title": "Challenge 1: Create token mint"
