@@ -407,19 +407,19 @@ export default function ChallengeTable({
                                 (result) =>
                                   result.instruction ===
                                   requirement.instructionKey
-                              )
-                              ?.program_logs?.map((log, index) => (
-                                <HeadingReveal
-                                  baseDelay={index * 0.1}
-                                  text="PROGRAM"
-                                  headingLevel="h3"
-                                  key={log}
-                                  splitBy="chars"
-                                  speed={0.1}
-                                  className="font-mono px-3 flex-shrink-0 w-max sticky left-0"
-                                />
-                              ))}
-                          </div>
+                                                          )
+                            ?.program_logs?.map((log, index) => (
+                              <HeadingReveal
+                                baseDelay={index * 0.1}
+                                text="PROGRAM"
+                                headingLevel="h3"
+                                key={index}
+                                splitBy="chars"
+                                speed={0.1}
+                                className="font-mono px-3 flex-shrink-0 w-max sticky left-0"
+                              />
+                            ))}
+                        </div>
                           <div className="flex flex-col gap-y-2 items-start px-1 overflow-x-auto pr-5 pb-2">
                             {verificationData.results.find(
                               (result) =>
