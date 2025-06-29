@@ -113,14 +113,17 @@
     "minting-an-spl-token": {
       "title": "Minting an SPL Token",
       "requirements": {
-        "create_mint": {
-          "title": "Challenge 1: Creating a token mint"
+        "create_mint_account": {
+          "title": "Challenge 1: Create token mint"
+        },
+        "initialize_mint": {
+          "title": "Challenge 2: Initialize mint"
         },
         "create_token_account": {
-          "title": "Challenge 2: Creating a token account"
+          "title": "Challenge 3: Create token account"
         },
         "mint_to": {
-          "title": "Challenge 3: Minting tokens"
+          "title": "Challenge 4: Mint tokens"
         }
       }
     }

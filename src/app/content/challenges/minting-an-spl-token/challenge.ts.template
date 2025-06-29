@@ -82,7 +82,7 @@ async function main() {
       ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
-    const mintAmount = 100;
+    const mintAmount = 21_000_000;
     const mintToCheckedIx = createMintToCheckedInstruction(
       mint.publicKey, // mint
       associatedTokenAccount, // destination

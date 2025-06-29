@@ -84,7 +84,8 @@ const allChallenges: ChallengeMetadata[] = [
     unitName: "SPL Token",
     apiPath: "/v1/verify/spl-token/mint",
     requirements: [
-      { instructionKey: "create_mint" },
+      { instructionKey: "create_mint_account" },
+      { instructionKey: "initialize_mint" },
       { instructionKey: "create_token_account" },
       { instructionKey: "mint_to" },
     ],
