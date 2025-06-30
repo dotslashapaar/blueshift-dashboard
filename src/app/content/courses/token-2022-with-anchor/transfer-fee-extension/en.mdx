@@ -321,7 +321,7 @@ pub struct TransferFee {
 So to change the fee we can use the `transfer_fee_set()` instruction like so:
 
 ```rust
-cuse anchor_lang::prelude::*;
+use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{transfer_fee_set, Mint, Token2022, TransferFeeSetTransferFee};
 
 #[derive(Accounts)]
