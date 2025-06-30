@@ -76,6 +76,10 @@ type V0PersistentStore = Omit<PersistentStore, 'challengeStatuses' | 'setNewChal
   courseStatus?: Record<string, "Locked" | "Unlocked" | "Claimed">;
 };
 
+type V1PersistentStore = Omit<PersistentStore, 'selectedLanguages'> & {
+  selectedLanguages: string[];
+};
+
 const migrate = (persistedState: unknown, version: number): Partial<PersistentStore> => {
   if (version === 0) {
     const oldState = persistedState as V0PersistentStore;
@@ -95,6 +99,18 @@ const migrate = (persistedState: unknown, version: number): Partial<PersistentSt
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { courseStatus, ...rest } = oldState;
     return { ...rest, challengeStatuses: newChallengeStatuses };
+  }
+
+  if (version === 1) {
+    const oldState = persistedState as V1PersistentStore;
+    // Migrate any "Research" language filters to "General"
+    const migratedLanguages = oldState.selectedLanguages.map(lang => 
+      lang === "Research" ? "General" : lang
+    ).filter((lang): lang is CourseLanguages => 
+      Object.keys(courseLanguages).includes(lang as string)
+    );
+    
+    return { ...oldState, selectedLanguages: migratedLanguages };
   }
 
   return persistedState as Partial<PersistentStore>;
@@ -181,7 +197,7 @@ export const usePersistentStore = create<PersistentStore>()(
     }),
     {
       name: "blueshift-storage",
-      version: 1,
+      version: 2,
       migrate,
     }
   )

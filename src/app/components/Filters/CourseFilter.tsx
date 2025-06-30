@@ -136,7 +136,7 @@ export default function CourseFilter({ className }: FiltersProps) {
                     className="z-10 relative"
                     checked={selectedLanguages.includes(language)}
                   /> */}
-                  <div className="flex items-center gap-x-2 relative z-10">
+                  <div className="flex items-center gap-x-2 relative z-10 text-brand-primary">
                     <Icon name={language as IconName} />
                     <span
                       className={classNames(

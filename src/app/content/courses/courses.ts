@@ -42,8 +42,8 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   },
   {
     slug: "tokens-on-solana",
-    language: "Typescript",
-    color: "105,162,241",
+    language: "General",
+    color: "0,255,255",
     difficulty: 1,
     isFeatured: true,
     lessons: [

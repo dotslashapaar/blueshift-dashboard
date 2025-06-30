@@ -34,9 +34,9 @@ const courseSections = {
     icon: "Assembly",
     title: "languages.assembly",
   },
-  Research: {
-    icon: "Research",
-    title: "languages.research",
+  General: {
+    icon: "General",
+    title: "languages.general",
   },
 } as const;
 

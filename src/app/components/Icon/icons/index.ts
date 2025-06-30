@@ -65,7 +65,7 @@ export const IconComponents = {
   Progress: ProgressIcon,
   Rewards: RewardsIcon,
   Refresh: RefreshIcon,
-  Research: ShiftArrowIcon,
+  General: ShiftArrowIcon,
   Rust: RustIcon,
   Search: SearchIcon,
   ShiftArrow: ShiftArrowIcon,
