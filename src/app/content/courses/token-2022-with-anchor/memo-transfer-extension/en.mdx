@@ -6,67 +6,81 @@ The `MemoTranfer` Extension is a `Token` account extension that enforces that al
 
 <ArticleSection name="Initializing the Token Account" id="initializing-the-token-account" level="h2" />
 
-To initialie the `MemoTransfer` extension on a `Token` account we're going to need the `enableRequiredMemoTransfers()` function. 
+Since `Anchor` doesn't have any macros for the `memo_transfer` extension we're going to create a `Token` account using the raw CPIs.
 
-Here's how to create a token with the Immutable Owner extension:
+Here's how to create a token with the Memo Transfer extension:
 
-```ts
-import {
-    Keypair,
-    SystemProgram,
-    Transaction,
-    sendAndConfirmTransaction,
-} from '@solana/web3.js';
-import {
-    createInitializeAccountInstruction,
-    createInitializeImmutableOwnerInstruction,
-    getAccountLen,
-    ExtensionType,
-    TOKEN_2022_PROGRAM_ID,
-} from '@solana/spl-token';
+```rust
+use anchor_lang::prelude::*;
+use anchor_lang::system_program::{create_account, CreateAccount};
+use anchor_spl::{
+    token_2022::{
+        initialize_account3,
+        spl_token_2022::{extension::ExtensionType, pod::PodAccount},
+        InitializeAccount3,
+    },
+    token_interface::{memo_transfer_initialize, MemoTransfer, Mint, Token2022},
+};
 
-const tokenAccount = Keypair.generate();
+// There is currently not an anchor constraint to automatically initialize the MemoTransfer extension
+// We can manually create and initialize the token account via CPIs in the instruction handler
+pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+    // Calculate space required for token and extension data
+    let token_account_size =
+        ExtensionType::try_calculate_account_len::<PodAccount>(&[ExtensionType::MemoTransfer])?;
 
-// Calculate the size needed for a Token account with Transfer Fee extension
-const accountLen = getAccountLen([ExtensionType.ImmutableOwner]);
+    // Calculate minimum lamports required for size of token account with extensions
+    let lamports = (Rent::get()?).minimum_balance(token_account_size);
 
-// Calculate minimum lamports required for rent exemption
-const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
+    // Invoke System Program to create new account with space for token account and extension data
+    create_account(
+        CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            CreateAccount {
+                from: ctx.accounts.payer.to_account_info(),
+                to: ctx.accounts.token_account.to_account_info(),
+            },
+        ),
+        lamports,                          // Lamports
+        token_account_size as u64,         // Space
+        &ctx.accounts.token_program.key(), // Owner Program
+    )?;
 
-// Create the account with the correct size and owner
-const createAccountInstruction = SystemProgram.createAccount({
-    fromPubkey: keypair.publicKey,
-    newAccountPubkey: tokenAccount.publicKey,
-    space: accountLen,
-    lamports,
-    programId: TOKEN_2022_PROGRAM_ID,
-});
+    // Initialize the standard token account data
+    initialize_account3(CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        InitializeAccount3 {
+            account: ctx.accounts.token_account.to_account_info(),
+            mint: ctx.accounts.mint_account.to_account_info(),
+            authority: ctx.accounts.payer.to_account_info(),
+        },
+    ))?;
 
-// Initialize the Memo Transfer extension
-const enableMemoTransferInstruction = createEnableRequiredMemoTransfersInstruction(
-    destinationTokenAccount.publicKey,
-    destinationKeypair.publicKey,
-    undefined,
-    TOKEN_2022_PROGRAM_ID,
-);
+    // Initialize the memo transfer extension
+    // This instruction must come after the token account initialization
+    memo_transfer_initialize(CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        MemoTransfer {
+            token_program_id: ctx.accounts.token_program.to_account_info(),
+            account: ctx.accounts.token_account.to_account_info(),
+            owner: ctx.accounts.payer.to_account_info(),
+        },
+    ))?;
 
-// Initialize the Token account itself
-const initializeAccountInstruction = createInitializeAccountInstruction(
-    tokenAccount.publicKey,
-    mint.publicKey,
-    keypair.publicKey,
-    TOKEN_2022_PROGRAM_ID,
-);
+    Ok(())
+}
 
-const transaction = new Transaction().add(
-    createAccountInstruction,
-    initializeAccountInstruction,
-    enableMemoTransferInstruction,
-);
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
 
-const signature = await sendAndConfirmTransaction(connection, transaction, [keypair, tokenAccount], {skipPreflight: false});
-
-console.log(`Token accounts created! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
+    #[account(mut)]
+    pub token_account: Signer<'info>,
+    pub mint_account: InterfaceAccount<'info, Mint>,
+    pub token_program: Program<'info, Token2022>,
+    pub system_program: Program<'info, System>,
+}
 ```
 
 <ArticleSection name="Transferring Token with a Memo" id="transferring-token-with-a-memo" level="h2" />
@@ -90,6 +104,8 @@ Or we can use the Memo program SDK after downloading the package like this:
 npm i @solana/spl-memo
 ```
 
+> After creating the memo, the next instruction will be a simple transfer instruction.
+
 In our example we're going to use the second option and it will look like this:
 
 ```ts
@@ -98,16 +114,7 @@ const memoInstruction = createMemoInstruction(
     [keypair.publicKey],
 );
 
-const transferInstruction = createTransferCheckedInstruction(
-    tokenAccount,
-    mint.publicKey,
-    destinationTokenAccount.publicKey,
-    keypair.publicKey,
-    BigInt(100e6),
-    6,
-    undefined,
-    TOKEN_2022_PROGRAM_ID,
-);
+//...anchor instruction with the transfer instruction
 
 const transferTransaction = new Transaction().add(
     memoInstruction,
@@ -121,64 +128,37 @@ console.log(`Tokens transferred with memo! Check out your TX here: https://explo
 
 <ArticleSection name="Disabling and Enabling the Memo" id="disabling-and-enabling-the-memo" level="h2" />
 
-If we don't want to enforce the transfer to come with a memo, we can do so using the `disableRequiredMemoTransfer` function and it would look like so:
+If we don't want to enforce the transfer to come with a memo, we can do so using the `memo_transfer_disable` function and it would look like so:
 
-```ts
-const disableRequiredMemoTransfersInstruction = createDisableRequiredMemoTransfersInstruction(
-    destinationTokenAccount,
-    destinationKeypair.publicKey,
-    undefined,
-    TOKEN_2022_PROGRAM_ID,
-);
+```rust
+use anchor_lang::prelude::*;
+use anchor_spl::token_interface::{memo_transfer_disable, MemoTransfer, Token, Mint, Token2022};
 
-const transferInstruction = createTransferCheckedInstruction(
-    tokenAccount,
-    mint.publicKey,
-    destinationTokenAccount,
-    keypair.publicKey,
-    BigInt(100e6),
-    6,
-    undefined,
-    TOKEN_2022_PROGRAM_ID,
-);
+#[derive(Accounts)]
+pub struct DisableMemo<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
 
-const transaction = new Transaction().add(
-    disableRequiredMemoTransfersInstruction,
-    transferInstruction,
-);
+    #[account(
+        mut,
+        token::authority = owner,
+    )]
+    pub token_account: InterfaceAccount<'info, TokenAccount>,
+    pub token_program: Program<'info, Token2022>,
+}
 
-const signature = await sendAndConfirmTransaction(connection, transaction, [keypair, destinationKeypair]);
-
-console.log(`Tokens transferred and account state changed! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
-```
-
-And if we want to enable it back we can just use the `enableRequiredMemoTransfers()` function like this:
-
-```ts
-const enableRequiredMemoTransfersInstruction = createEnableRequiredMemoTransfersInstruction(
-    destinationTokenAccount,
-    destinationKeypair.publicKey,
-    undefined,
-    TOKEN_2022_PROGRAM_ID,
-);
-
-const transferInstruction = createTransferCheckedInstruction(
-    tokenAccount,
-    mint.publicKey,
-    destinationTokenAccount,
-    keypair.publicKey,
-    BigInt(100e6),
-    6,
-    undefined,
-    TOKEN_2022_PROGRAM_ID,
-);
-
-const transaction = new Transaction().add(
-    enableRequiredMemoTransfersInstruction,
-    transferInstruction,
-);
-
-const signature = await sendAndConfirmTransaction(connection, transaction, [keypair, destinationKeypair]);
-
-console.log(`Tokens transferred and account state changed! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
+pub fn disable_memo(
+    ctx: Context<DisableMemo>,
+) -> Result<()> {
+    memo_transfer_disable(CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        MemoTransfer {
+            token_program_id: ctx.accounts.token_program.to_account_info(),
+            account: ctx.accounts.token_account.to_account_info(),
+            owner: ctx.accounts.owner.to_account_info(),
+        },
+    ))?;
+    
+    Ok(())
+}
 ```

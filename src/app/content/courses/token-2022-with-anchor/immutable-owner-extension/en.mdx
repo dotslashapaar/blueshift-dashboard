@@ -8,7 +8,7 @@ The `ImmutableOwner` extension is a `Token` account extension that prevents any 
 
 <ArticleSection name="Initializing the Token Account" id="initializing-the-token-account" level="h2" />
 
-To initialie the `ImmutableOwner` extension on a `Token` account we're going to need the `immutable_owner_initialize()` instruction. 
+Since `Anchor` doesn't have any macros for the `immutable_owner` extension we're going to create a `Mint` account using the raw CPIs.
 
 Here's how to create a mint with the Immutable Owner extension:
 
