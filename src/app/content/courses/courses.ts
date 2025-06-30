@@ -105,6 +105,28 @@ const allCourses: CourseMetadata[] = withCourseNumber([
       { slug: "conclusions" },
     ],
   },
+  {
+    slug: "token-2022-with-anchor",
+    language: "Rust",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    lessons: [
+      { slug: "introduction" },
+      { slug: "transfer-fee-extension" },
+      { slug: "mint-close-authority-extension" },
+      { slug: "default-account-state-extension" },
+      { slug: "immutable-owner-extension" },
+      { slug: "memo-transfer-extension" },
+      { slug: "non-transferable-extension" },
+      { slug: "interest-bearing-extension" },
+      { slug: "cpi-guard-extension" },
+      { slug: "permanent-delegate-extension" },
+      { slug: "metadata-extension" },
+      { slug: "group-and-member-extension" },
+      { slug: "conclusions" },
+    ],
+  },
 ]);
 
 const releasedCoursesSetting = process.env.NEXT_PUBLIC_RELEASED_COURSES?.trim();
