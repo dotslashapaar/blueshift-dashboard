@@ -17,7 +17,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   {
     slug: "introduction-to-pinocchio",
     language: "Rust",
-    color: "221,234,224",
+    color: "255,173,102",
     difficulty: 1,
     isFeatured: true,
     lessons: [
@@ -30,7 +30,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   {
     slug: "secp256r1-on-solana",
     language: "Rust",
-    color: "221,234,224",
+    color: "255,173,102",
     difficulty: 1,
     isFeatured: true,
     lessons: [
@@ -43,7 +43,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   {
     slug: "tokens-on-solana",
     language: "Typescript",
-    color: "221,234,224",
+    color: "105,162,241",
     difficulty: 1,
     isFeatured: true,
     lessons: [
@@ -56,7 +56,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   {
     slug: "spl-token-with-web3js",
     language: "Typescript",
-    color: "221,234,224",
+    color: "105,162,241",
     difficulty: 1,
     isFeatured: true,
     lessons: [
@@ -92,7 +92,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   {
     slug: "token-2022-program",
     language: "Rust",
-    color: "221,234,224",
+    color: "255,173,102",
     difficulty: 1,
     isFeatured: true,
     lessons: [
@@ -104,7 +104,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   {
     slug: "token-2022-with-web3js",
     language: "Typescript",
-    color: "221,234,224",
+    color: "105,162,241",
     difficulty: 1,
     isFeatured: true,
     lessons: [
