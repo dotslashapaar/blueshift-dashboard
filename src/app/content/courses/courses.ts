@@ -72,6 +72,24 @@ const allCourses: CourseMetadata[] = withCourseNumber([
     ],
   },
   {
+    slug: "spl-token-with-anchor",
+    language: "Anchor",
+    color: "221,234,224",
+    difficulty: 1,
+    isFeatured: true,
+    lessons: [
+      { slug: "introduction" },
+      { slug: "mint-to" },
+      { slug: "transfer" },
+      { slug: "burn" },
+      { slug: "close-account"},
+      { slug: "approve-and-revoke"},
+      { slug: "freeze-and-thaw"},
+      { slug: "set-authority"},
+      { slug: "conclusions" },
+    ],
+  },
+  {
     slug: "token-2022-program",
     language: "Rust",
     color: "221,234,224",
@@ -107,7 +125,7 @@ const allCourses: CourseMetadata[] = withCourseNumber([
   },
   {
     slug: "token-2022-with-anchor",
-    language: "Rust",
+    language: "Anchor",
     color: "221,234,224",
     difficulty: 1,
     isFeatured: true,

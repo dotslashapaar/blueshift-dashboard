@@ -1,0 +1,47 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# Approve and Revoke Instructions
+
+Approve grants a delegate the authority to transfer a specific amount of tokens on behalf of the account owner. This enables programmatic token transfers without giving full account control.
+
+> We set an "approved" amount, and the delegate can transfer only up to that amount
+
+Revoke removes the current delegate's authority over the account, returning full control to the account owner.
+
+> Immediately cancels any existing delegation and only the account owner can revoke delegation (not the delegate itself)
+
+Before we can mint any token, we'll need to already have:
+- Initialized a `Mint` account which we hold the `mintAuthority`
+- Initialized a `Token` account or `Associated Token` account where we're going to take control of
+
+> The amount of tokens we mint are "normalized" for decimals. This means that if we want to mint 1 token that has 6 decimals, we'll need to actually put `1_000_000` as amount
+
+This is how the CPI to the `approve()` instruction looks like: 
+
+```rust
+approve(
+    CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        Approve {
+            to: ctx.accounts.token_account.to_account_info(),
+            delegate: ctx.accounts.delegate.to_account_info(),
+            authority: ctx.accounts.authority.to_account_info(),
+        },
+    ),
+    &1_000_000,
+)?;
+```
+
+And this is how the CPI to the `revoke()` instruction looks like: 
+
+```rust
+revoke(
+    CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        Revoke {
+            pub source: ctx.accounts.token_account.to_account_info(),
+            authority: ctx.accounts.authority.to_account_info(),
+        },
+    ),
+)?;
+```

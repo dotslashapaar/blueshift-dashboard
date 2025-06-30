@@ -1,0 +1,26 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# Set Authority Instructions
+
+Changes the authority of a mint or account. This allows transferring ownership or updating specific authority types.
+
+Before we can mint any token, we'll need to already have:
+- Initialized a `Mint` account which we hold the `mintAuthority` or `freezeAuthority`
+- Initialized a `Token` account or `Associated Token` account that we own
+
+This is how the CPI to the `set_authority()` instruction looks like: 
+
+```rust
+set_authority(
+    CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        SetAuthority {
+            account_or_mint: ctx.accounts.mint_account.to_account_info(),
+            to: ctx.accounts.to_token_account.to_account_info(),
+            current_authority: ctx.accounts.authority.to_account_info(),
+        },
+    ),
+    &spl_token::instruction::AuthorityType::MintTokens, // authority_type
+    Some(new_authority.key()) // new_autority
+)?;
+```

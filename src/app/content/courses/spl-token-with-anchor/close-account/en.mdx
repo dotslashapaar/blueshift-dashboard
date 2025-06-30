@@ -1,0 +1,26 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# Close Account Instruction
+
+Closes a token account and transfers its remaining SOL rent to a destination account. The token account must have zero balance unless it's a native SOL account.
+
+> From Token2022 it's possible to close a `Mint` account that has a supply of 0
+
+Before we can mint any token, we'll need to already have:
+- Initialized a `Mint` account
+- Initialized a `Token` account or `Associated Token` account that doesn't have any token inside.
+
+This is how the CPI to the `close_account()` instruction looks like: 
+
+```rust
+close_account(
+    CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        CloseAccount {
+            account: ctx.accounts.token_account.to_account_info(),
+            destination: ctx.accounts.authority.to_account_info(),,
+            authority: ctx.accounts.authority.to_account_info(),
+        },
+    ),
+)?;
+```
