@@ -46,11 +46,16 @@ pub struct TransferFee {
 ```
 
 Some things to point out:
-- The discriminator of this extension is 1 and is 108 bytes long. 
 - The `config_authority` can be different from who actually can withdraw the tokens from the `Token` accounts.
 - We have both an `older` and `newer` transfer fee struct. 
 
 The last point is due to the fact there is a "cooldown" period when we set a new `TransferFee` of 2 epochs to avoid rug pulls at the end of an epoch. This means that for the first 2 epochs of a new `TransferFee`, the older `TransferFee` is the one that is actually active.
+
+Additionally, you can see that the `TransferFeeConfig` has a `withheld_amount` field. This might sound strange since we just said that the token fee accrue into the `Token Account` but the reality is that claiming those fee is a 2 step process:
+- Claim fees from the `Token Account` to the `Mint`. This can be done permissionlessly
+- Claim fees from the `Mint` to the destination account. This is a permissioned action that only the `Withdraw Authority` can execute.
+
+For this extension, we need a 2 step process to account for the edge case in which someone want to close a `Token Account` where there are fees still inside. Since the destination of those fee could be "different" from the `Withdraw Authority` we need to account for the fact that those fees needs to be sent somewhere before closing the `Token Account`
 
 And this is how the `TransferFeeAmount` Extension data looks
 

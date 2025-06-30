@@ -135,7 +135,7 @@ pub account: Account<'info, CustomAccountType>,
 
 Since the calculating the bump can "burn" a lot of CUs, it's always good to save it into the account or pass it into the instruction and validate it without having to calculate like this: 
 
-```
+```rust
 #[account(
     seeds = <seeds>,
     bump = <expr>
@@ -145,7 +145,7 @@ pub account: Account<'info, CustomAccountType>,
 
 And it's possible to derive a PDA that is derived from another program by passing the address of the program is derived from like this:
 
-```
+```rust
 #[account(
     seeds = <seeds>,
     bump = <expr>,
