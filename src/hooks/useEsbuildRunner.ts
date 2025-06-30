@@ -113,8 +113,6 @@ export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
         "SYSTEM",
         `Build system initialization failed: ${esbuildInitializationError?.message}`,
       );
-    } else if (esBuildInitializationState === "initialized") {
-      addLog("SYSTEM", "Build system is initialized.");
     }
   }, [esBuildInitializationState, esbuildInitializationError, addLog]);
 
@@ -153,7 +151,6 @@ export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
       if (workerRef.current) {
         workerRef.current.terminate();
         workerRef.current = null;
-        addLog("SYSTEM", "Terminated existing worker.");
       }
 
       try {
@@ -238,7 +235,6 @@ if (!rpcEndpointForWorker) {
 }
 
 const originalFetch = self.fetch;
-console.debug('[FetchPatcher] Original self.fetch stored. Targeting endpoint:', rpcEndpointForWorker);
 
 let fetchRequestIdCounter = 0;
 const pendingFetches = new Map();
@@ -251,12 +247,10 @@ self.addEventListener('message', (event) => {
     if (pending) {
       pendingFetches.delete(requestId);
       if (decision === 'PROCEED') {
-        console.debug('[FetchPatcher] Decision: PROCEED. Calling original fetch for requestId:', requestId);
         originalFetch.apply(self, pending.originalArgs)
           .then(pending.resolve)
           .catch(pending.reject);
       } else if (decision === 'MOCK_SUCCESS') {
-        console.debug('[FetchPatcher] Decision: MOCK_SUCCESS for requestId:', requestId, responseData);
         const mockedResponse = new Response(responseData.body ? JSON.stringify(responseData.body) : null, {
           status: responseData.status || 200,
           statusText: responseData.statusText || 'OK',
@@ -264,14 +258,10 @@ self.addEventListener('message', (event) => {
         });
         pending.resolve(mockedResponse);
       } else if (decision === 'MOCK_ERROR') {
-        console.warn('[FetchPatcher] Decision: MOCK_ERROR for requestId:', requestId, errorData);
         pending.reject(new Error(errorData?.message || 'Mocked fetch error'));
       } else {
-        console.error('[FetchPatcher] Unknown decision for requestId:', requestId, decision);
         pending.reject(new Error('Unknown decision from main thread for fetch'));
       }
-    } else {
-      console.warn('[FetchPatcher] Received decision for unknown requestId:', requestId);
     }
   }
 });
@@ -281,20 +271,15 @@ self.fetch = async function(...args) {
   let rpcMethod = null;
   let requestBody = null; // Store the original body
 
-  // Log every fetch call's URL
-  console.debug('[Patched Fetch] Processing fetch call. URL:', url);
-
   if (typeof url === 'string' && url === rpcEndpointForWorker) {
-    console.debug('[Patched Fetch] Intercepted call to RPC_ENDPOINT:', url);
     if (options && options.body && typeof options.body === 'string') {
       try {
         requestBody = JSON.parse(options.body); // Store parsed body
         if (requestBody && requestBody.method) {
           rpcMethod = requestBody.method;
-          console.debug('[Patched Fetch] RPC Method for decision:', rpcMethod);
         }
       } catch (e) {
-        console.warn('[Patched Fetch] Could not parse request body for decision:', e);
+        // Could not parse request body
       }
     }
 
@@ -312,7 +297,6 @@ self.fetch = async function(...args) {
       }
     }
     
-    console.debug('[Patched Fetch] Posting INTERCEPTED_RPC_CALL_AWAIT_DECISION for requestId:', requestId);
     self.postMessage({
       type: 'INTERCEPTED_RPC_CALL_AWAIT_DECISION',
       payload: {
@@ -331,29 +315,11 @@ self.fetch = async function(...args) {
 
   // For non-intercepted calls
   const promise = originalFetch.apply(self, args);
-  // Optional: keep logging for non-intercepted calls if desired
-  if (typeof url === 'string' && url === rpcEndpointForWorker) { // This block might be redundant if already handled by interception
-    return promise.then(async (response) => {
-      console.debug('[Patched Fetch] Response from RPC_ENDPOINT for method ', rpcMethod, 'status:', response.status);
-      const clonedResponse = response.clone();
-      try {
-        const responseBody = await clonedResponse.json();
-        console.debug('[Patched Fetch] Response Body for method ', rpcMethod, ':', responseBody);
-      } catch (e) {
-        console.warn('[Patched Fetch] Could not parse response body for method ', rpcMethod, ':', e);
-      }
-      return response;
-    }).catch(error => {
-      console.error('[Patched Fetch] Error from RPC_ENDPOINT for method ', rpcMethod, ':', error);
-      throw error;
-    });
-  }
   return promise;
 };
-console.debug('[FetchPatcher] self.fetch has been patched for RPC endpoint:', rpcEndpointForWorker);`;
+`;
 
           const webSocketPatcher = `
-self.console.debug('[WsPatcher] Initializing WebSocket Patcher');
 
 const OriginalWebSocket = self.WebSocket;
 let wsRequestIdCounter = 0;
@@ -550,7 +516,6 @@ self.WebSocket = WebSocketProxy;
                 if (workerRef.current) workerRef.current.terminate();
                 break;
               case "READY":
-                addLog("SYSTEM", "Worker ready. Sending code...");
                 workerInstance.postMessage(codeToExecuteInWorker);
                 break;
               case "EXECUTION_COMPLETE":
@@ -561,19 +526,11 @@ self.WebSocket = WebSocketProxy;
               case "INTERCEPTED_RPC_CALL_AWAIT_DECISION":
                 const decisionPayload =
                   message.payload as InterceptedRpcCallData;
-                console.debug(
-                  "[FetchPatcher] Received INTERCEPTED_RPC_CALL_AWAIT_DECISION for requestId:",
-                  {
-                    method: decisionPayload.rpcMethod,
-                    url: decisionPayload.url,
-                  },
-                );
 
                 if (props?.onRpcCallInterceptedForDecision) {
                   props
                     .onRpcCallInterceptedForDecision(decisionPayload)
                     .then((decision) => {
-                      console.debug("[FetchPatcher] FETCH_DECISION", { requestId: decisionPayload.requestId, url: decisionPayload.url, rpcMethod: decisionPayload.rpcMethod, decision });
                       if (workerRef.current) {
                         // Ensure worker is still active
                         workerRef.current.postMessage({
@@ -622,7 +579,6 @@ self.WebSocket = WebSocketProxy;
                 if (props?.onWsSendInterceptedForDecision) {
                   props.onWsSendInterceptedForDecision(wsSendData)
                     .then(decision => {
-                      console.debug("[WsPatcher] WS_SEND_DECISION", { wsRequestId: wsSendData.wsRequestId, url: wsSendData.url, decision });
                       if (workerRef.current) { // Check if worker is still active
                         workerRef.current.postMessage({
                           type: "WS_SEND_DECISION_RESPONSE",
@@ -653,7 +609,6 @@ self.WebSocket = WebSocketProxy;
                 if (props?.onWsReceiveInterceptedForDecision) {
                   props.onWsReceiveInterceptedForDecision(wsReceiveData)
                     .then(decision => {
-                      console.debug("[WsPatcher] WS_RECEIVE_DECISION", { wsRequestId: wsReceiveData.wsRequestId, url: wsReceiveData.url, decision });
                       if (workerRef.current) { // Check if worker is still active
                         workerRef.current.postMessage({
                           type: "WS_RECEIVE_DECISION_RESPONSE",
