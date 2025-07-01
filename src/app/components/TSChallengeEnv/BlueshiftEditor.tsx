@@ -358,8 +358,8 @@ export default function BlueshiftEditor({
   };
 
   return (
-    <div className={classNames("w-full h-full relative", className)}>
-      <div className="absolute py-4 bottom-0 z-10 right-0 px-6 flex items-center gap-x-4 w-full h-auto justify-end border-t border-border bg-background/50 lg:border-t-0 backdrop-blur lg:bg-transparent lg:backdrop-blur-none">
+    <div className={classNames("w-full h-full lg:relative", className)}>
+      <div className="absolute py-4 bottom-0 z-10 right-0 px-6 flex items-center gap-x-4 w-full h-auto justify-end border-t border-border bg-background/80 lg:border-t-0 backdrop-blur lg:bg-transparent lg:backdrop-blur-none">
         {/* Loaded from auto-save indicator */}
         {loadedFromAutoSave && saveState === "saved" && (
           <div className="flex items-center gap-x-1.5 text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">

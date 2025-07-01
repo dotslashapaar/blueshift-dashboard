@@ -99,7 +99,7 @@ export default function ChallengeTable({
         onClose={() => setIsCompletedModalOpen(false)}
         challenge={challenge}
       />
-      <div className="bg-background-card/50 overflow-y-auto rounded-b-xl lg:rounded-none w-full min-w-full xl:min-w-[400px] px-2 lg:px-4 lg:right-4 lg:border-l lg:border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden lg:pb-6 [mask:linear-gradient(to_bottom,black_85%,transparent_100%)]">
+      <div className="pb-24 bg-background-card/50 overflow-y-auto rounded-b-xl lg:rounded-none w-full min-w-full xl:min-w-[400px] px-2 lg:px-4 lg:right-4 lg:border-l lg:border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden lg:pb-6 [mask:linear-gradient(to_bottom,black_85%,transparent_100%)]">
         {(challengeStatuses[courseSlug] === "completed" ||
           challengeStatuses[courseSlug] === "claimed") &&
           !allowRedo && (

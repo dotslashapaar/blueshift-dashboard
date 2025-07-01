@@ -71,7 +71,7 @@ export default function Button({
             variant === "rust",
           "transition before:[background:linear-gradient(180deg,_rgba(255,255,255,0.25)_0%,_rgba(255,255,255,0.15)_100%)] shadow-[0px_0px_12px_rgba(140,255,102,0.25)] [background:radial-gradient(161.28%_68.75%_at_50%_68.75%,_rgba(255,255,255,0)_0%,_rgba(255,255,255,0.25)_100%),_#8CFF66] text-black before:bg-[linear-gradient(180deg,_rgba(0,255,255,0.13)_0%,_rgba(0,255,255,0.08)_100%)]":
             variant === "assembly",
-          "transition before:[background:linear-gradient(180deg,_rgba(255,255,255,0.25)_0%,_rgba(255,255,255,0.15)_100%)] shadow-[0px_0px_12px_rgba(140,255,102,0.25)] [background:radial-gradient(161.28%_68.75%_at_50%_68.75%,_rgba(255,255,255,0)_0%,_rgba(255,255,255,0.25)_100%),_#69A2F1] text-black before:bg-[linear-gradient(180deg,_rgba(0,255,255,0.13)_0%,_rgba(0,255,255,0.08)_100%)]":
+          "transition before:[background:linear-gradient(180deg,_rgba(255,255,255,0.25)_0%,_rgba(255,255,255,0.15)_100%)] shadow-[0px_0px_12px_rgba(102,163,255,0.25)] [background:radial-gradient(161.28%_68.75%_at_50%_68.75%,_rgba(255,255,255,0)_0%,_rgba(255,255,255,0.25)_100%),_#69A2F1] text-black before:bg-[linear-gradient(180deg,_rgba(0,255,255,0.13)_0%,_rgba(0,255,255,0.08)_100%)]":
             variant === "typescript",
         },
         className
