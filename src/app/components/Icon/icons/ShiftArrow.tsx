@@ -1,3 +1,5 @@
+import classNames from "classnames";
+
 export interface IconProps {
   className?: string;
   size?: 18 | 14 | 12 | 8;
@@ -10,7 +12,7 @@ export const ShiftArrowIcon = ({ className, size = 18 }: IconProps) => {
       width={size}
       height={size}
       viewBox="0 0 18 18"
-      className={className}
+      className={classNames(className, "text-brand-primary")}
       fill="none"
     >
       <path d="M1 12.6667H3.66667V15.3333H1V12.6667Z" fill="currentColor" />

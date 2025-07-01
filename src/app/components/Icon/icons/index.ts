@@ -37,6 +37,8 @@ import { XIcon } from "./X";
 import { GlobeIcon } from "./Globe";
 import { MinimizeIcon } from "./Minimize";
 import { ExpandIcon } from "./Expand";
+import { DisconnectIcon } from "./Disconnect";
+import { LogsIcon } from "./Logs";
 
 export const IconComponents = {
   Anchor: AnchorIcon,
@@ -50,6 +52,7 @@ export const IconComponents = {
   Completed: UnclaimedIcon,
   Copy: CopyIcon,
   Discord: DiscordIcon,
+  Disconnect: DisconnectIcon,
   Filter: FilterIcon,
   Flag: FlagIcon,
   Flame: FlameIcon,
@@ -60,6 +63,7 @@ export const IconComponents = {
   Link: LinkIcon,
   ListView: ListViewIcon,
   Locked: LockedIcon,
+  Logs: LogsIcon,
   Open: LockedIcon,
   Play: PlayIcon,
   Progress: ProgressIcon,

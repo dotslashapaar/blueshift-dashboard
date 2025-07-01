@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
 import { ChallengeMetadata } from "@/app/utils/challenges";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import classNames from "classnames";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
@@ -61,14 +62,14 @@ export default function ChallengesContent({
   ] = useState(false);
 
   // Auto-save functionality
-  const { 
-    getAutoSavedCode, 
-    clearSavedCode, 
-    saveState, 
-    justSaved, 
+  const {
+    getAutoSavedCode,
+    clearSavedCode,
+    saveState,
+    justSaved,
     loadedFromAutoSave,
     markAsLoadedFromAutoSave,
-    clearLoadedFromAutoSave 
+    clearLoadedFromAutoSave,
   } = useAutoSave({
     challengeSlug: currentChallenge.slug,
     code: editorCode,
@@ -208,7 +209,8 @@ export default function ChallengesContent({
         }
       } catch (err) {
         console.error("Failed to load challenge template:", err);
-        const errorTemplate = "// Failed to load challenge template. Please check console.";
+        const errorTemplate =
+          "// Failed to load challenge template. Please check console.";
         setEditorCode(errorTemplate);
         setInitialEditorCode(errorTemplate);
         if (!hasInitiallyLoaded) {
@@ -220,7 +222,12 @@ export default function ChallengesContent({
     if (currentChallenge.slug) {
       fetchSolutionsTemplate();
     }
-  }, [currentChallenge.slug, hasInitiallyLoaded, getAutoSavedCode, markAsLoadedFromAutoSave]);
+  }, [
+    currentChallenge.slug,
+    hasInitiallyLoaded,
+    getAutoSavedCode,
+    markAsLoadedFromAutoSave,
+  ]);
 
   // Reset initial load flag when challenge changes
   useEffect(() => {
@@ -275,7 +282,10 @@ export default function ChallengesContent({
   const handleRunCode = () => {
     if (esBuildInitializationState !== "initialized") {
       // Show user-friendly error without blocking alert
-      addLog("SYSTEM", "Code runner is still initializing. Please wait a moment and try again.");
+      addLog(
+        "SYSTEM",
+        "Code runner is still initializing. Please wait a moment and try again."
+      );
       return;
     }
     clearLogs();
@@ -284,7 +294,10 @@ export default function ChallengesContent({
 
     runCode(editorCode).catch((error) => {
       console.error("Error running code:", error);
-      addLog("SYSTEM", "An error occurred while running your code. Please try again.");
+      addLog(
+        "SYSTEM",
+        "An error occurred while running your code. Please try again."
+      );
     });
   };
 
@@ -299,6 +312,8 @@ export default function ChallengesContent({
     setHasInitiallyLoaded(false);
     setEditorCode(initialEditorCode);
   };
+
+  const [tab, setTab] = useState<"logs" | "editor">("editor");
 
   return (
     <div className="relative w-full h-full">
@@ -334,7 +349,7 @@ export default function ChallengesContent({
           className="px-4 py-14 pb-20 max-w-app grid grid-cols-1 md:px-8 lg:px-14 mx-auto w-full gap-y-12 lg:gap-x-24"
         >
           <div className="flex flex-col relative w-full h-full">
-            <div className="flex flex-col w-full h-full min-h-[35dvh] lg:min-h-[65dvh]">
+            <div className="flex flex-col w-full h-full min-h-[50dvh] lg:min-h-[65dvh]">
               <div className="w-full h-full flex flex-col rounded-xl overflow-hidden border border-border">
                 <div className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-xl flex items-center border-b border-border">
                   <div className="flex items-center gap-x-2">
@@ -353,34 +368,62 @@ export default function ChallengesContent({
                     </span>
                   </div>
                 </div>
-                <div className="left-[1px] w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
+                <div className="lg:left-[1px] w-full lg:w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
                   <LogoGlyph width={16} />
                   <div className="flex items-center gap-x-2.5">
-                    <>
-                      <Button
-                        variant="link"
-                        icon={"Play"}
-                        iconSize={12}
-                        size="sm"
-                        label={
-                          isCodeRunning
-                            ? t("ChallengePage.running_program_btn")
-                            : t("ChallengePage.run_program_btn")
-                        }
-                        className="w-max !text-brand-primary"
-                        onClick={() => {
-                          handleRunCode();
-                        }}
-                        disabled={isVerificationLoading}
-                      />
-                    </>
+                    <Button
+                      variant="link"
+                      icon={"Play"}
+                      iconSize={12}
+                      size="sm"
+                      label={
+                        isCodeRunning
+                          ? t("ChallengePage.running_program_btn")
+                          : t("ChallengePage.run_program_btn")
+                      }
+                      className="w-max !text-brand-primary"
+                      onClick={() => {
+                        handleRunCode();
+                      }}
+                      disabled={isVerificationLoading}
+                    />
+                    <Button
+                      variant="link"
+                      icon={"Logs"}
+                      iconSize={12}
+                      size="sm"
+                      label={t("ChallengePage.view_logs_btn")}
+                      className={classNames(
+                        "w-max !text-brand-primary lg:hidden flex",
+                        tab === "logs" && "hidden"
+                      )}
+                      onClick={() => {
+                        setTab("logs");
+                      }}
+                      disabled={isVerificationLoading}
+                    />
+
+                    <Button
+                      variant="link"
+                      icon={"ArrowLeft"}
+                      iconSize={12}
+                      size="sm"
+                      label={t("ChallengePage.back_to_editor_btn")}
+                      className={classNames(
+                        "w-max !text-brand-primary lg:hidden flex",
+                        tab === "editor" && "hidden"
+                      )}
+                      onClick={() => {
+                        setTab("editor");
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="flex flex-col lg:grid lg:grid-cols-3 w-full h-full">
                   <BlueshiftEditor
                     initialCode={editorCode}
                     onCodeChange={setEditorCode}
-                    className="col-span-2"
+                    className="col-span-2 lg:max-h-full"
                     title={t(`challenges.${currentChallenge.slug}.title`)}
                     fileName="mint-an-spl-token.ts"
                     onRefresh={() => setEditorCode(initialEditorCode)}
@@ -389,6 +432,7 @@ export default function ChallengesContent({
                     loadedFromAutoSave={loadedFromAutoSave}
                   />
                   <ClientChallengeTable
+                    isOpen={tab === "logs"}
                     onRunCodeClick={handleRunCode}
                     requirements={requirements}
                     completedRequirementsCount={completedRequirementsCount}

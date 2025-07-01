@@ -359,36 +359,36 @@ export default function BlueshiftEditor({
 
   return (
     <div className={classNames("w-full h-full relative", className)}>
-      <div className="absolute bottom-4 z-10 right-8 flex items-center gap-x-4">
+      <div className="absolute py-4 bottom-0 z-10 right-0 px-6 flex items-center gap-x-4 w-full h-auto justify-end border-t border-border bg-background/50 lg:border-t-0 backdrop-blur lg:bg-transparent lg:backdrop-blur-none">
         {/* Loaded from auto-save indicator */}
-        {loadedFromAutoSave && (
-          <div className="flex items-center gap-x-1.5 text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-md">
+        {loadedFromAutoSave && saveState === "saved" && (
+          <div className="flex items-center gap-x-1.5 text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">
             <Icon name="Progress" size={12} />
             <span>{t("ChallengePage.loaded_from_auto_save")}</span>
           </div>
         )}
-        
+
         {/* Save status indicator */}
         {saveState === "unsaved" && (
-          <div className="flex items-center gap-x-1.5 text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-md">
+          <div className="flex items-center gap-x-1.5 text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-lg">
             <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
             <span>{t("ChallengePage.unsaved_changes")}</span>
           </div>
         )}
         {saveState === "saving" && (
-          <div className="flex items-center gap-x-1.5 text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-md">
+          <div className="flex items-center gap-x-1.5 text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">
             <div className="w-2 h-2 bg-blue-400 rounded-full animate-spin" />
             <span>{t("ChallengePage.saving")}</span>
           </div>
         )}
         {justSaved && (
-          <div className="flex items-center gap-x-1.5 text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-md">
+          <div className="flex items-center gap-x-1.5 text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-lg">
             <Icon name="Success" size={12} />
             <span>{t("ChallengePage.auto_saved")}</span>
           </div>
         )}
-        
-        <button 
+
+        <button
           className="group/refresh font-medium flex items-center gap-x-2 text-sm text-tertiary cursor-pointer hover:text-secondary transition-colors"
           onClick={handleRefreshClick}
         >
@@ -401,7 +401,7 @@ export default function BlueshiftEditor({
         </button>
       </div>
 
-            {/* Refresh Confirmation Dialog */}
+      {/* Refresh Confirmation Dialog */}
       <AnimatePresence>
         {showRefreshDialog && (
           <motion.div
@@ -413,23 +413,25 @@ export default function BlueshiftEditor({
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1, 
+              animate={{
+                opacity: 1,
+                scale: 1,
                 y: 0,
-                transition: { duration: 0.3, ease: anticipate }
+                transition: { duration: 0.3, ease: anticipate },
               }}
-              exit={{ 
-                opacity: 0, 
-                scale: 0.95, 
+              exit={{
+                opacity: 0,
+                scale: 0.95,
                 y: 20,
-                transition: { duration: 0.2 }
+                transition: { duration: 0.2 },
               }}
               className="bg-background-card border border-border rounded-xl p-6 max-w-md mx-4 shadow-xl"
             >
               <div className="flex items-center gap-x-3 mb-4">
                 <Icon name="Warning" size={18} className="text-yellow-500" />
-                <h3 className="text-lg font-semibold">{t("ChallengePage.reset_code_modal.title")}</h3>
+                <h3 className="text-lg font-semibold">
+                  {t("ChallengePage.reset_code_modal.title")}
+                </h3>
               </div>
               <p className="text-secondary mb-6">
                 {t("ChallengePage.reset_code_modal.description")}
