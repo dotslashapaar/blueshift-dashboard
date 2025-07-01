@@ -236,10 +236,10 @@ export default function ChallengeTable({
                 key={requirement.instructionKey}
               >
                 <div
-                  className="flex items-center justify-between px-4 text-left"
+                  className="flex items-center justify-between px-4 text-left w-full"
                   key={requirement.instructionKey}
                 >
-                  <span className="font-medium text-xs xs:text-sm max-w-[50%]">
+                  <span className="font-medium text-xs xs:text-sm max-w-[60%]">
                     {t(
                       `challenges.${courseSlug}.requirements.${requirement.instructionKey}.title`
                     )}

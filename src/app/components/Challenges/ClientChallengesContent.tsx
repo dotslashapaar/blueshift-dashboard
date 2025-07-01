@@ -331,7 +331,7 @@ export default function ChallengesContent({
     if (!isMobile || !editorRef.current) return;
 
     // Calculate height constraints in dvh
-    const minHeight = window.innerHeight * 0.65;
+    const minHeight = window.innerHeight * 0.6;
     const maxHeight = window.innerHeight * 0.9;
 
     const currentHeight = editorHeight;
@@ -351,7 +351,7 @@ export default function ChallengesContent({
 
     // Define snap points in dvh
     const snapPoints = [
-      window.innerHeight * 0.65, // 65dvh (minimum)
+      window.innerHeight * 0.6, // 60dvh (minimum)
       window.innerHeight * 0.75, // 75dvh
       window.innerHeight * 0.9, // 90dvh (maximum)
     ];
@@ -405,7 +405,7 @@ export default function ChallengesContent({
   useEffect(() => {
     if (isMobile) {
       const handleResize = () => {
-        const newMinHeight = window.innerHeight * 0.65; // 65dvh
+        const newMinHeight = window.innerHeight * 0.6; // 60dvh
         const newMaxHeight = window.innerHeight * 0.9; // 90dvh
 
         // Adjust current height proportionally if needed
@@ -424,7 +424,7 @@ export default function ChallengesContent({
   // Initialize editor height when switching to mobile
   useEffect(() => {
     if (isMobile && editorHeight === 0) {
-      setEditorHeight(window.innerHeight * 0.65); // 65dvh default
+      setEditorHeight(window.innerHeight * 0.6); // 60dvh default
     } else if (!isMobile) {
       setEditorHeight(0);
     }
@@ -466,13 +466,6 @@ export default function ChallengesContent({
           <div className="flex flex-col relative w-full h-full">
             <motion.div
               ref={editorRef}
-              drag={isMobile ? "y" : false}
-              dragControls={dragControls}
-              onDragStart={handleDragStart}
-              onDrag={handleDrag}
-              onDragEnd={handleDragEnd}
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={0.1}
               style={{
                 height: isMobile ? `${editorHeight}px` : undefined,
                 cursor: isDragging ? "grabbing" : undefined,
@@ -484,7 +477,17 @@ export default function ChallengesContent({
               )}
             >
               <div className="w-full h-full flex flex-col rounded-t-2xl lg:rounded-xl overflow-hidden border border-border backdrop-blur-lg">
-                <div className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-2xl lg:rounded-t-xl flex gap-y-4 lg:gap-y-0 flex-col lg:flex-row items-center justify-center lg:justify-start border-b border-border">
+                <motion.div
+                  drag={isMobile ? "y" : false}
+                  dragControls={dragControls}
+                  onDragStart={handleDragStart}
+                  onDrag={handleDrag}
+                  onDragEnd={handleDragEnd}
+                  dragMomentum={true}
+                  dragConstraints={{ top: 0, bottom: 0 }}
+                  dragElastic={0}
+                  className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-2xl lg:rounded-t-xl flex gap-y-4 lg:gap-y-0 flex-col lg:flex-row items-center justify-center lg:justify-start border-b border-border"
+                >
                   {/* Mobile Thumb */}
                   <div className="h-[8px] w-[72px] rounded-full bg-background-card-foreground mx-auto flex lg:hidden" />
                   <div className="items-center gap-x-2 hidden lg:flex">
@@ -498,7 +501,7 @@ export default function ChallengesContent({
                       {t(`challenges.${currentChallenge.slug}.title`)}
                     </span>
                   </div>
-                </div>
+                </motion.div>
                 <div className="lg:left-[1px] w-full lg:w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
                   <LogoGlyph width={16} />
                   <div className="flex items-center gap-x-2.5">
