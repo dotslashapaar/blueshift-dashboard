@@ -89,6 +89,7 @@ const allChallenges: ChallengeMetadata[] = [
       { instructionKey: "create_token_account" },
       { instructionKey: "mint_to" },
     ],
+    collectionMintAddress: "2NVDhSXZck9AX2aUdPSxMemLN2wtqEd5sNEcwuZVCbHW",
   },
 ];
 
