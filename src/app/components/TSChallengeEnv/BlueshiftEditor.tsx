@@ -459,7 +459,7 @@ export default function BlueshiftEditor({
         <Editor
           height="100%"
           width="100%"
-          className="bg-transparent min-h-[400px]"
+          className="bg-transparent min-h-[400px] backdrop-blur-lg"
           language="typescript"
           value={initialCode}
           options={{

@@ -27,6 +27,8 @@ import { ChallengeMetadata } from "@/app/utils/challenges";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import classNames from "classnames";
 import { useWindowSize } from "usehooks-ts";
+import ChallengeCompleted from "../Modals/ChallengeComplete";
+import { usePersistentStore } from "@/stores/store";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
@@ -61,6 +63,11 @@ export default function ChallengesContent({
     verificationFailureMessageLogged,
     setVerificationFailureMessageLogged,
   ] = useState(false);
+
+  // Modal state
+  const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
+  const [allowRedo, setAllowRedo] = useState(false);
+  const { setChallengeStatus, challengeStatuses } = usePersistentStore();
 
   // Auto-save functionality
   const {
@@ -280,6 +287,30 @@ export default function ChallengesContent({
     setVerificationData,
   } = useChallengeVerifier({ challenge: currentChallenge });
 
+  // Effect to handle challenge completion modal
+  useEffect(() => {
+    if (verificationData) {
+      const allRequirementsPassed = requirements.every(
+        (req) => req.status === "passed"
+      );
+      if (allRequirementsPassed) {
+        setTimeout(() => {
+          if (challengeStatuses[currentChallenge.slug] === "open") {
+            setChallengeStatus(currentChallenge.slug, "completed");
+          }
+          setIsCompletedModalOpen(true);
+          setAllowRedo(false);
+        }, 1000);
+      }
+    }
+  }, [
+    verificationData,
+    requirements,
+    setChallengeStatus,
+    currentChallenge.slug,
+    challengeStatuses,
+  ]);
+
   const handleRunCode = () => {
     if (esBuildInitializationState !== "initialized") {
       // Show user-friendly error without blocking alert
@@ -312,6 +343,8 @@ export default function ChallengesContent({
     clearLoadedFromAutoSave();
     setHasInitiallyLoaded(false);
     setEditorCode(initialEditorCode);
+    setAllowRedo(true);
+    setIsCompletedModalOpen(false);
   };
 
   const [tab, setTab] = useState<"logs" | "editor">("editor");
@@ -432,6 +465,11 @@ export default function ChallengesContent({
 
   return (
     <div className="relative w-full h-full">
+      <ChallengeCompleted
+        isOpen={isCompletedModalOpen && !allowRedo}
+        onClose={() => setIsCompletedModalOpen(false)}
+        challenge={currentChallenge}
+      />
       {!isUserConnected ? (
         <div className="z-10 flex-col gap-y-8 pb-12 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
           <div className="flex flex-col mt-12 gap-y-4 lg:mt-24 max-w-[90dvw]">
@@ -476,7 +514,7 @@ export default function ChallengesContent({
                 isDragging && "select-none"
               )}
             >
-              <div className="w-full h-full flex flex-col rounded-t-2xl lg:rounded-xl overflow-hidden border border-border backdrop-blur-lg">
+              <div className="w-full h-full flex flex-col rounded-t-2xl lg:rounded-xl overflow-hidden border border-border">
                 <motion.div
                   drag={isMobile ? "y" : false}
                   dragControls={dragControls}
@@ -581,6 +619,7 @@ export default function ChallengesContent({
                       esBuildInitializationState === "initialized"
                     }
                     onRedoChallenge={handleRedoChallenge}
+                    allowRedo={allowRedo}
                   />
                 </div>
               </div>

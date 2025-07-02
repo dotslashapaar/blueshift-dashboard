@@ -15,7 +15,6 @@ import Icon from "../Icon/Icon";
 import Divider from "../Divider/Divider";
 import HeadingReveal from "../HeadingReveal/HeadingReveal";
 import { usePersistentStore } from "@/stores/store";
-import ChallengeCompleted from "../Modals/ChallengeComplete";
 import { Link } from "@/i18n/navigation";
 import { LogMessage } from "@/hooks/useEsbuildRunner";
 import { ChallengeMetadata } from "@/app/utils/challenges";
@@ -35,6 +34,7 @@ interface ChallengeTableProps {
   isEsbuildReady: boolean;
   onRedoChallenge: () => void;
   isOpen: boolean;
+  allowRedo: boolean;
 }
 
 export default function ChallengeTable({
@@ -48,6 +48,7 @@ export default function ChallengeTable({
   isEsbuildReady,
   onRedoChallenge,
   isOpen,
+  allowRedo,
 }: ChallengeTableProps) {
   const t = useTranslations();
   const searchParams = useSearchParams();
@@ -55,9 +56,7 @@ export default function ChallengeTable({
   const [selectedRequirement, setSelectedRequirement] =
     useState<ChallengeRequirement | null>(null);
 
-  const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false);
-  const [allowRedo, setAllowRedo] = useState(false);
-  const { setChallengeStatus, challengeStatuses } = usePersistentStore();
+  const { challengeStatuses } = usePersistentStore();
   const courseSlug = challenge.slug;
 
   useEffect(() => {
@@ -68,37 +67,19 @@ export default function ChallengeTable({
       if (firstFailedRequirement) {
         setSelectedRequirement(firstFailedRequirement);
       }
-
-      const allRequirementsPassed = requirements.every(
-        (req) => req.status === "passed"
-      );
-      if (allRequirementsPassed) {
-        setTimeout(() => {
-          if (challengeStatuses[courseSlug] === "open") {
-            setChallengeStatus(courseSlug, "completed");
-          }
-          setIsCompletedModalOpen(true);
-          setAllowRedo(false);
-        }, 1000);
-      }
     }
-  }, [verificationData, requirements, setChallengeStatus, courseSlug]);
+  }, [verificationData, requirements]);
 
   const overallIsLoading = isCodeRunning || !isEsbuildReady;
 
   return (
     <motion.div
       className={classNames(
-        "w-[calc(100%-2px)] transition opacity-0 lg:opacity-100 mx-auto flex absolute lg:relative z-0 bg-background lg:bg-transparent h-[calc(100%-81px)] lg:h-full lg:w-full rounded-b-xl lg:rounded-none",
-        isOpen && "opacity-100 z-10 lg:z-0",
+        "w-[calc(100%-2px)] transition opacity-0 lg:opacity-100 mx-auto flex absolute lg:relative bg-background lg:bg-transparent h-[calc(100%-81px)] lg:h-full lg:w-full rounded-b-xl lg:rounded-none",
+        isOpen && "opacity-100 z-10 lg:z-1",
         !isOpen && "pointer-events-none lg:pointer-events-auto"
       )}
     >
-      <ChallengeCompleted
-        isOpen={isCompletedModalOpen && !allowRedo}
-        onClose={() => setIsCompletedModalOpen(false)}
-        challenge={challenge}
-      />
       <div className="pb-24 bg-background-card/50 overflow-y-auto rounded-b-xl lg:rounded-none w-full min-w-full xl:min-w-[400px] px-2 lg:px-4 lg:right-4 lg:border-l lg:border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden lg:pb-6 [mask:linear-gradient(to_bottom,black_85%,transparent_100%)]">
         {(challengeStatuses[courseSlug] === "completed" ||
           challengeStatuses[courseSlug] === "claimed") &&
@@ -143,11 +124,7 @@ export default function ChallengeTable({
                 size="md"
                 icon="Refresh"
                 label={t("ChallengePage.challenge_completed.redo")}
-                onClick={() => {
-                  onRedoChallenge();
-                  setAllowRedo(true);
-                  setIsCompletedModalOpen(false);
-                }}
+                onClick={onRedoChallenge}
               />
             </motion.div>
           )}
