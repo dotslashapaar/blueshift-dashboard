@@ -110,7 +110,7 @@
         }
       }
     },
-    "mint-an-spl-token": {
+    "typescript-mint-an-spl-token": {
       "title": "Mint an SPL Token",
       "requirements": {
         "create_mint_account": {

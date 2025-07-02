@@ -1,11 +1,11 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useRef } from "react";
 import Button from "../Button/Button";
 import Icon from "../Icon/Icon";
 import { useTranslations } from "next-intl";
 import ClientChallengeTable from "./ClientChallengeTable";
-import { motion } from "motion/react";
+import { motion, useDragControls } from "motion/react";
 import { anticipate } from "motion";
 import {
   useEsbuildRunner,
@@ -25,6 +25,8 @@ import { useAuth } from "@/hooks/useAuth";
 import WalletMultiButton from "@/app/components/Wallet/WalletMultiButton";
 import { ChallengeMetadata } from "@/app/utils/challenges";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import classNames from "classnames";
+import { useWindowSize } from "usehooks-ts";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
@@ -61,14 +63,14 @@ export default function ChallengesContent({
   ] = useState(false);
 
   // Auto-save functionality
-  const { 
-    getAutoSavedCode, 
-    clearSavedCode, 
-    saveState, 
-    justSaved, 
+  const {
+    getAutoSavedCode,
+    clearSavedCode,
+    saveState,
+    justSaved,
     loadedFromAutoSave,
     markAsLoadedFromAutoSave,
-    clearLoadedFromAutoSave 
+    clearLoadedFromAutoSave,
   } = useAutoSave({
     challengeSlug: currentChallenge.slug,
     code: editorCode,
@@ -208,7 +210,8 @@ export default function ChallengesContent({
         }
       } catch (err) {
         console.error("Failed to load challenge template:", err);
-        const errorTemplate = "// Failed to load challenge template. Please check console.";
+        const errorTemplate =
+          "// Failed to load challenge template. Please check console.";
         setEditorCode(errorTemplate);
         setInitialEditorCode(errorTemplate);
         if (!hasInitiallyLoaded) {
@@ -220,7 +223,12 @@ export default function ChallengesContent({
     if (currentChallenge.slug) {
       fetchSolutionsTemplate();
     }
-  }, [currentChallenge.slug, hasInitiallyLoaded, getAutoSavedCode, markAsLoadedFromAutoSave]);
+  }, [
+    currentChallenge.slug,
+    hasInitiallyLoaded,
+    getAutoSavedCode,
+    markAsLoadedFromAutoSave,
+  ]);
 
   // Reset initial load flag when challenge changes
   useEffect(() => {
@@ -275,7 +283,10 @@ export default function ChallengesContent({
   const handleRunCode = () => {
     if (esBuildInitializationState !== "initialized") {
       // Show user-friendly error without blocking alert
-      addLog("SYSTEM", "Code runner is still initializing. Please wait a moment and try again.");
+      addLog(
+        "SYSTEM",
+        "Code runner is still initializing. Please wait a moment and try again."
+      );
       return;
     }
     clearLogs();
@@ -284,7 +295,10 @@ export default function ChallengesContent({
 
     runCode(editorCode).catch((error) => {
       console.error("Error running code:", error);
-      addLog("SYSTEM", "An error occurred while running your code. Please try again.");
+      addLog(
+        "SYSTEM",
+        "An error occurred while running your code. Please try again."
+      );
     });
   };
 
@@ -300,11 +314,127 @@ export default function ChallengesContent({
     setEditorCode(initialEditorCode);
   };
 
+  const [tab, setTab] = useState<"logs" | "editor">("editor");
+
+  const { width } = useWindowSize();
+  const isMobile = width < 1024;
+  const [editorHeight, setEditorHeight] = useState<number>(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragControls = useDragControls();
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDrag = (_event: any, info: any) => {
+    if (!isMobile || !editorRef.current) return;
+
+    // Calculate height constraints in dvh
+    const minHeight = window.innerHeight * 0.6;
+    const maxHeight = window.innerHeight * 0.9;
+
+    const currentHeight = editorHeight;
+    const dragDelta = -info.delta.y; // Invert because dragging up should increase height
+    const newHeight = Math.min(
+      Math.max(currentHeight + dragDelta, minHeight),
+      maxHeight
+    );
+
+    setEditorHeight(newHeight);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+
+    if (!isMobile) return;
+
+    // Define snap points in dvh
+    const snapPoints = [
+      window.innerHeight * 0.6, // 60dvh (minimum)
+      window.innerHeight * 0.75, // 75dvh
+      window.innerHeight * 0.9, // 90dvh (maximum)
+    ];
+
+    // Find the closest snap point
+    const snapThreshold = window.innerHeight * 0.05; // 5dvh threshold
+    let closestSnap = editorHeight;
+    let minDistance = Infinity;
+
+    snapPoints.forEach((snapPoint) => {
+      const distance = Math.abs(editorHeight - snapPoint);
+      if (distance < snapThreshold && distance < minDistance) {
+        minDistance = distance;
+        closestSnap = snapPoint;
+      }
+    });
+
+    // Apply snap if we found a close snap point
+    if (closestSnap !== editorHeight) {
+      // Smooth animation to snap point
+      const animateToSnap = () => {
+        const startHeight = editorHeight;
+        const targetHeight = closestSnap;
+        const startTime = Date.now();
+        const duration = 200; // 200ms animation
+
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          // Ease out cubic function for smooth animation
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          const currentHeight =
+            startHeight + (targetHeight - startHeight) * easeOut;
+
+          setEditorHeight(currentHeight);
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          }
+        };
+
+        requestAnimationFrame(animate);
+      };
+
+      animateToSnap();
+    }
+  };
+
+  // Handle window resize for mobile editor height
+  useEffect(() => {
+    if (isMobile) {
+      const handleResize = () => {
+        const newMinHeight = window.innerHeight * 0.6; // 60dvh
+        const newMaxHeight = window.innerHeight * 0.9; // 90dvh
+
+        // Adjust current height proportionally if needed
+        if (editorHeight < newMinHeight) {
+          setEditorHeight(newMinHeight);
+        } else if (editorHeight > newMaxHeight) {
+          setEditorHeight(newMaxHeight);
+        }
+      };
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, [isMobile, editorHeight]);
+
+  // Initialize editor height when switching to mobile
+  useEffect(() => {
+    if (isMobile && editorHeight === 0) {
+      setEditorHeight(window.innerHeight * 0.6); // 60dvh default
+    } else if (!isMobile) {
+      setEditorHeight(0);
+    }
+  }, [isMobile, editorHeight]);
+
   return (
     <div className="relative w-full h-full">
       {!isUserConnected ? (
-        <div className="z-10 flex-col gap-y-8 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
-          <div className="flex flex-col gap-y-4 mt-24 max-w-[90dvw]">
+        <div className="z-10 flex-col gap-y-8 pb-12 flex items-center justify-center top-0 left-0 w-full h-full bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col mt-12 gap-y-4 lg:mt-24 max-w-[90dvw]">
             <img
               src="/graphics/connect-wallet.svg"
               className="sm:w-[360px] max-w-[80dvw] w-full mx-auto"
@@ -331,56 +461,103 @@ export default function ChallengesContent({
             transition: { duration: 0.4, ease: anticipate },
           }}
           exit={{ opacity: 0 }}
-          className="px-4 py-14 pb-20 max-w-app grid grid-cols-1 md:px-8 lg:px-14 mx-auto w-full gap-y-12 lg:gap-x-24"
+          className="px-4 py-14 lg:pb-20 max-w-app grid grid-cols-1 md:px-8 lg:px-14 mx-auto w-full gap-y-12 lg:gap-x-24"
         >
           <div className="flex flex-col relative w-full h-full">
-            <div className="flex flex-col w-full h-full min-h-[35dvh] lg:min-h-[65dvh]">
-              <div className="w-full h-full flex flex-col rounded-xl overflow-hidden border border-border">
-                <div className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-xl flex items-center border-b border-border">
-                  <div className="flex items-center gap-x-2">
+            <motion.div
+              ref={editorRef}
+              style={{
+                height: isMobile ? `${editorHeight}px` : undefined,
+                cursor: isDragging ? "grabbing" : undefined,
+              }}
+              className={classNames(
+                "flex flex-col w-full z-10 fixed left-0 bottom-0",
+                "lg:relative lg:h-full lg:min-h-[65dvh]",
+                isDragging && "select-none"
+              )}
+            >
+              <div className="w-full h-full flex flex-col rounded-t-2xl lg:rounded-xl overflow-hidden border border-border backdrop-blur-lg">
+                <motion.div
+                  drag={isMobile ? "y" : false}
+                  dragControls={dragControls}
+                  onDragStart={handleDragStart}
+                  onDrag={handleDrag}
+                  onDragEnd={handleDragEnd}
+                  dragMomentum={true}
+                  dragConstraints={{ top: 0, bottom: 0 }}
+                  dragElastic={0}
+                  className="z-10 w-full py-3 relative px-4 bg-background-card rounded-t-2xl lg:rounded-t-xl flex gap-y-4 lg:gap-y-0 flex-col lg:flex-row items-center justify-center lg:justify-start border-b border-border"
+                >
+                  {/* Mobile Thumb */}
+                  <div className="h-[8px] w-[72px] rounded-full bg-background-card-foreground mx-auto flex lg:hidden" />
+                  <div className="items-center gap-x-2 hidden lg:flex">
                     <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
                     <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
                     <div className="w-[12px] h-[12px] bg-background-card-foreground rounded-full"></div>
                   </div>
-                  <div className="text-sm font-medium text-secondary absolute left-1/2 -translate-x-1/2 flex items-center gap-x-1.5">
-                    <Icon
-                      name="Challenge"
-                      size={12}
-                      className="hidden sm:block"
-                    />
+                  <div className="text-sm font-medium text-secondary lg:absolute lg:left-1/2 lg:-translate-x-1/2 flex items-center gap-x-1.5">
+                    <Icon name="Challenge" size={12} />
                     <span className="flex-shrink-0">
                       {t(`challenges.${currentChallenge.slug}.title`)}
                     </span>
                   </div>
-                </div>
-                <div className="left-[1px] w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
+                </motion.div>
+                <div className="lg:left-[1px] w-full lg:w-[calc(100%-2px)] py-2 bg-background-card/20 backdrop-blur-xl border-b border-border z-20 justify-between px-4 flex items-center">
                   <LogoGlyph width={16} />
                   <div className="flex items-center gap-x-2.5">
-                    <>
-                      <Button
-                        variant="link"
-                        icon={"Play"}
-                        iconSize={12}
-                        size="sm"
-                        label={
-                          isCodeRunning
-                            ? t("ChallengePage.running_program_btn")
-                            : t("ChallengePage.run_program_btn")
-                        }
-                        className="w-max !text-brand-primary"
-                        onClick={() => {
-                          handleRunCode();
-                        }}
-                        disabled={isVerificationLoading}
-                      />
-                    </>
+                    <Button
+                      variant="link"
+                      icon={"Play"}
+                      iconSize={12}
+                      size="sm"
+                      label={
+                        isCodeRunning
+                          ? t("ChallengePage.running_program_btn")
+                          : t("ChallengePage.run_program_btn")
+                      }
+                      className="w-max !text-brand-primary"
+                      onClick={() => {
+                        handleRunCode();
+                      }}
+                      disabled={isVerificationLoading}
+                    />
+                    <Button
+                      variant="link"
+                      icon={"Logs"}
+                      iconSize={12}
+                      size="sm"
+                      label={t("ChallengePage.view_logs_btn")}
+                      className={classNames(
+                        "w-max !text-brand-primary lg:hidden flex",
+                        tab === "logs" && "hidden"
+                      )}
+                      onClick={() => {
+                        setTab("logs");
+                      }}
+                      disabled={isVerificationLoading}
+                    />
+
+                    <Button
+                      variant="link"
+                      icon={"ArrowLeft"}
+                      iconSize={12}
+                      size="sm"
+                      label={t("ChallengePage.back_to_editor_btn")}
+                      className={classNames(
+                        "w-max !text-brand-primary lg:hidden flex",
+                        tab === "editor" && "hidden"
+                      )}
+                      onClick={() => {
+                        setTab("editor");
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="flex flex-col lg:grid lg:grid-cols-3 w-full h-full">
                   <BlueshiftEditor
                     initialCode={editorCode}
                     onCodeChange={setEditorCode}
-                    className="col-span-2"
+                    className="col-span-2 lg:max-h-full"
                     title={t(`challenges.${currentChallenge.slug}.title`)}
                     fileName="mint-an-spl-token.ts"
                     onRefresh={() => setEditorCode(initialEditorCode)}
@@ -389,6 +566,7 @@ export default function ChallengesContent({
                     loadedFromAutoSave={loadedFromAutoSave}
                   />
                   <ClientChallengeTable
+                    isOpen={tab === "logs"}
                     onRunCodeClick={handleRunCode}
                     requirements={requirements}
                     completedRequirementsCount={completedRequirementsCount}
@@ -406,7 +584,7 @@ export default function ChallengesContent({
                   />
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </motion.div>
       )}

@@ -99,25 +99,25 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
         if (collectionSize === null) {
           console.error(
-            `Failed to decode num_minted for collection ${collectionMintAddress}`,
+            `Failed to decode num_minted for collection ${collectionMintAddress}`
           );
         }
       } else {
         console.error(
-          `Failed to fetch account info for ${collectionMintAddress}`,
+          `Failed to fetch account info for ${collectionMintAddress}`
         );
       }
     } catch (error) {
       console.error(
         `Failed to fetch collection details for ${collectionMintAddress}:`,
-        error,
+        error
       );
     }
   }
 
   const allLessons = courseMetadata.lessons;
   const currentLessonIndex = allLessons.findIndex(
-    (lesson) => lesson.slug === lessonName,
+    (lesson) => lesson.slug === lessonName
   );
   const nextLesson = allLessons[currentLessonIndex + 1];
   const nextLessonSlug = nextLesson ? nextLesson.slug : "";
@@ -130,7 +130,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
           background: `linear-gradient(180deg, rgb(${courseColors[courseMetadata.language]},0.05) 0%, transparent 100%)`,
         }}
       >
-        <div className="px-4 py-14 pb-20 md:px-8 lg:px-14 max-w-app w-full mx-auto flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
+        <div className="px-4 py-14 lg:pb-20 md:px-8 lg:px-14 max-w-app w-full mx-auto flex lg:flex-row flex-col lg:items-center gap-y-12 lg:gap-y-0 justify-start lg:justify-between">
           <div className="flex flex-col gap-y-2">
             <div className="flex items-center gap-x-2 relative w-max">
               <CrosshairCorners
@@ -216,7 +216,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
                       </span>
                       <span className="font-medium text-primary">
                         {t(
-                          `courses.${courseMetadata.slug}.lessons.${nextLessonSlug}`,
+                          `courses.${courseMetadata.slug}.lessons.${nextLessonSlug}`
                         )}
                       </span>
                     </div>

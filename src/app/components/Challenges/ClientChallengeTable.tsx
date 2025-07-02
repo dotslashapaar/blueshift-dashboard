@@ -34,6 +34,7 @@ interface ChallengeTableProps {
   runnerLogs: LogMessage[];
   isEsbuildReady: boolean;
   onRedoChallenge: () => void;
+  isOpen: boolean;
 }
 
 export default function ChallengeTable({
@@ -46,6 +47,7 @@ export default function ChallengeTable({
   runnerLogs,
   isEsbuildReady,
   onRedoChallenge,
+  isOpen,
 }: ChallengeTableProps) {
   const t = useTranslations();
   const searchParams = useSearchParams();
@@ -84,65 +86,73 @@ export default function ChallengeTable({
 
   const overallIsLoading = isCodeRunning || !isEsbuildReady;
 
-
   return (
-    <div className="w-full flex">
+    <motion.div
+      className={classNames(
+        "w-[calc(100%-2px)] transition opacity-0 lg:opacity-100 mx-auto flex absolute lg:relative z-0 bg-background lg:bg-transparent h-[calc(100%-81px)] lg:h-full lg:w-full rounded-b-xl lg:rounded-none",
+        isOpen && "opacity-100 z-10 lg:z-0",
+        !isOpen && "pointer-events-none lg:pointer-events-auto"
+      )}
+    >
       <ChallengeCompleted
         isOpen={isCompletedModalOpen && !allowRedo}
         onClose={() => setIsCompletedModalOpen(false)}
         challenge={challenge}
       />
-      <div className="bg-background-card/50 rounded-b-xl lg:rounded-none w-full min-w-full lg:min-w-[400px] px-4 lg:px-6 lg:right-4 lg:border-l border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden pb-6">
+      <div className="pb-24 bg-background-card/50 overflow-y-auto rounded-b-xl lg:rounded-none w-full min-w-full xl:min-w-[400px] px-2 lg:px-4 lg:right-4 lg:border-l lg:border-l-border lg:pt-6 flex flex-col lg:gap-y-8 justify-between overflow-hidden lg:pb-6 [mask:linear-gradient(to_bottom,black_85%,transparent_100%)]">
         {(challengeStatuses[courseSlug] === "completed" ||
-          challengeStatuses[courseSlug] === "claimed") && !allowRedo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute z-10 inset-0 w-full h-full bg-background/80 backdrop-blur gap-y-5 flex flex-col items-center justify-center"
-          >
-            <div className="flex flex-col items-center justify-center gap-y-1">
-              <span className="text-lg font-medium text-primary">
-                {t("ChallengePage.challenge_completed.title")}
-              </span>
-              <span className="text-tertiary">
-                {t("ChallengePage.challenge_completed.body")}
-              </span>
-            </div>
-
-            <Link href={`/${fromCourse ? "courses" : "challenges"}`}>
-              <Button
-                variant="primary"
-                size="md"
-                icon="Lessons"
-                label={t(
-                  fromCourse
-                    ? "ChallengePage.challenge_completed.view_other_courses"
-                    : "ChallengePage.challenge_completed.view_other_challenges"
-                )}
-              />
-            </Link>
-            <div className="relative w-full">
-              <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">
-                {t(`ChallengePage.challenge_completed.divider_label`).toUpperCase()}
+          challengeStatuses[courseSlug] === "claimed") &&
+          !allowRedo && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute z-10 inset-0 w-full h-[20dvh] lg:h-full bg-background/80 backdrop-blur gap-y-5 flex flex-col items-center justify-center"
+            >
+              <div className="flex flex-col items-center justify-center gap-y-1">
+                <span className="text-lg font-medium text-primary">
+                  {t("ChallengePage.challenge_completed.title")}
+                </span>
+                <span className="text-tertiary">
+                  {t("ChallengePage.challenge_completed.body")}
+                </span>
               </div>
-              <div className="w-full h-[1px] bg-border absolute"></div>
-            </div>
-            <Button
-              variant="secondary"
-              size="md"
-              icon="Refresh"
-              label={t("ChallengePage.challenge_completed.redo")}
-              onClick={() => {
-                onRedoChallenge();
-                setAllowRedo(true);
-                setIsCompletedModalOpen(false);
-              }}
-            />
-          </motion.div>
-        )}
 
-        <div className="order-2 lg:order-1 flex flex-col gap-y-4 pt-8 lg:pt-0 lg:border-t-0">
+              <Link href={`/${fromCourse ? "courses" : "challenges"}`}>
+                <Button
+                  variant="primary"
+                  size="md"
+                  icon="Lessons"
+                  label={t(
+                    fromCourse
+                      ? "ChallengePage.challenge_completed.view_other_courses"
+                      : "ChallengePage.challenge_completed.view_other_challenges"
+                  )}
+                />
+              </Link>
+              <div className="relative w-full">
+                <div className="font-mono absolute text-xs text-mute top-1/2 z-10 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 bg-background">
+                  {t(
+                    `ChallengePage.challenge_completed.divider_label`
+                  ).toUpperCase()}
+                </div>
+                <div className="w-full h-[1px] bg-border absolute"></div>
+              </div>
+              <Button
+                variant="secondary"
+                size="md"
+                icon="Refresh"
+                label={t("ChallengePage.challenge_completed.redo")}
+                onClick={() => {
+                  onRedoChallenge();
+                  setAllowRedo(true);
+                  setIsCompletedModalOpen(false);
+                }}
+              />
+            </motion.div>
+          )}
+
+        <div className="order-2 lg:order-1 flex flex-col gap-y-4 pt-4 lg:pt-0 lg:border-t-0">
           {runnerLogs.length > 0 && (
             <div className="flex flex-col gap-y-2">
               <div className="flex flex-col gap-y-4 items-start overflow-hidden bg-background pt-4 px-1 pb-1 rounded-xl border border-border">
@@ -156,7 +166,7 @@ export default function ChallengeTable({
                 <div className="px-2 w-full">
                   <Divider />
                 </div>
-                <div className="max-w-full sm:max-w-[400px] overflow-x-scroll flex flex-col gap-y-1 items-start px-3 pr-5 pb-2 w-max max-h-80 custom-scrollbar font-geist-mono text-xs">
+                <div className="max-w-full sm:max-w-[450px] overflow-x-scroll flex flex-col gap-y-1 items-start px-3 pr-5 pb-2 w-max max-h-80 custom-scrollbar font-geist-mono text-xs">
                   {runnerLogs.map((log, index) => (
                     <motion.div
                       key={index}
@@ -226,10 +236,10 @@ export default function ChallengeTable({
                 key={requirement.instructionKey}
               >
                 <div
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-between px-4 text-left w-full"
                   key={requirement.instructionKey}
                 >
-                  <span className="font-medium text-sm">
+                  <span className="font-medium text-xs xs:text-sm max-w-[60%]">
                     {t(
                       `challenges.${courseSlug}.requirements.${requirement.instructionKey}.title`
                     )}
@@ -269,7 +279,7 @@ export default function ChallengeTable({
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.1, ease: "linear" }}
-                    className="flex flex-col gap-y-4"
+                    className="flex flex-col gap-y-4 px-4"
                   >
                     <Divider />
                     {verificationData?.results?.find(
@@ -310,19 +320,19 @@ export default function ChallengeTable({
                                   (result) =>
                                     result.instruction ===
                                     requirement.instructionKey
-                                                              )
-                              ?.program_logs?.map((log, index) => (
-                                <HeadingReveal
-                                  baseDelay={index * 0.1}
-                                  text="PROGRAM"
-                                  headingLevel="h3"
-                                  key={index}
-                                  splitBy="chars"
-                                  speed={0.1}
-                                  className="font-mono px-3 flex-shrink-0 w-max sticky left-0"
-                                />
-                              ))}
-                          </div>
+                                )
+                                ?.program_logs?.map((log, index) => (
+                                  <HeadingReveal
+                                    baseDelay={index * 0.1}
+                                    text="PROGRAM"
+                                    headingLevel="h3"
+                                    key={index}
+                                    splitBy="chars"
+                                    speed={0.1}
+                                    className="font-mono px-3 flex-shrink-0 w-max sticky left-0"
+                                  />
+                                ))}
+                            </div>
                             <div className="flex flex-col gap-y-2 items-start px-1 overflow-x-auto pr-5 pb-2">
                               {verificationData.results.find(
                                 (result) =>
@@ -395,7 +405,7 @@ export default function ChallengeTable({
                                   }
                                 </span>
                               </div>
-                              <div>
+                              <div className="hidden lg:block">
                                 <span className="text-text-tertiary">
                                   Execution Time:{" "}
                                 </span>
@@ -422,6 +432,6 @@ export default function ChallengeTable({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
