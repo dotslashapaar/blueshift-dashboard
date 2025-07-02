@@ -81,7 +81,7 @@ const allChallenges: ChallengeMetadata[] = [
     color: "105,162,241",
     difficulty: 1,
     isFeatured: true,
-    unitName: "TypeScript Mint an SPL Token",
+    unitName: "Mint an SPL Token",
     apiPath: "/v1/verify/typescript/mint-an-spl-token",
     requirements: [
       { instructionKey: "create_mint_account" },
