@@ -48,12 +48,11 @@ const connection = new Connection(
 // Entry point of your TypeScript code (we will call this)
 async function main() {
   try {
-    // Start here
-    // const mint = ???
-
     const mint = Keypair.generate();
 
     const mintRent = await getMinimumBalanceForRentExemptMint(connection);
+
+    // START HERE
 
     // Create the mint account
     // const createAccountIx = ???
