@@ -1,6 +1,6 @@
 /** Challenge: Mint an SPL Token
  *
- * In this challenge, you will create an SPL token on the Solana blockchain.
+ * In this challenge, you will create an SPL token!
  *
  * Goal:
  *   Mint an SPL token in a single transaction using Web3.js and the SPL Token library.
