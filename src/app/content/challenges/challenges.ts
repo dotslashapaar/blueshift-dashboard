@@ -75,6 +75,22 @@ const allChallenges: ChallengeMetadata[] = [
     ],
     collectionMintAddress: "4NKZ2B5zeG9TGZifzfnG7Zw28P3ZetjaS6xPVKW5MHrp",
   },
+  {
+    slug: "typescript-mint-an-spl-token",
+    language: "Typescript",
+    color: "105,162,241",
+    difficulty: 1,
+    isFeatured: true,
+    unitName: "Mint an SPL Token",
+    apiPath: "/v1/verify/typescript/mint-an-spl-token",
+    requirements: [
+      { instructionKey: "create_mint_account" },
+      { instructionKey: "initialize_mint" },
+      { instructionKey: "create_token_account" },
+      { instructionKey: "mint_to" },
+    ],
+    collectionMintAddress: "2NVDhSXZck9AX2aUdPSxMemLN2wtqEd5sNEcwuZVCbHW",
+  },
 ];
 
 const releasedChallengesSetting =

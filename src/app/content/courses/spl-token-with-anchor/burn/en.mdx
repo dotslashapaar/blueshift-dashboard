@@ -1,0 +1,27 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# Burn Instruction
+
+Permanently destroys tokens by removing them from circulation. This reduces the total supply of the token.
+
+Before we can mint any token, we'll need to already have:
+- Initialized a `Mint` account.
+- A `Token` account or `Associated Token` account that already has at least the amount we want to burn.
+
+> The amount of tokens we burn are "normalized" for decimals. This means that if we want to burn 1 token that has 6 decimals, we'll need to actually put `1_000_000` as amount
+
+This is how the CPI to the `burn()` instruction looks like: 
+
+```rust
+burn(
+    CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        Burn {
+            mint: ctx.accounts.mint.to_account_info(),
+            from: ctx.accounts.token_account.to_account_info(),
+            authority: ctx.accounts.authority.to_account_info(),
+        },
+    ),
+    &1_000_000,
+)?;
+```

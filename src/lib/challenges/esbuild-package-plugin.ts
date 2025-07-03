@@ -15,9 +15,9 @@ export const createCdnPlugin = (
       build.onResolve(
         { filter: new RegExp(`^${escapedModuleName}$`) },
         (args: esbuild.OnResolveArgs) => {
-          console.log(
-            `[cdn-plugin-${namespace}] onResolve (@module): ${args.path} (importer: ${args.importer})`,
-          );
+          // console.log(
+          //   `[cdn-plugin-${namespace}] onResolve (@module): ${args.path} (importer: ${args.importer})`,
+          // );
           return { path: args.path, namespace: namespace };
         },
       );
@@ -26,9 +26,9 @@ export const createCdnPlugin = (
       build.onResolve(
         { filter: /^\//, namespace: namespace },
         (args: esbuild.OnResolveArgs) => {
-          console.log(
-            `[cdn-plugin-${namespace}] onResolve (/path): ${args.path} (importer: ${args.importer})`,
-          );
+          // console.log(
+          //   `[cdn-plugin-${namespace}] onResolve (/path): ${args.path} (importer: ${args.importer})`,
+          // );
           return { path: args.path, namespace: namespace };
         },
       );
@@ -37,15 +37,15 @@ export const createCdnPlugin = (
       build.onResolve(
         { filter: /^\.\.?\//, namespace: namespace },
         (args: esbuild.OnResolveArgs) => {
-          console.log(
-            `[cdn-plugin-${namespace}] onResolve (./path): ${args.path} (importer: ${args.importer})`,
-          );
+          // console.log(
+          //   `[cdn-plugin-${namespace}] onResolve (./path): ${args.path} (importer: ${args.importer})`,
+          // );
           const resolvedUrl = new URL(
             args.path,
             `https://esm.sh${args.importer}`,
           );
           const newPath = resolvedUrl.pathname + resolvedUrl.search; // Preserve query params
-          console.log(`  [cdn-plugin-${namespace}] resolved to: ${newPath}`);
+          // console.log(`  [cdn-plugin-${namespace}] resolved to: ${newPath}`);
           return {
             path: newPath,
             namespace: namespace,
@@ -66,9 +66,9 @@ export const createCdnPlugin = (
             fetchUrl = `https://esm.sh/${args.path}`;
           }
 
-          console.log(
-            `[cdn-plugin-${namespace}] onLoad (${args.namespace}): ${args.path}, fetching from ${fetchUrl}`,
-          );
+          // console.log(
+          //   `[cdn-plugin-${namespace}] onLoad (${args.namespace}): ${args.path}, fetching from ${fetchUrl}`,
+          // );
           try {
             const res = await fetch(fetchUrl);
             if (!res.ok) {

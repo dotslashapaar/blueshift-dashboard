@@ -1,0 +1,102 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# Mint and Token Accounts
+
+As we said in the prvious section, the building blocks of the `SPL Token` program are the accounts: the mint account that rapresent all information about the tokens and the token account that rapresent all information about the ownership of that specific tokens.
+
+For each unique mint, there are thousand of different token accounts that rapresents how many holder of that token are in the ledger. 
+
+In this section we're going to talk more in depth about these different accounts:
+
+<ArticleSection name="The Mint Account" id="the-mint-account" level="h2" />
+
+Tokens on Solana are uniquely identified by the address of a Mint Account owned by the Token Program. This account acts as a global counter for a specific token and stores data such as:
+- Supply: Total supply of the token
+- Decimals: Decimal precision of the token
+- Mint authority: The account authorized to create new units of the token, increasing the supply
+- Freeze authority: The account authorized to freeze tokens in a Token Account, preventing them from being transferred or burned
+
+This is how that data looks onchain:
+
+```rust
+pub struct Mint {
+    /// Optional authority used to mint new tokens. The mint authority may only
+    /// be provided during mint creation. If no mint authority is present
+    /// then the mint has a fixed supply and no further tokens may be
+    /// minted.
+    pub mint_authority: COption<Pubkey>,
+    /// Total supply of tokens.
+    pub supply: u64,
+    /// Number of base 10 digits to the right of the decimal place.
+    pub decimals: u8,
+    /// Is `true` if this structure has been initialized
+    pub is_initialized: bool,
+    /// Optional authority to freeze token accounts.
+    pub freeze_authority: COption<Pubkey>,
+}
+```
+
+### Metadata
+
+On explorers and wallets, tokens usually appear recognizable and human-readable thanks to a specific name and image linked to them.
+
+We refer to that name, symbol and image as the `Metadata` of a token. Because in its native form a `Mint` account is just a 32 bytes long public key with no human-readable information attached.
+
+Natively, in the original SPL Token program, it's not possible to set metadata directly on the token. For this reason, protocols like [Metaplex](https://www.metaplex.com/) developed the [MPL-token-metadata](https://github.com/metaplex-foundation/mpl-token-metadata) program to offer a way for every token to have associated metadata.
+
+> With Token Extensions and the [Token2022 program](en/courses/token-2022-program), this changes completely. The Metadata extension allows you to embed metadata directly into the mint account itself, eliminating the need for external programs.
+
+### Non-fungible Tokens
+
+While the utility of tokens is specifically delegated to the creator, who can decide to make that specific token a governance token, a utility token or a community token, there are some characteristics that we can follow to distinguish between fungible and non-fungible tokens:
+
+Non-fungible tokens need to have:
+- A supply of 1 since they are unique
+- 0 decimals since they are indivisible
+- No mint authority since we don't want to add more tokens with that same characteristic, as it would "destroy" the uniqueness of a token
+
+Natively it's impossible to enforce these characteristics in the Token program. For this reason, programs like the `MPL-token-metadata` not only offer an implementation for the metadata but they also offer an implementation to enforce these constraints and easily create NFTs.
+
+<ArticleSection name="The Token Account" id="the-token-account" level="h2" />
+
+The Token Program creates Token Accounts to track individual ownership of each token unit. A Token Account stores data such as:
+- Mint: The token the Token Account holds units of
+- Owner: The account authorized to transfer tokens from the Token Account
+- Amount: Number of the tokens the Token Account currently holds
+
+This is how that data looks onchain:
+
+```rust
+pub struct Account {
+    /// The mint associated with this account
+    pub mint: Pubkey,
+    /// The owner of this account.
+    pub owner: Pubkey,
+    /// The amount of tokens this account holds.
+    pub amount: u64,
+    /// If `delegate` is `Some` then `delegated_amount` represents
+    /// the amount authorized by the delegate
+    pub delegate: COption<Pubkey>,
+    /// The account's state
+    pub state: AccountState,
+    /// If is_native.is_some, this is a native token, and the value logs the
+    /// rent-exempt reserve. An Account is required to be rent-exempt, so
+    /// the value is used by the Processor to ensure that wrapped SOL
+    /// accounts do not drop below this threshold.
+    pub is_native: COption<u64>,
+    /// The amount delegated
+    pub delegated_amount: u64,
+    /// Optional authority to close the account.
+    pub close_authority: COption<Pubkey>,
+}
+```
+
+Each wallet needs to have a token account for each token (mint) it wants to hold, with the wallet address set as the token account owner. Each wallet can own multiple token accounts for the same token (mint), but a token account can only have one owner and hold units of one token (mint).
+
+<ArticleSection name="The Associated Token Account" id="the-associated-token-account" level="h2" />
+
+Associated Token Accounts simplify the process of finding a token account's address for a specific mint and owner. Think of the Associated Token Account as the "default" token account for a specific mint and owner.
+
+An Associated Token Account is created with an address derived from the owner's address and the mint account's address. It's important to understand that an Associated Token Account is just a token account with a specific address.
+
+This introduces a key concept in Solana development: [Program Derived Address](https://solana.com/docs/core/pda) (PDA). A PDA derives an address deterministically using predefined inputs, making it easy to find the address of an account. 

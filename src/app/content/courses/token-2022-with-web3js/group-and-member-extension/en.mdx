@@ -1,0 +1,168 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# The Group and Member Extension
+
+The `Group` and `Member` extensions are `Mint` account extensions that introduce the ability to create groups, like collections for NFTs, that are linked with multiple assets.
+
+<ArticleSection name="Initializing the Mint Account" id="initializing-the-mint-account" level="h2" />
+
+The `Member` and `Group` extension are a little different from what we're used to doing because it's composed of 2 different extensions that both go on a `Mint` account:
+- The `Extension` that contains all the information about the group or member.
+- The `Pointer Extension` that references the `Mint` account where the `Group` or `Member` extension lives.
+
+Usually, when used, the `Extension` and the `Pointer Extension` live on the same `Mint` account; and we're going to do the same for this example.
+
+> The `Group` and `Member` extension can't be on the same account
+
+Let's start with some basics before diving into the code:
+
+While the `GroupPointer` and `MemberPointer` extension lives in the `@solana/spl-token package`, to initialize the `Group` and `Member` we need to use the `@solana/spl-token-group` package.
+
+While the `GroupPointer` and `MemberPointer` extension lives in the `anchor-spl` crate, to initialize the `Group` and `Member` we need to use the `spl_token_group_interface` crate.
+
+So let's install the required package:
+
+```
+cargo add spl_token_metadata_interface
+```
+
+
+Additionally, the `Group` and `Member` extension is one of the "only" extensions that requires you to initialize the extension after having initialized the `Mint` account. 
+
+This is because the metadata initialization instruction dynamically allocates the required space for the length of the group and member content.
+
+At the same time, this means that we're going to need to initialize the `Mint` account with enough lamports to be rent exempt with the `Group` or `Member` extension included, but allocating enough space only for the `GroupPointer` or `MemberPointer` extension since the `token_group_initialize()` and `token_group_member_initialize()` instruction actually increases the space correctly.
+
+In the code initializing the `Group` looks like this:
+
+```rust
+use anchor_lang::prelude::*;
+use anchor_spl::token_2022::spl_token_2022::extension::group_pointer::GroupPointer;
+use anchor_spl::token_interface::token_group_initialize, Mint, Token2022, TokenGroupInitialize;
+use spl_token_group_interface::state::TokenGroup;
+
+
+pub fn initialize_group(ctx: Context<InitializeGroup>) -> Result<()> {
+    // Add 4 extra bytes for size of MetadataExtension (2 bytes for the discriminator, 2 bytes for length)
+    let data_len = 4 + size_of::<TokenGroup>();?;
+
+    // Calculate lamports required for the additional metadata
+    let lamports =
+        data_len as u64 * DEFAULT_LAMPORTS_PER_BYTE_YEAR * DEFAULT_EXEMPTION_THRESHOLD as u64;
+
+    // Transfer additional lamports to mint account
+    transfer(
+        CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.payer.to_account_info(),
+                to: ctx.accounts.mint_account.to_account_info(),
+            },
+        ),
+        lamports,
+    )?;
+
+    // Initialize the token group extension
+    token_group_initialize(
+        CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            TokenGroupInitialize {
+                token_program_id: ctx.accounts.token_program.to_account_info(),
+                group: ctx.accounts.mint_account.to_account_info(),
+                mint: ctx.accounts.mint_account.to_account_info(),
+                mint_authority: ctx.accounts.payer.to_account_info(),
+            },
+        )
+        Some(ctx.accounts.payer.key()), // update_authority
+        10,                             // max_size
+    )?;
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct InitializeGroup<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
+    #[account(
+        init,
+        payer = payer,
+        mint::decimals = 2,
+        mint::authority = payer,
+        mint::freeze_authority = mint_account,
+        extensions::group_pointer::authority = payer,
+        extensions::group_pointer::group_address = mint_account,
+    )]
+    pub mint_account: InterfaceAccount<'info, Mint>,
+    pub token_program: Program<'info, Token2022>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+And after this, we can use the group that we just created to add a member to it like this:
+
+```rust
+use anchor_lang::prelude::*;
+use anchor_spl::token_2022::spl_token_2022::extension::group_pointer::GroupPointer;
+use anchor_spl::token_interface::token_group_member_initialize, Mint, Token2022, TokenGroupMemberInitialize;
+use spl_token_group_interface::state::TokenGroupMember;
+
+
+pub fn initialize_group(ctx: Context<InitializeMember>) -> Result<()> {
+    // Add 4 extra bytes for size of MetadataExtension (2 bytes for the discriminator, 2 bytes for length)
+    let data_len = 4 + size_of::<TokenGroupMember>();?;
+
+    // Calculate lamports required for the additional metadata
+    let lamports =
+        data_len as u64 * DEFAULT_LAMPORTS_PER_BYTE_YEAR * DEFAULT_EXEMPTION_THRESHOLD as u64;
+
+    // Transfer additional lamports to mint account
+    transfer(
+        CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.payer.to_account_info(),
+                to: ctx.accounts.mint_account.to_account_info(),
+            },
+        ),
+        lamports,
+    )?;
+
+    // Initialize the token group extension
+    token_group_member_initialize(
+        CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            TokenGroupMemberInitialize {
+                token_program_id: ctx.accounts.token_program.to_account_info(),
+                group: ctx.accounts.group.to_account_info(),
+                group_update_authority: ctx.accounts.payer.to_account_info(),
+                member: ctx.accounts.mint_account.to_account_info(),
+                member_mint: ctx.accounts.mint_account.to_account_info(),
+                member_mint_authority: ctx.accounts.mint_account.to_account_info(),
+            },
+        )
+    )?;
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct InitializeMember<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
+    #[account(mut)]
+    pub group: InterfaceAccount<'info, Mint>,
+    #[account(
+        init,
+        payer = payer,
+        mint::decimals = 2,
+        mint::authority = mint_account,
+        mint::freeze_authority = mint_account,
+        extensions::group_member_pointer::authority = payer,
+        extensions::group_member_pointer::member_address = mint_account,
+    )]
+    pub mint_account: InterfaceAccount<'info, Mint>,
+    pub token_program: Program<'info, Token2022>,
+    pub system_program: Program<'info, System>,
+}
+```

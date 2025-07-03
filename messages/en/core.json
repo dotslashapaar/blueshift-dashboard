@@ -53,7 +53,7 @@
     "rust": "Rust",
     "typescript": "Typescript",
     "assembly": "Assembly",
-    "research": "Research"
+    "general": "General"
   },
   "ChallengeCenter": {
     "title": "Complete to Earn NFTs",
@@ -140,6 +140,17 @@
       "title": "Getting stuck?",
       "body": "Don't give up just yet! Join our Discord community for help and support.",
       "link_text": "Get support"
-    }
+    },
+    "reset_code_modal": {
+      "title": "Reset Code",
+      "description": "Are you sure you want to reset your code? This will discard all changes and restore the original template.",
+      "cancel": "Cancel",
+      "confirm": "Reset Code"
+    },
+    "reset_button": "Reset",
+    "auto_saved": "Auto-saved",
+    "unsaved_changes": "Unsaved changes",
+    "saving": "Saving...",
+    "loaded_from_auto_save": "Code loaded from previous session"
   }
 }

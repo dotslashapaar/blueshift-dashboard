@@ -110,12 +110,20 @@
         }
       }
     },
-    "your-first-spl-token": {
-      "title": "Your First SPL Token",
+    "typescript-mint-an-spl-token": {
+      "title": "Mint an SPL Token",
       "requirements": {
-        "create_mint": {
-          "title": "Challenge 1: Creating an SPL mint",
-          "description": "Your code should create an SPL mint with 6 decimal places."
+        "create_mint_account": {
+          "title": "Challenge 1: Create token mint"
+        },
+        "initialize_mint": {
+          "title": "Challenge 2: Initialize mint"
+        },
+        "create_token_account": {
+          "title": "Challenge 3: Create token account"
+        },
+        "mint_to": {
+          "title": "Challenge 4: Mint tokens"
         }
       }
     }

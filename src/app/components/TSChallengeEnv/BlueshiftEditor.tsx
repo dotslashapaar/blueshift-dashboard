@@ -1,18 +1,37 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useState } from "react";
 import "./style.css";
-import Editor from "@monaco-editor/react";
+import Editor, { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import { useMonaco } from "@/hooks/useMonaco";
 import classNames from "classnames";
 import Icon from "../Icon/Icon";
+import { useTranslations } from "next-intl";
+import { motion, AnimatePresence } from "motion/react";
+import { anticipate } from "motion";
 
+/**
+ * Props for the BlueshiftEditor component
+ */
 interface BlueshiftTSEditorProps {
+  /** Initial code content to display in the editor */
   initialCode: string;
+  /** Callback fired when code content changes */
   onCodeChange: (code: string) => void;
+  /** Optional title for the editor */
   title?: string;
+  /** Additional CSS classes */
   className?: string;
+  /** Name of the file being edited */
+  fileName?: string;
+  /** Callback fired when refresh/reset is requested */
+  onRefresh?: () => void;
+  /** Current auto-save state */
+  saveState?: "saved" | "unsaved" | "saving";
+  /** Whether to show the "just saved" indicator */
+  justSaved?: boolean;
+  /** Whether to show the "loaded from auto-save" indicator */
+  loadedFromAutoSave?: boolean;
 }
 
 const processEnvTypes = `
@@ -27,16 +46,34 @@ declare var process: {
 };
 `;
 
+/**
+ * Monaco-based TypeScript code editor with auto-save functionality
+ * Features syntax highlighting, type checking, and visual save state indicators
+ */
 export default function BlueshiftEditor({
   initialCode,
   onCodeChange,
   className,
+  fileName = "main.ts",
+  onRefresh,
+  saveState = "saved",
+  justSaved = false,
+  loadedFromAutoSave = false,
 }: BlueshiftTSEditorProps) {
   const editorRefInternal = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const monaco = useMonaco();
+  const [showRefreshDialog, setShowRefreshDialog] = useState(false);
+  const t = useTranslations();
 
-  useEffect(() => {
-    if (!monaco) return;
+  const handleEditorDidMount = (
+    editorInstance: editor.IStandaloneCodeEditor,
+    monaco: Monaco
+  ) => {
+    if (editorRefInternal.current) return;
+
+    editorRefInternal.current = editorInstance;
+    editorInstance.onDidChangeModelContent(() => {
+      onCodeChange(editorInstance.getValue());
+    });
 
     monaco.languages.typescript.typescriptDefaults.addExtraLib(
       processEnvTypes,
@@ -303,46 +340,143 @@ export default function BlueshiftEditor({
     });
 
     monaco.editor.setTheme("dracula");
-  }, [monaco, initialCode]);
+  };
 
-  const handleEditorDidMount = (
-    editorInstance: editor.IStandaloneCodeEditor
-  ) => {
-    editorRefInternal.current = editorInstance;
-    editorInstance.onDidChangeModelContent(() => {
-      onCodeChange(editorInstance.getValue());
-    });
+  const handleRefreshClick = () => {
+    setShowRefreshDialog(true);
+  };
+
+  const handleConfirmRefresh = () => {
+    setShowRefreshDialog(false);
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
+  const handleCancelRefresh = () => {
+    setShowRefreshDialog(false);
   };
 
   return (
-    <div className={classNames("w-full h-full relative", className)}>
-      <button className="absolute group/refresh bottom-4 z-10 right-8 font-medium flex items-center gap-x-2 text-sm text-tertiary cursor-pointer">
-        <Icon
-          name="Refresh"
-          size={12}
-          className="group-hover/refresh:rotate-360 transition-transform"
+    <div className={classNames("w-full h-full lg:relative", className)}>
+      <div className="absolute py-4 bottom-0 z-10 right-0 px-6 flex items-center gap-x-4 w-full h-auto justify-end border-t border-border bg-background/80 lg:border-t-0 backdrop-blur lg:bg-transparent lg:backdrop-blur-none">
+        {/* Loaded from auto-save indicator */}
+        {loadedFromAutoSave && saveState === "saved" && (
+          <div className="flex items-center gap-x-1.5 text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">
+            <Icon name="Progress" size={12} />
+            <span>{t("ChallengePage.loaded_from_auto_save")}</span>
+          </div>
+        )}
+
+        {/* Save status indicator */}
+        {saveState === "unsaved" && (
+          <div className="flex items-center gap-x-1.5 text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-lg">
+            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
+            <span>{t("ChallengePage.unsaved_changes")}</span>
+          </div>
+        )}
+        {saveState === "saving" && (
+          <div className="flex items-center gap-x-1.5 text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-spin" />
+            <span>{t("ChallengePage.saving")}</span>
+          </div>
+        )}
+        {justSaved && (
+          <div className="flex items-center gap-x-1.5 text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-lg">
+            <Icon name="Success" size={12} />
+            <span>{t("ChallengePage.auto_saved")}</span>
+          </div>
+        )}
+
+        <button
+          className="group/refresh font-medium flex items-center gap-x-2 text-sm text-tertiary cursor-pointer hover:text-secondary transition-colors"
+          onClick={handleRefreshClick}
+        >
+          <Icon
+            name="Refresh"
+            size={12}
+            className="group-hover/refresh:rotate-360 transition-transform"
+          />
+          <span>{t("ChallengePage.reset_button")}</span>
+        </button>
+      </div>
+
+      {/* Refresh Confirmation Dialog */}
+      <AnimatePresence>
+        {showRefreshDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: { duration: 0.3, ease: anticipate },
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.95,
+                y: 20,
+                transition: { duration: 0.2 },
+              }}
+              className="bg-background-card border border-border rounded-xl p-6 max-w-md mx-4 shadow-xl"
+            >
+              <div className="flex items-center gap-x-3 mb-4">
+                <Icon name="Warning" size={18} className="text-yellow-500" />
+                <h3 className="text-lg font-semibold">
+                  {t("ChallengePage.reset_code_modal.title")}
+                </h3>
+              </div>
+              <p className="text-secondary mb-6">
+                {t("ChallengePage.reset_code_modal.description")}
+              </p>
+              <div className="flex gap-x-3 justify-end">
+                <button
+                  className="px-4 py-2 text-sm font-medium text-secondary hover:text-primary border border-border rounded-lg hover:bg-background-card-hover transition-colors cursor-pointer"
+                  onClick={handleCancelRefresh}
+                >
+                  {t("ChallengePage.reset_code_modal.cancel")}
+                </button>
+                <button
+                  className="px-4 py-2 text-sm font-medium bg-[#ff285a] hover:bg-[#e6234f] text-white rounded-lg transition-colors cursor-pointer"
+                  onClick={handleConfirmRefresh}
+                >
+                  {t("ChallengePage.reset_code_modal.confirm")}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="w-full h-full">
+        <Editor
+          height="100%"
+          width="100%"
+          className="bg-transparent min-h-[400px] backdrop-blur-lg"
+          language="typescript"
+          value={initialCode}
+          options={{
+            automaticLayout: true,
+            minimap: {
+              enabled: false,
+            },
+            stickyScroll: {
+              enabled: false,
+            },
+            wordWrap: "on", // Optional: for better readability of long lines
+            renderLineHighlight: "all", // Highlight the current line
+          }}
+          path={`file:///${fileName}`}
+          onMount={handleEditorDidMount}
         />
-        <span>Refresh</span>
-      </button>
-      <Editor
-        height="100%"
-        width="100%"
-        className="bg-transparent min-h-[400px]"
-        defaultLanguage="typescript"
-        defaultValue={initialCode}
-        options={{
-          automaticLayout: true,
-          minimap: {
-            enabled: false,
-          },
-          stickyScroll: {
-            enabled: false,
-          },
-          wordWrap: "on", // Optional: for better readability of long lines
-          renderLineHighlight: "all", // Highlight the current line
-        }}
-        onMount={handleEditorDidMount}
-      />
+      </div>
     </div>
   );
 }

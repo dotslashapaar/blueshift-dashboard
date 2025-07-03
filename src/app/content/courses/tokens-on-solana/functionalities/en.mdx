@@ -1,0 +1,72 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# Functionalities
+
+The Token Program operates through a set of instructions that allow you to create token mints, initialize token accounts, transfer tokens between accounts, and manage authorities. 
+
+It also supports multisignature accounts for enhanced security and provides mechanisms for freezing accounts and delegating token authority.
+
+<ArticleSection name="Initializing an Account" id="intializing-an-account" level="h2" />
+
+The token program has different instructions and helpers that abstract away the complexities of intializing a new account. 
+
+There are different instructions if we want to initialize a `Mint` account or a `Token` account, in the case of the `Associated Token` account, the associated token program uses the `initializeAccount` instruction under the hood after having derived the correct program derived address.
+
+> This functions just initialize the account, so we need to make sure that we use the `createAccount()` instruction from the System Program before and setting the correct owner (token program), space and lamports to make it rent exampt.
+
+<ArticleSection name="Transfer" id="transfer" level="h2" />
+
+Moves tokens from one account to another. This is the basic operation for sending tokens between users.
+
+The owner of the token account needs to be a `Signer` of that transaction, and the destination of that transfer needs to be another token account. 
+
+> The amount that we decide to transfer is without decimals. So if we want to send 1 token that has 6 decimals we'll need to use the `1e6` notation.
+
+<ArticleSection name="Approve" id="approve" level="h2" />
+
+Grants a delegate the authority to transfer a specific amount of tokens on behalf of the account owner. This enables programmatic token transfers without giving full account control.
+
+> We set an "approved" amount, and the delegate can transfer only up to that amount
+
+<ArticleSection name="Revoke" id="revoke" level="h2" />
+
+Removes the current delegate's authority over the account, returning full control to the account owner.
+
+> Immediately cancels any existing delegation and only the account owner can revoke delegation (not the delegate itself)
+
+<ArticleSection name="Set Authority" id="set-authority" level="h2" />
+
+Changes the authority of a mint or account. This allows transferring ownership or updating specific authority types.
+
+> Can change mint authority, freeze authority, or account owner and setting authority to `None` is an irreversible action that permanently removes that capability
+
+<ArticleSection name="Mint To" id="mint-to" level="h2" />
+
+Creates new tokens and deposits them into a specified account. Only the mint authority can perform this operation.
+
+> Increases the total supply of the token and the amount respects the mint's decimal configuration
+
+<ArticleSection name="Burn" id="burn" level="h2" />
+
+Permanently destroys tokens by removing them from circulation. This reduces the total supply of the token.
+
+> Permanently reduces the token's total supply and this action can be performed by the account owner or delegate
+
+<ArticleSection name="Close Account" id="close-account" level="h2" />
+
+Closes a token account and transfers its remaining SOL rent to a destination account. The token account must have zero balance unless it's a native SOL account.
+
+> From Token2022 it's possible to close a `Mint` account that has a supply of 0
+
+<ArticleSection name="Freeze Account" id="set-mint-to" level="h2" />
+
+Prevents all token operations on an account until it's thawed. Only the mint's freeze authority can perform this operation.
+
+> Completely disables transfers, approvals, and burns and it only affects the specific frozen account
+
+<ArticleSection name="Thaw Account" id="thaw-account" level="h2" />
+
+Re-enables token operations on a previously frozen account. Only the mint's freeze authority can thaw accounts.
+
+> Restores full functionality to a frozen account and can only be performed by the mint's freeze authority
+

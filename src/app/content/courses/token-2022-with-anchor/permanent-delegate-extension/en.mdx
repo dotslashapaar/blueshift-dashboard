@@ -1,0 +1,38 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# The Permanent Delegate Extension
+
+The `PermanentDelegate` extension is a Mint account extension that allows a permanent delegate for all tokens of the mint that is capable of transferring or burning any token of that mint, from any token account.
+
+<ArticleSection name="Initializing the Mint Account" id="initializing-the-mint-account" level="h2" />
+
+To initialie the `PermanentDelegate` extension on a `Mint` account we can simply use the macro that `Anchor` created for us.
+
+Here's how to create a mint with the Permanent Delegate extension:
+
+```ts
+#[derive(Accounts)]
+pub struct CreateMint<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    #[account(
+        init,
+        payer = signer,
+        mint::decimals = 6,
+        mint::authority = signer.key(),
+        mint::token_program = token_program
+        extensions::permanent_delegate::delegate = signer,
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
+    pub system_program: Program<'info, System>,
+    pub token_program: Interface<'info, TokenInterface>,
+}
+```
+
+<ArticleSection name="Permissioned Actions" id="permissioned-actions" level="h2" />
+
+Unlike regular delegates which can be revoked, this delegate authority is permanent and immutable. 
+
+This means that every normal action like `transfer()`, `burn()`, `approve()` and `freeze()` can be executed whenever needed directly by the authority without needing the signature of the actual owner.
+
+This means that we can just use the normal `transferChecked()`, `burnChecked()`, ... instructions and pass in the `PermanetDelegate` authority in the `authority` field.

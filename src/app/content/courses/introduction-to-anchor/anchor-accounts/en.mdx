@@ -135,7 +135,7 @@ pub account: Account<'info, CustomAccountType>,
 
 Since the calculating the bump can "burn" a lot of CUs, it's always good to save it into the account or pass it into the instruction and validate it without having to calculate like this: 
 
-```
+```rust
 #[account(
     seeds = <seeds>,
     bump = <expr>
@@ -145,7 +145,7 @@ pub account: Account<'info, CustomAccountType>,
 
 And it's possible to derive a PDA that is derived from another program by passing the address of the program is derived from like this:
 
-```
+```rust
 #[account(
     seeds = <seeds>,
     bump = <expr>,
@@ -225,6 +225,8 @@ pub maker_ata_a: InterfaceAccounts<'info, TokenAccount>,
 The key difference here is that we're using `InterfaceAccounts` instead of `Account`. This allows our program to work with both Token and Token2022 accounts without needing to handle the differences in their deserialization logic. The interface provides a common way to interact with both types of accounts while maintaining type safety and proper validation.
 
 This approach is particularly useful when you want your program to be compatible with both token standards, as it eliminates the need to write separate logic for each program. The interface handles all the complexity of dealing with different account structures behind the scenes.
+
+If you want to learn more about how to use `anchor-spl` you can follow the [SPL-Token Program with Anchor](blueshift.gg/en/courses/spl-token-with-anchor) or [Token2022 Program with Anchor](blueshift.gg/en/courses/token-2022-with-anchor) courses.
 
 <ArticleSection name="Additional Accounts Type" id="additional-accounts-type" level="h2" />
 

@@ -3,7 +3,7 @@ export const courseLanguages = {
   Rust: "Rust",
   Typescript: "TypeScript",
   Assembly: "Assembly",
-  Research: "Research",
+  General: "General",
 } as const;
 
 export const courseColors = {
@@ -11,7 +11,7 @@ export const courseColors = {
   Rust: "255,173,102",
   Typescript: "105,162,241",
   Assembly: "140,255,102",
-  Research: "0,255,255",
+  General: "0,255,255",
 } as const;
 
 export const courseDifficulty = {

@@ -1,0 +1,210 @@
+import { ArticleSection } from "../../../../components/ArticleSection/ArticleSection";
+
+# The Transfer Fee Extension
+
+The `TransferFee` extension is a `Mint` extension that lets the creator set a "tax" on the token that is collected every time somebody performs a swap.
+
+To make sure that the fee recipient doesn't get write-locked every time somebody performs a swap, and to ensure that we can parallelize transactions containing a `Mint` with this extension, the fee is set aside in the recipient's Token Account that only the `Withdraw Authority` can withdraw.
+
+<ArticleSection name="Initializing the Mint Account" id="initializing-the-mint-account" level="h2" />
+
+To initialie the `TransferFee` extension on a `Mint` account we're going to need the `createInitializeTransferFeeConfigInstruction()` function. 
+
+Here's how to create a mint with the Transfer Fee extension:
+
+```ts
+import {
+    Keypair,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from '@solana/web3.js';
+import {
+    createInitializeMintInstruction,
+    createInitializeTransferFeeConfigInstruction,
+    getMintLen,
+    ExtensionType,
+    TOKEN_2022_PROGRAM_ID,
+} from '@solana/spl-token';
+
+const mint = Keypair.generate();
+
+// Calculate the size needed for a Mint account with Transfer Fee extension
+const mintLen = getMintLen([ExtensionType.TransferFeeConfig]);
+
+// Calculate minimum lamports required for rent exemption
+const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+
+// Create the account with the correct size and owner
+const createAccountInstruction = SystemProgram.createAccount({
+    fromPubkey: keypair.publicKey,
+    newAccountPubkey: mint.publicKey,
+    space: mintLen,
+    lamports,
+    programId: TOKEN_2022_PROGRAM_ID,
+});
+
+// Initialize the Transfer Fee extension
+const initializeTransferFeeConfig = createInitializeTransferFeeConfigInstruction(
+    mint.publicKey,
+    keypair.publicKey,
+    keypair.publicKey,
+    500,
+    BigInt(1e6),
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Initialize the mint itself
+const initializeMintInstruction = createInitializeMintInstruction(
+    mint.publicKey,
+    6,
+    keypair.publicKey,
+    null,
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Combine all instructions in the correct order
+const transaction = new Transaction().add(
+    createAccountInstruction,
+    initializeTransferFeeConfig,
+    initializeMintInstruction,
+);
+
+const signature = await sendAndConfirmTransaction(connection, transaction, [keypair, mint]);
+
+console.log(`Mint created! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
+```
+
+<ArticleSection name="Transferring Tokens with the Fee" id="transferring-tokens-with-the-fee" level="h2" />
+
+To transfer tokens for `Mint` that have a TransferFee` extension we have to routes:
+- We can use the normal `transferChecked()` instruction and by doing this the calculation of the fee is handled automatically
+- We can use the `tranferCheckedWithFee()` instruction and supply manually the `fee` we're going to pay in that tansfer. This is very useful if we want to make sure to not get "rugged" if the authority change the fee and create a abnormally high fee; it's like setting the slippage for a transfer.
+
+> Even if the authority change the fee, the new fee become active 2 epoch after being set
+
+Here's how to create a transfer using the `tranferCheckedWithFee()` instruction:
+
+```ts
+createTransferCheckedWithFeeInstruction(
+    sourceTokenAccount,
+    mint.publicKey, 
+    destinationTokenAccount, 
+    keypair.publicKey, 
+    BigInt(100e6), // transfer amount
+    6, // decimals
+    BigInt(1e6), // fee paid for the transfer
+    undefined,
+    TOKEN_2022_PROGRAM_ID,
+)
+
+const transaction = new Transaction().add(transferInstructions);
+
+const signature = await sendAndConfirmTransaction(connection, transaction, [keypair]);
+
+console.log(`Tokens transferred! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
+```
+
+<ArticleSection name="Harvesting the Fee" id="harvesting-the-fee" level="h2" />
+
+As pointed in the introduction, the transfer fee stays in the `Token` account that is receiving tokens to avoit write-locking the `Mint` account or the `sourceTokenAccount` for this reason, before being able to withdraw the fee we'll need to be able to search for all the `Token` account that have fees to claim.
+
+We can do this by setting a filter and getting all the accounts that belong to that mint like so:
+
+```ts
+// Retrieve all Token Accounts for the Mint Account
+const allAccounts = await connection.getProgramAccounts(TOKEN_2022_PROGRAM_ID, {
+    commitment: "confirmed",
+    filters: [
+        {
+            memcmp: {
+                offset: 0,
+                bytes: mint.publicKey.toString(), // Mint Account address
+            },
+        },
+    ],
+});
+```
+
+And get a list of all the `Token` account that have a fee inside of them by unpacking the `Token` account and using the `getTransferAmoun()` function like so:
+
+```ts
+// List of Token Accounts to withdraw fees from
+const accountsToWithdrawFrom: PublicKey[] = [];
+
+for (const accountInfo of allAccounts) {
+    const account = unpackAccount(
+        accountInfo.pubkey,
+        accountInfo.account,
+        TOKEN_2022_PROGRAM_ID,
+    );
+
+    // Extract transfer fee data from each account
+    const transferFeeAmount = getTransferFeeAmount(account);
+
+    // Check if fees are available to be withdrawn
+    if (transferFeeAmount !== null && transferFeeAmount.withheldAmount > 0) {
+        accountsToWithdrawFrom.push(accountInfo.pubkey);
+    }
+}
+```
+
+After that we can use the `withdrawWithheldTokensFromAccounts` instruction with the `Withdraw Authority` to pass in the list of `accountsToWithdrawFrom` like so:
+
+```ts
+const harvestInstructions = createWithdrawWithheldTokensFromAccountsInstruction(
+    mint.publicKey,
+    sourceTokenAccount,
+    keypair.publicKey,
+    [],
+    accountsToWithdrawFrom,
+    TOKEN_2022_PROGRAM_ID,
+);
+
+const transaction = new Transaction().add(harvestInstructions);
+
+const signature = await sendAndConfirmTransaction(connection, transaction, [keypair]);
+
+console.log(`Withheld tokens harvested! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
+```
+
+<ArticleSection name="Updating the Fee" id="updating-the-fee" level="h2" />
+
+After having intialized our `Mint` with the `TranferFee` extension, we might need to update that specific fee in the future. And to make sure that the creator doesn't "rug" their token holder with a "bait and switch" by setting the fee very high everytime a transfer is executed the new `TranferFee` will be activated after 2 epoch.
+
+To accomodate for this, this is how the data of the `TransferFee` extension looks like: 
+
+```rust
+pub struct TransferFeeConfig {
+    pub transfer_fee_config_authority: Pubkey,
+    pub withdraw_withheld_authority: Pubkey,
+    pub withheld_amount: u64,
+    pub older_transfer_fee: TransferFee,
+    pub newer_transfer_fee: TransferFee,
+}
+ 
+pub struct TransferFee {
+    pub epoch: u64,
+    pub maximum_fee: u64,
+    pub transfer_fee_basis_point: u16,
+}
+```
+
+So to change the fee we can use the `setTransferFee` instruction like so:
+
+```ts
+const setTransferFeeInstruction = createSetTransferFeeInstruction(
+    mint.publicKey
+    keypaird.publicKey
+    [],
+    BigInt(1000), // new transfer fee
+    BigInt(100e6), // new maximum fee amount
+    TOKEN_2022_PROGRAM_ID,
+)
+
+const transaction = new Transaction().add(setTransferFeeInstruction);
+
+const signature = await sendAndConfirmTransaction(connection, transaction, [keypair]);
+
+console.log(`Withheld tokens harvested! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
+```

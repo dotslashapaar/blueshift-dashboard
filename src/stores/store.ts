@@ -65,10 +65,19 @@ interface PersistentStore {
   // Challenge Statuses
   challengeStatuses: Record<string, ChallengeStatuses>;
   setChallengeStatus: (slug: string, status: ChallengeStatuses) => void;
+
+  // Auto-saved challenge code
+  autoSavedCode: Record<string, string>;
+  setAutoSavedCode: (challengeSlug: string, code: string) => void;
+  clearAutoSavedCode: (challengeSlug: string) => void;
 }
 
 type V0PersistentStore = Omit<PersistentStore, 'challengeStatuses' | 'setNewChallengeStatus'> & {
   courseStatus?: Record<string, "Locked" | "Unlocked" | "Claimed">;
+};
+
+type V1PersistentStore = Omit<PersistentStore, 'selectedLanguages'> & {
+  selectedLanguages: string[];
 };
 
 const migrate = (persistedState: unknown, version: number): Partial<PersistentStore> => {
@@ -90,6 +99,18 @@ const migrate = (persistedState: unknown, version: number): Partial<PersistentSt
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { courseStatus, ...rest } = oldState;
     return { ...rest, challengeStatuses: newChallengeStatuses };
+  }
+
+  if (version === 1) {
+    const oldState = persistedState as V1PersistentStore;
+    // Migrate any "Research" language filters to "General"
+    const migratedLanguages = oldState.selectedLanguages.map(lang => 
+      lang === "Research" ? "General" : lang
+    ).filter((lang): lang is CourseLanguages => 
+      Object.keys(courseLanguages).includes(lang as string)
+    );
+    
+    return { ...oldState, selectedLanguages: migratedLanguages };
   }
 
   return persistedState as Partial<PersistentStore>;
@@ -157,10 +178,26 @@ export const usePersistentStore = create<PersistentStore>()(
         set((state) => ({
           challengeStatuses: { ...state.challengeStatuses, [slug]: status },
         })),
+
+      // Auto-saved challenge code
+      autoSavedCode: {},
+      setAutoSavedCode: (challengeSlug: string, code: string) =>
+        set((state) => ({
+          autoSavedCode: { ...state.autoSavedCode, [challengeSlug]: code },
+        })),
+      clearAutoSavedCode: (challengeSlug: string) =>
+        set((state) => ({
+          autoSavedCode: Object.keys(state.autoSavedCode).reduce((acc, key) => {
+            if (key !== challengeSlug) {
+              acc[key] = state.autoSavedCode[key];
+            }
+            return acc;
+          }, {} as Record<string, string>),
+        })),
     }),
     {
       name: "blueshift-storage",
-      version: 1,
+      version: 2,
       migrate,
     }
   )
