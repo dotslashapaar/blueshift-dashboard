@@ -8,6 +8,7 @@ interface AccountAddresses {
   'pinocchio-vault': string;
   'pinocchio-escrow': string;
   'pinocchio-secp256r1-vault': string;
+  'mint-an-spl-token': string;
 }
 
 interface AccountData {
@@ -16,6 +17,7 @@ interface AccountData {
   'pinocchio-vault': number;
   'pinocchio-escrow': number;
   'pinocchio-secp256r1-vault': number;
+  'mint-an-spl-token': number;
   'total': number;
 }
 
@@ -28,6 +30,7 @@ const ACCOUNTS: AccountAddresses = {
   'pinocchio-vault': "AL38QM96SDu4Jpx7UGcTcaLtwvWPVgRUzg9PqC787djK",
   'pinocchio-escrow': "HTXVJ8DD6eSxkVyDwgddxGw8cC8j6kXda3BUipA43Wvs",
   'pinocchio-secp256r1-vault': "4NKZ2B5zeG9TGZifzfnG7Zw28P3ZetjaS6xPVKW5MHrp",
+  'mint-an-spl-token': "2NVDhSXZck9AX2aUdPSxMemLN2wtqEd5sNEcwuZVCbHW";
 }
 
 async function getMultipleAccountData(
@@ -53,6 +56,7 @@ async function getMultipleAccountData(
     'pinocchio-vault': 0,
     'pinocchio-escrow': 0,
     'pinocchio-secp256r1-vault': 0,
+    'mint-an-spl-token': 0,
     'total': 0,
   };
 
