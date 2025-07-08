@@ -115,7 +115,7 @@ For more complex instructions, you can move the logic to the context struct's im
 
 ```rust
 // In a separate file: transfer.rs
-pub fn handler(ctx: Context<Transfer>, amount: u64) -> Result<()> {
+pub fn execute(ctx: Context<Transfer>, amount: u64) -> Result<()> {
     ctx.accounts.transfer_tokens(amount)?;
     ctx.accounts.close_token_account()?;
  
