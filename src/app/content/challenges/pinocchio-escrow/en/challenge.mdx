@@ -122,7 +122,7 @@ The `#[repr(C)]` attribute ensures our struct has a predictable memory layout, w
 - **mint_a**: The SPL token mint address for the token being deposited
 - **mint_b**: The SPL token mint address for the token being requested
 - **receive**: The exact amount of token B that the maker wants to receive
-- **bump**: A single byte used in PDA derivation to ensure the address is on the ed25519 curve
+- **bump**: A single byte used in PDA derivation to ensure the address is not on the Ed25519 curve
 
 Now, let's look at the implementation with all its helper methods:
 
