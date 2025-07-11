@@ -487,7 +487,7 @@ A reinitialization attack occurs when an attacker attempts to reuse a closed acc
               return Err(PinocchioError::InvalidOwner.into());
           }
 
-          if account.data_len().ne(&crate::state::Escrow::LEN) {
+          if account.data_len().ne(&crate::state::ProgramAccount::LEN) {
               return Err(PinocchioError::InvalidAccountData.into());
           }
 
@@ -560,19 +560,19 @@ Here's an example of how to implement this optimization:
 #[repr(C)]
 pub struct AccountExample {
     pub seed: u64,
-    pub bump: [u8;1]
+    pub bump: [u8; 1]
 }
 
-impl Escrow {
-    /// The length of the `Mint` account data.
-    + size_of::<[u8;1]>();
+impl AccountExample {
+    /// The length of the `AccountExample` account data.
+    pub const LEN: usize = size_of::<u64>() + size_of::<[u8; 1]>();
 
     /// Return an `AccountExample` from the given account info.
     ///
     /// This method performs owner and length validation on `AccountInfo`, safe borrowing
     /// the account data.
     #[inline]
-    pub fn from_account_info(account_info: &AccountInfo) -> Result<Ref<Escrow>, ProgramError> {
+    pub fn from_account_info(account_info: &AccountInfo) -> Result<Ref<AccountExample>, ProgramError> {
         if account_info.data_len() != Self::LEN {
             return Err(ProgramError::InvalidAccountData);
         }
@@ -584,7 +584,7 @@ impl Escrow {
         }))
     }
 
-    /// Return a `Escrow` from the given account info.
+    /// Return a `AccountExample` from the given account info.
     ///
     /// This method performs owner and length validation on `AccountInfo`, but does not
     /// perform the borrow check.
@@ -606,14 +606,14 @@ impl Escrow {
         Ok(Self::from_bytes(account_info.borrow_data_unchecked()))
     }
 
-    /// Return a `Escrow` from the given bytes.
+    /// Return a `AccountExample` from the given bytes.
     ///
     /// # Safety
     ///
-    /// The caller must ensure that `bytes` contains a valid representation of `Escrow`.
+    /// The caller must ensure that `bytes` contains a valid representation of `AccountExample`.
     #[inline(always)]
     pub unsafe fn from_bytes(bytes: &[u8]) -> &Self {
-        &*(bytes.as_ptr() as *const Escrow)
+        &*(bytes.as_ptr() as *const AccountExample)
     }
 }
 ```
