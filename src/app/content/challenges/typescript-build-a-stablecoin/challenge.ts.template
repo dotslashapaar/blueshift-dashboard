@@ -1,0 +1,169 @@
+/** Challenge: Build a Stablecoin
+ *
+ * In this challenge, you will create a simple stablecoin with some typical stablecoin features.
+ *
+ * Goal:
+ *   Build a stablecoin in a single transaction using Web3.js and the Token-2022 TypeScript library.
+ *
+ * Objectives:
+ *   1. Creates a Token-2022 Mint Account
+ *   2. Create a Mint Close Authority, setting your public key (keypair) as the close authority
+ *   3. Appoint your public key (keypair) as the permanent delegate
+ *   4. Set a transfer fee of 500 basis points with a max fee of 1 token. Set your public key (keypair) as the fee update and withdraw authority
+ *   5. Set a transfer hook pointing to a randomly generated program ID (we will not implement this in the challenge)
+ *   6. Set Token Metadata Pointer
+ *   7. Initialize Mint
+ *   8. Initialize the Metadata
+ */
+
+import {
+  Connection,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  sendAndConfirmTransaction,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
+
+import {
+  ExtensionType,
+  TOKEN_2022_PROGRAM_ID,
+  createInitializeMintInstruction,
+  getMintLen,
+  TYPE_SIZE,
+  LENGTH_SIZE,
+  createInitializeMetadataPointerInstruction,
+  createInitializeMintCloseAuthorityInstruction,
+  createInitializePermanentDelegateInstruction,
+  createInitializeTransferFeeConfigInstruction,
+  createInitializeTransferHookInstruction,
+} from "@solana/spl-token";
+
+import {
+  createInitializeInstruction,
+  createUpdateFieldInstruction,
+  createRemoveKeyInstruction,
+  pack,
+  TokenMetadata,
+} from "@solana/spl-token-metadata";
+
+import bs58 from "bs58";
+
+// Import our keypair from the wallet file
+const keypair = Keypair.fromSecretKey(
+  // ⚠️ INSECURE KEY. DO NOT USE OUTSIDE OF THIS CHALLENGE
+  bs58.decode(process.env.SECRET)
+);
+
+//Create a connection to the RPC endpoint
+const connection = new Connection(
+  process.env.RPC_ENDPOINT,
+  "confirmed"
+);
+
+// Entry point of your TypeScript code (we will call this)
+async function main() {
+  try {
+
+    // Generate a new keypair for the mint account
+    const mint = Keypair.generate();
+
+    const metadata: TokenMetadata = {
+      mint: mint.publicKey,
+      name: "PayPal USD",
+      symbol: "PYUSD",
+      uri: "https://token-metadata.paxos.com/pyusd_metadata/prod/solana/pyusd_metadata.json",
+      additionalMetadata: [],
+    };
+
+    // START HERE
+
+    // Size of Mint Account with extensions
+    // We use four other extensions. What are they?
+    const mintLen = getMintLen([
+      ExtensionType.MintCloseAuthority,
+      // Insert the other extensions here
+    ]);
+
+    // Size of the Metadata Extension
+    const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
+
+    // Minimum lamports required for Mint Account
+    const lamports = await connection.getMinimumBalanceForRentExemption(
+      mintLen + metadataLen,
+    );
+
+    // Create the mint account
+    // const createAccountInstruction = ???
+
+
+    // Initialize the mint close authority
+    // Set your public key (keypair) as the close authority
+    // const initializeMintCloseAuthority = ???
+
+
+    // Initialize the permanent delegate
+    // Set your public key (keypair) as the permanent delegate
+    // const initializePermanentDelegate = ???
+
+
+    // Initialize the transfer fee configuration
+    // Set a transfer fee of 500 basis points with a max fee of 1 token
+    // const initializeTransferFeeConfig = ???
+
+
+    // Initialize the transfer hook
+    // Set your public key (keypair) as the transfer hook authority
+    // Set a transfer hook pointing to a randomly generated valid program ID
+    // NOTE: We will not implement the actual transfer hook in this challenge
+    // const initializeTransferHook = ???
+
+
+    // Initialize the metadata pointer
+    // Set your public key (keypair) as the metadata pointer authority
+    // Set the account metadata to the mint public key
+    // const initializeMetadataPointer = ???
+
+
+    // Initialize the mint
+    // Set decimals to 6
+    // Set the mint and freeze authority to your public key (keypair)
+    // const initializeMintInstruction = ???
+
+
+    // Initialize the metadata
+    // Set the metadata to the mint public key
+    // Set the mint and update authorities to your public key (keypair)
+    // const initializeMetadataInstruction = ???
+
+
+    const recentBlockhash = await connection.getLatestBlockhash();
+
+    const transaction = new Transaction({
+      feePayer: keypair.publicKey,
+      blockhash: recentBlockhash.blockhash,
+      lastValidBlockHeight: recentBlockhash.lastValidBlockHeight
+    }).add(
+      createAccountInstruction,
+      initializeMintCloseAuthority,
+      initializePermanentDelegate,
+      initializeTransferFeeConfig,
+      initializeTransferHook,
+      initializeMetadataPointer,
+      initializeMintInstruction,
+      initializeMetadataInstruction,
+    );
+
+    const transactionSignature = await sendAndConfirmTransaction(
+      connection,
+      transaction,
+      []  // This is the list of signers. Who should be signing this transaction?
+    );
+
+    console.log("Mint Address:", mint.publicKey.toBase58());
+    console.log("Transaction Signature:", transactionSignature);
+  } catch (error) {
+    console.error(`Oops, something went wrong: ${error}`);
+  }
+}

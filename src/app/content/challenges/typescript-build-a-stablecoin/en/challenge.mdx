@@ -1,0 +1,34 @@
+![Build a Stablecoin Challenge](/graphics/challenge-banners/typescript-build-a-stablecoin.png)
+
+<ArticleSection name="What is a Stablecoin?" id="what-is-a-stablecoin" />
+
+Stablecoins have fueled the growth of the crypto ecosystem by removing the volatility risk of cryptocurrencies, enabling
+companies and individuals to bring everyday businesses on-chain. Whether it's paying employees, covering expenses,
+or raising funds, stablecoins unlock the potential of blockchains to serve as the backbone of a global financial
+system.
+
+While different mechanisms such as algorithmic stabilization have been explored to provide price stability, the
+predominant approach is to peg their value to a less volatile asset, such as a fiat currency like the US dollar.
+Because a fiat currency is involved, stablecoins have regulatory and compliance features not typically found in
+other cryptocurrencies. This is where the Token-2022 program comes into play.
+
+One of the primary use cases for Token-2022 and its many extensions is to support the regulatory and compliance
+requirements of stablecoins, making Solana a great platform for building stablecoins.
+
+<ArticleSection name="Challenge Overview" id="challenge-overview" />
+
+In this challenge, we will build a stablecoin using the Token-2022 program. If you are new to Token-2022, our
+[Token2022 with Web3.js](/en/courses/token-2022-with-web3js/introduction) course is a fast-paced introduction
+to get you started quickly.
+
+For the stablecoin we are building, we will implement eight instructions in a single transaction to:
+- Create a Mint: Creates a Mint Account to represent our stablecoin
+- Create a Mint Close Authority: Sets the authority with rights to close the mint account
+- Set a Permanent Delegate: Appoint a delegate with administrative rights over the mint
+- Set Transfer Fee: Charge a transfer fee on token transfers
+- Set Transfer Hook: Set a transfer hook to execute custom logic on token transfers
+- Set Token Metadata Pointer: Set the metadata address holding the token's information
+- Initialize Mint: Initialize the Mint Account with 6 decimals, setting the mint and freeze authority
+- Initialize the Metadata: Initializes the metadata for the mint, including the name, symbol, and URI
+
+Let's dive in!

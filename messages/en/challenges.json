@@ -127,6 +127,35 @@
         }
       }
     },
+    "typescript-build-a-stablecoin": {
+      "title": "Build a Stablecoin",
+      "requirements": {
+        "create_mint_account": {
+          "title": "Challenge 1: Create token mint"
+        },
+        "init_close_mint_authority": {
+          "title": "Challenge 2: Initialize close mint authority"
+        },
+        "init_permanent_delegate": {
+          "title": "Challenge 3: Initialize permanent delegate"
+        },
+        "init_transfer_fee_config": {
+          "title": "Challenge 4: Initialize transfer fee config"
+        },
+        "init_transfer_hook": {
+          "title": "Challenge 5: Initialize transfer hook"
+        },
+        "init_metadata_pointer": {
+          "title": "Challenge 6: Initialize metadata pointer"
+        },
+        "init_mint": {
+          "title": "Challenge 7: Initialize mint"
+        },
+        "init_metadata_instruction": {
+          "title": "Challenge 8: Initialize metadata instruction"
+        }
+      }
+    },
     "typescript-build-a-soulbound-nft": {
       "title": "Build a Soulbound NFT",
       "requirements": {
