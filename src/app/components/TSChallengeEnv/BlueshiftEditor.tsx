@@ -119,6 +119,13 @@ export default function BlueshiftEditor({
     );
 
     addMonacoTypesForModule(
+      "@solana/spl-token-metadata",
+      import("./types/spl-token-metadata.d.ts?raw"),
+      "file:///node_modules/@types/@solana/spl-token-metadata/index.d.ts",
+      "file:///node_modules/@solana/spl-token-metadata/index.d.ts"
+    );
+
+    addMonacoTypesForModule(
       "bs58",
       import("./types/bs58.d.ts?raw"),
       "file:///node_modules/@types/bs58/index.d.ts",
