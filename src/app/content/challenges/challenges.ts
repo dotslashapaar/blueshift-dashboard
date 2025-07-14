@@ -91,6 +91,21 @@ const allChallenges: ChallengeMetadata[] = [
     ],
     collectionMintAddress: "2NVDhSXZck9AX2aUdPSxMemLN2wtqEd5sNEcwuZVCbHW",
   },
+  {
+    slug: "typescript-build-a-soulbound-nft",
+    language: "Typescript",
+    color: "105,162,241",
+    difficulty: 1,
+    isFeatured: true,
+    unitName: "Bound a Soulbound NFT",
+    apiPath: "/v1/verify/typescript/mint-a-soulbound-token",
+    requirements: [
+      { instructionKey: "create_mint_account" },
+      { instructionKey: "initialize_mint" },
+      { instructionKey: "create_token_account" },
+      { instructionKey: "mint_to" },
+    ],
+  },
 ];
 
 const releasedChallengesSetting =

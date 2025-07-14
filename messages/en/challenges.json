@@ -126,6 +126,23 @@
           "title": "Challenge 4: Mint tokens"
         }
       }
+    },
+    "typescript-build-a-soulbound-nft": {
+      "title": "Build a Soulbound NFT",
+      "requirements": {
+        "create_mint_account": {
+          "title": "Challenge 1: Create token mint"
+        },
+        "initialize_mint": {
+          "title": "Challenge 2: Initialize mint"
+        },
+        "create_token_account": {
+          "title": "Challenge 3: Create token account"
+        },
+        "mint_to": {
+          "title": "Challenge 4: Mint tokens"
+        }
+      }
     }
   }
 }
