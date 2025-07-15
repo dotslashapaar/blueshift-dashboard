@@ -209,6 +209,7 @@ export function useEsbuildRunner(props?: UseEsbuildRunnerProps) {
             },
             createCdnPlugin("@solana/web3.js", "cdn-solana-web3-ns"),
             createCdnPlugin("@solana/spl-token", "cdn-spl-token-ns"),
+            createCdnPlugin("@solana/spl-token-metadata", "cdn-spl-token-metadata-ns"),
             createCdnPlugin("bs58", "cdn-bs58-ns"),
           ],
           bundle: true,
