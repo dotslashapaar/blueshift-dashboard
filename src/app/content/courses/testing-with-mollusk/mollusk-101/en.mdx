@@ -99,7 +99,7 @@ When testing Solana programs with Mollusk, you'll work with several types of acc
 
 The most fundamental account type is the `SystemAccount`, which comes in two primary variants:
 - Payer: An account with lamports that funds program account creation or lamport transfers
-- Deafault Account: An empty and lamport-less account, usually used to rapresent program account awaiting initialization within your instruction
+- Default Account: An empty and lamport-less account, usually used to rapresent program account awaiting initialization within your instruction
 
 System accounts contain no data and are owned by the System Program. The key difference between payer and uninitialized accounts is their lamport balance: payers have funds, while uninitialized accounts start empty.
 
